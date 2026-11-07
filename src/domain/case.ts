@@ -39,6 +39,8 @@ export interface CaseDefinition {
   readonly title: string;
   readonly location: string;
   readonly accessLevel: AccessLevel;
+  /** Held back until this case is closed; absent for cases open from the start. */
+  readonly availableAfter?: CaseId;
   readonly briefing: CaseBriefing;
   /** All evidence for the case, in inventory order, including locked items. */
   readonly evidence: readonly EvidenceItem[];
@@ -58,4 +60,8 @@ export function briefingReport(caseFile: CaseDefinition): DocumentEvidence {
     throw new Error(`Case ${caseFile.id}: briefing report must be a document item.`);
   }
   return item;
+}
+
+export function isCaseAvailable(caseFile: CaseDefinition, isClosed: (id: CaseId) => boolean): boolean {
+  return caseFile.availableAfter === undefined || isClosed(caseFile.availableAfter);
 }

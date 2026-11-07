@@ -4,8 +4,18 @@ import { CASES, findCase } from '../content/cases';
 import { visibleAnomalies } from '../domain/anomaly';
 import { AnomalyScreen } from '../features/anomaly/AnomalyScreen';
 import { EMPTY_BOARD } from '../domain/board';
-import { findEvidence, type CaseDefinition } from '../domain/case';
-import { availableEvidence, evidenceUnlockedBy, type DocumentEvidence } from '../domain/evidence';
+import {
+  briefingReport,
+  isCaseAvailable,
+  type CaseDefinition,
+  type CaseId,
+} from '../domain/case';
+import {
+  availableEvidence,
+  evidenceUnlockedBy,
+  withAmendments,
+  type DocumentEvidence,
+} from '../domain/evidence';
 import { caseProgress, caseStatus } from '../domain/progress';
 import { ArchiveScreen } from '../features/archive/ArchiveScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
@@ -44,11 +54,20 @@ function Unavailable({ title, body, onBack }: { title: string; body: string; onB
   );
 }
 
+/** How many of a case's records currently carry an amendment. */
+function amendedRecords(caseFile: CaseDefinition, isClosed: (id: CaseId) => boolean): number {
+  return caseFile.evidence.filter(
+    (e) => e.kind === 'document' && (e.amendments ?? []).some((a) => isClosed(a.whenCaseClosed)),
+  ).length;
+}
+
 /** Maps the current screen to its feature component. No navigation state here. */
 export function ScreenRouter(props: ScreenRouterProps) {
   const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
   const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
-  const anomalies = visibleAnomalies(ANOMALIES, (id) => caseStatus(save, id) === 'closed');
+  const isClosed = (id: CaseId) => caseStatus(save, id) === 'closed';
+  const anomalies = visibleAnomalies(ANOMALIES, isClosed);
+  const cases = CASES.filter((c) => isCaseAvailable(c, isClosed));
 
   switch (screen.id) {
     case 'menu':
@@ -76,8 +95,12 @@ export function ScreenRouter(props: ScreenRouterProps) {
     case 'archive':
       return (
         <ArchiveScreen
-          cases={CASES}
+          cases={cases}
           statusOf={(id) => caseStatus(save, id)}
+          amendedCount={(id) => {
+            const c = findCase(id);
+            return c ? amendedRecords(c, isClosed) : 0;
+          }}
           onOpenCase={(caseId) => navigate({ id: 'briefing', caseId })}
           anomalies={anomalies}
           onOpenAnomaly={(anomalyId) => navigate({ id: 'anomaly', anomalyId })}
@@ -98,18 +121,23 @@ export function ScreenRouter(props: ScreenRouterProps) {
       break;
   }
 
-  const caseFile: CaseDefinition | undefined = findCase(screen.caseId);
+  const found: CaseDefinition | undefined = findCase(screen.caseId);
+  const caseFile = found && isCaseAvailable(found, isClosed) ? found : undefined;
   if (!caseFile) {
     return <Unavailable title="File not found." body="This case file is not in the archive." onBack={back} />;
   }
   const progress = caseProgress(save, caseFile.id);
-  const evidence = availableEvidence(caseFile.evidence, progress?.discoveries ?? []);
+  // Records read as they currently stand, including any amendments in effect.
+  const evidence = availableEvidence(caseFile.evidence, progress?.discoveries ?? []).map((e) =>
+    withAmendments(e, isClosed),
+  );
 
   switch (screen.id) {
     case 'briefing':
       return (
         <BriefingScreen
           caseFile={caseFile}
+          report={withAmendments(briefingReport(caseFile), isClosed).document}
           onBeginInvestigation={() => navigate({ id: 'investigation', caseId: caseFile.id })}
           focusOnMount={focusOnMount}
           onBack={back}
@@ -159,8 +187,8 @@ export function ScreenRouter(props: ScreenRouterProps) {
         />
       );
     case 'evidence': {
-      const item = findEvidence(caseFile, screen.evidenceId);
-      if (!item || !evidence.includes(item)) {
+      const item = evidence.find((e) => e.id === screen.evidenceId);
+      if (!item) {
         return (
           <Unavailable
             title="Item not available."

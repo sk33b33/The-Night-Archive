@@ -70,6 +70,14 @@ export const CASE_001: CaseDefinition = {
           },
         ],
       },
+      // Approved end beat of Case 002: the file changes. Never explained.
+      amendments: [
+        {
+          id: 'filed-m',
+          whenCaseClosed: caseId('case-002'),
+          block: { type: 'annotation', text: 'Filed. — M.' },
+        },
+      ],
     },
     {
       id: CASE_001_IDS.audioReel,

@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from 'react';
 import { ScreenLayout } from '../../components/ScreenLayout';
 import type { DocumentEvidence, EvidenceId, EvidenceItem } from '../../domain/evidence';
+import type { RecordField } from '../../domain/case';
 import { AudioPlayer } from './audio/AudioPlayer';
+import { PhotoEvidenceView } from './photo/PhotoEvidenceView';
 import type { EngineFactory } from './audio/useReelPlayer';
 import { DocumentWorkspace, loadCompare, storeCompare } from './DocumentWorkspace';
 
@@ -46,7 +48,7 @@ export function EvidenceScreen({
       focusOnMount={focusOnMount}
       wide={comparing}
     >
-      {item.kind === 'document' ? (
+      {item.kind === 'document' && (
         <DocumentWorkspace
           item={item}
           others={others}
@@ -59,25 +61,31 @@ export function EvidenceScreen({
           onHighlight={onHighlight}
           onClearHighlights={onClearHighlights}
         />
-      ) : (
-        <>
-          <AudioPlayer item={item} onDiscover={onDiscover} createEngine={createEngine} />
-          <section className="panel" aria-labelledby="catalogue-heading">
-            <h2 id="catalogue-heading" className="panel__title">
-              Catalogue entry
-            </h2>
-            <dl className="catalogue">
-              {item.catalogue.map((field) => (
-                <div key={field.label} className="catalogue__row">
-                  <dt>{field.label}</dt>
-                  <dd>{field.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        </>
       )}
+      {item.kind === 'audio' && (
+        <AudioPlayer item={item} onDiscover={onDiscover} createEngine={createEngine} />
+      )}
+      {item.kind === 'photo' && <PhotoEvidenceView item={item} onDiscover={onDiscover} />}
+      {item.kind !== 'document' && <Catalogue fields={item.catalogue} />}
       {notice}
     </ScreenLayout>
+  );
+}
+
+function Catalogue({ fields }: { readonly fields: readonly RecordField[] }) {
+  return (
+    <section className="panel" aria-labelledby="catalogue-heading">
+      <h2 id="catalogue-heading" className="panel__title">
+        Catalogue entry
+      </h2>
+      <dl className="catalogue">
+        {fields.map((field) => (
+          <div key={field.label} className="catalogue__row">
+            <dt>{field.label}</dt>
+            <dd>{field.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

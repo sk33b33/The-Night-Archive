@@ -2,10 +2,13 @@ import type { ReactNode } from 'react';
 import { Button } from '../../components/Button';
 import { DocumentView } from '../../components/DocumentView';
 import { ScreenLayout } from '../../components/ScreenLayout';
-import { briefingReport, type CaseDefinition } from '../../domain/case';
+import type { CaseDefinition } from '../../domain/case';
+import type { DocumentContent } from '../../domain/evidence';
 
 interface BriefingScreenProps {
   readonly caseFile: CaseDefinition;
+  /** The record under review, as it currently reads. */
+  readonly report: DocumentContent;
   readonly onBeginInvestigation: () => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
@@ -14,6 +17,7 @@ interface BriefingScreenProps {
 
 export function BriefingScreen({
   caseFile,
+  report,
   onBeginInvestigation,
   onBack,
   focusOnMount,
@@ -37,7 +41,7 @@ export function BriefingScreen({
         ))}
       </section>
 
-      <DocumentView document={briefingReport(caseFile).document} />
+      <DocumentView document={report} />
 
       <Button variant="primary" onClick={onBeginInvestigation}>
         Open case files

@@ -1889,3 +1889,20 @@ tr.is-marked td {
   text-transform: uppercase;
   color: var(--color-amber);
 }
+
+/* ---------- Case 002 additions ---------- */
+
+.kind--photo {
+  color: #c9a7e8;
+}
+
+.case-card__amended {
+  margin-top: var(--space-2);
+  align-self: flex-start;
+  padding: 0.125rem var(--space-2);
+  border: 1px dashed rgb(217 164 65 / 0.6);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-amber);
+}

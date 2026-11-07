@@ -9,6 +9,7 @@ import { CaseCard } from './CaseCard';
 interface ArchiveScreenProps {
   readonly cases: readonly CaseDefinition[];
   readonly statusOf: (id: CaseId) => CaseStatus;
+  readonly amendedCount: (id: CaseId) => number;
   readonly onOpenCase: (id: CaseId) => void;
   readonly anomalies: readonly Anomaly[];
   readonly onOpenAnomaly: (id: string) => void;
@@ -21,6 +22,7 @@ interface ArchiveScreenProps {
 export function ArchiveScreen({
   cases,
   statusOf,
+  amendedCount,
   onOpenCase,
   anomalies,
   onOpenAnomaly,
@@ -67,6 +69,7 @@ export function ArchiveScreen({
                 key={caseFile.id}
                 caseFile={caseFile}
                 status={statusOf(caseFile.id)}
+                amended={amendedCount(caseFile.id)}
                 onOpen={() => onOpenCase(caseFile.id)}
               />
             ))}

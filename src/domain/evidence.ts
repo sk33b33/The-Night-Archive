@@ -1,5 +1,6 @@
 import type { AudioFilter, AudioTimeline } from './audio';
-import type { RecordField } from './case';
+import type { CaseId, RecordField } from './case';
+import type { PhotoRegion } from './photoView';
 
 /** Evidence domain model and unlock rules. Pure; no React. */
 
@@ -52,9 +53,21 @@ interface EvidenceBase {
   readonly unlock: UnlockRule;
 }
 
+/**
+ * A block added to a record once a condition is met: the archive's files
+ * "change". Appended after the original blocks so existing passage keys,
+ * and the player's highlights on them, stay valid.
+ */
+export interface DocumentAmendment {
+  readonly id: string;
+  readonly whenCaseClosed: CaseId;
+  readonly block: DocumentBlock;
+}
+
 export interface DocumentEvidence extends EvidenceBase {
   readonly kind: 'document';
   readonly document: DocumentContent;
+  readonly amendments?: readonly DocumentAmendment[];
 }
 
 export interface AudioEvidence extends EvidenceBase {
@@ -68,7 +81,18 @@ export interface AudioEvidence extends EvidenceBase {
   readonly fixedFilters: readonly string[];
 }
 
-export type EvidenceItem = DocumentEvidence | AudioEvidence;
+export interface PhotoEvidence extends EvidenceBase {
+  readonly kind: 'photo';
+  /** Key of the presentation component that draws the photograph. */
+  readonly artwork: string;
+  /** Full description for assistive technology. */
+  readonly alt: string;
+  readonly caption: string;
+  readonly regions: readonly PhotoRegion[];
+  readonly catalogue: readonly RecordField[];
+}
+
+export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence;
 export type EvidenceKind = EvidenceItem['kind'];
 
 export function isUnlocked(item: EvidenceItem, discoveries: ReadonlySet<string>): boolean {
@@ -144,4 +168,26 @@ export function passageKeys(doc: DocumentContent): string[] {
     }
   });
   return keys;
+}
+
+/** The document as it currently reads, including amendments now in effect. */
+export function effectiveDocument(
+  item: DocumentEvidence,
+  isClosed: (caseId: CaseId) => boolean,
+): DocumentContent {
+  const added = (item.amendments ?? []).filter((a) => isClosed(a.whenCaseClosed));
+  if (added.length === 0) return item.document;
+  return { ...item.document, blocks: [...item.document.blocks, ...added.map((a) => a.block)] };
+}
+
+/** Applies amendments to a document item, leaving other kinds unchanged. */
+export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseId: CaseId) => boolean): T {
+  if (item.kind !== 'document' || !item.amendments?.length) return item;
+  const document = effectiveDocument(item, isClosed);
+  return document === item.document ? item : { ...item, document };
+}
+
+/** Every passage key the document can ever have, amendments included. */
+export function allPassageKeys(item: DocumentEvidence): string[] {
+  return passageKeys(effectiveDocument(item, () => true));
 }

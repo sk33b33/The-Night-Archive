@@ -1,8 +1,16 @@
-# Case bible — Case 002: The Empty House (DRAFT for review)
+# Case bible — Case 002: The Empty House
 
-Status: **proposal**. Nothing here is canon until approved. CLAUDE.md gives only
-the title. Everything below is **[Proposed]** unless marked **[Canon]** or
-**[Rule]**. Mark changes inline; content is built only after sign-off.
+Status: **approved** (2026-11-07). All proposals below were approved as
+written and are now canon for Case 002, implemented in
+`src/content/cases/case-002*.ts`. Approval answers: premise, location and date
+kept; answerphone echo and "M." initial kept; end beat approved; calendar
+discovery **required**.
+
+**Names chosen at implementation [Added]:** neighbour Mrs J. Pell (No. 12,
+tenant since April 1961); inspecting officer "D.R." (initials only); No. 16
+tenants R. & S. Coyle. Meter readings: 04217 (12 Nov 1982, disconnection;
+9 Jan 1984, unchanged), 04561 (5 Mar 1984). Kitchen photo regions: wall
+calendar, radio (dial lit), cup.
 
 ## Premise
 

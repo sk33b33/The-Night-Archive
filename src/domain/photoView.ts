@@ -20,6 +20,8 @@ export interface PhotoRegion {
   readonly y: number;
   readonly width: number;
   readonly height: number;
+  /** Discovery recorded when the player examines this region. */
+  readonly revealsDiscovery?: string;
 }
 
 export const MIN_SCALE = 1;

@@ -1,9 +1,10 @@
 import { useId } from 'react';
 import type { EvidenceItem, EvidenceKind } from '../../domain/evidence';
 
-const KIND_LABEL: Record<EvidenceKind, string> = {
+export const KIND_LABEL: Record<EvidenceKind, string> = {
   document: 'Document',
   audio: 'Audio',
+  photo: 'Photograph',
 };
 
 interface EvidenceCardProps {

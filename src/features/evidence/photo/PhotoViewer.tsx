@@ -25,6 +25,8 @@ interface PhotoViewerProps {
   /** The photograph itself; it must fill a 4:3 box. */
   readonly children: ReactNode;
   readonly regions: readonly PhotoRegion[];
+  /** Called when the player examines a region from the list. */
+  readonly onExamine?: (region: PhotoRegion) => void;
 }
 
 interface Gesture {
@@ -38,7 +40,7 @@ interface Gesture {
  * (drag, pinch, double-tap), mouse (drag, double-click, Ctrl+wheel), and
  * keyboard (+/−/0 and arrows). Every action also has a visible button.
  */
-export function PhotoViewer({ children, regions }: PhotoViewerProps) {
+export function PhotoViewer({ children, regions, onExamine }: PhotoViewerProps) {
   const id = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<PhotoView>(FULL_VIEW);
@@ -259,6 +261,7 @@ export function PhotoViewer({ children, regions }: PhotoViewerProps) {
                   onClick={() => {
                     setActiveRegion(region.id);
                     setView(fitRegion(region));
+                    onExamine?.(region);
                   }}
                 >
                   {region.label}

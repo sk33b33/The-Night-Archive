@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.11.0 — Case 002: The Empty House (2026-11-07)
+
+Built from the approved case bible (`docs/cases/case-002-bible.md`).
+
+### Added
+- Engine: **photos as evidence** (`PhotoEvidence`) using the existing viewer,
+  with an artwork registry; examining a photo region can record a discovery.
+- Engine: **case availability** (`availableAfter`): Case 002 appears in the
+  archive once Case 001 is closed; locked cases cannot be opened via history.
+- Engine: **record amendments**: a document gains a block once a case is
+  closed, appended so existing passage keys and highlights stay valid. Case
+  cards show "N records amended since filing".
+- Case 002 content: inspection report, welfare request, meter card, kitchen
+  photograph (calendar, radio, cup), calendar enlargement (unlocked by
+  examining the calendar; required for the findings), answerphone cassette,
+  tenancy register; six board rules; three findings with hints.
+- End beat: once Case 002 closes, Case 001's incident report carries a new
+  annotation, "Filed. — M." Unexplained.
+- Tests: Case 002 content integrity, findings (never accepting Ellery, Pell,
+  vacancy, or a motive), amendments, and a full Case 002 playthrough.
+
+### Notes
+- No save-format change: availability and amendments derive from closed
+  cases; discoveries, board, and highlights already work per case.
+
 ## 0.10.0 — Document highlighting and comparison (2026-11-07)
 
 Completes the CLAUDE.md document tools (read, search, highlight, compare).

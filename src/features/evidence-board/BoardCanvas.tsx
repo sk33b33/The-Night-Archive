@@ -11,6 +11,7 @@ import {
   type LinkEvaluation,
 } from '../../domain/board';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
+import { KIND_LABEL } from '../investigation/EvidenceCard';
 
 interface BoardCanvasProps {
   readonly evidence: readonly EvidenceItem[];
@@ -206,7 +207,7 @@ export function BoardCanvas({
               onPointerCancel={() => update(null)}
               onKeyDown={onKeyDown(item.id)}
             >
-              <span className={`kind kind--${item.kind}`}>{item.kind === 'audio' ? 'Audio' : 'Document'}</span>
+              <span className={`kind kind--${item.kind}`}>{KIND_LABEL[item.kind]}</span>
               <span className="visually-hidden">:</span>{' '}
               <span className="board-card__title">{item.title}</span>
               <span className="visually-hidden">,</span>{' '}

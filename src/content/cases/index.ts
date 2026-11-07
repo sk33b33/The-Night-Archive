@@ -1,11 +1,12 @@
 import { findEvidence, type CaseDefinition, type CaseId } from '../../domain/case';
-import { passageKeys, type EvidenceId } from '../../domain/evidence';
+import { allPassageKeys, type EvidenceId } from '../../domain/evidence';
 import type { ContentIndex } from '../../domain/save';
 import { findAnomaly } from '../anomalies/file-0091';
 import { CASE_001 } from './case-001';
+import { CASE_002 } from './case-002';
 
 /** All cases available in this build, in archive order. */
-export const CASES: readonly CaseDefinition[] = [CASE_001];
+export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002];
 
 export function findCase(id: string): CaseDefinition | undefined {
   return CASES.find((c) => c.id === id);
@@ -28,6 +29,6 @@ export const CONTENT_INDEX: ContentIndex = {
   isKnownPassage: (caseIdValue, evidenceIdValue, key) => {
     const caseFile = findCase(caseIdValue);
     const item = caseFile && findEvidence(caseFile, evidenceIdValue);
-    return item?.kind === 'document' && passageKeys(item.document).includes(key);
+    return item?.kind === 'document' && allPassageKeys(item).includes(key);
   },
 };
