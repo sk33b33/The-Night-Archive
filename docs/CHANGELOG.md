@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.8.1 — Case 001 polish and QA (2026-11-07)
+
+### Added
+- Full Case 001 playthrough regression test (`src/app/playthrough.test.tsx`),
+  including a refresh mid-case and a later session.
+- Case bible (`docs/cases/case-001-bible.md`) separating canon, added
+  details, supported conclusions, and unknowns.
+
+### Fixed
+- Evidence board cards: the accessible name now matches the visible text
+  (axe `label-content-name-mismatch`); movement instructions are a shared
+  description instead.
+
+### Verified
+- axe-core 4.14 (WCAG 2.1 A/AA + best practice) on 15 screen states at 360px
+  (standard and large text) and 1280px: no violations, no horizontal
+  overflow, no console errors.
+- Keyboard-only playthrough from the main menu to File 0091, with a visible
+  focus indicator at every stop.
+
 ## 0.8.0 — Phase 8 (assumed): installable PWA and offline play (2026-11-07)
 
 `docs/ROADMAP.md` is still absent. With Case 001 playable end to end, this

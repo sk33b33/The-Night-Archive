@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import {
   BOARD_SIZE,
   CARD_SIZE,
@@ -48,6 +48,7 @@ export function BoardCanvas({
   onMove,
   onSelect,
 }: BoardCanvasProps) {
+  const instructionsId = useId();
   const [drag, setDrag] = useState<Drag | null>(null);
   const dragRef = useRef<Drag | null>(null);
 
@@ -117,6 +118,9 @@ export function BoardCanvas({
 
   return (
     <div className="board-scroll">
+      <p id={instructionsId} className="visually-hidden">
+        Arrow keys move the card. Enter selects it for a new connection.
+      </p>
       <div className="board" style={{ width: BOARD_SIZE.width, height: BOARD_SIZE.height }}>
         <svg
           className="board__lines"
@@ -195,7 +199,7 @@ export function BoardCanvas({
                 transform: `translate(${p.x}px, ${p.y}px)`,
               }}
               aria-pressed={selectedIndex >= 0}
-              aria-label={`${item.title}, ${item.reference}. Arrow keys move the card; Enter selects it for a connection.`}
+              aria-describedby={instructionsId}
               onPointerDown={onPointerDown(item.id)}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
@@ -203,7 +207,9 @@ export function BoardCanvas({
               onKeyDown={onKeyDown(item.id)}
             >
               <span className={`kind kind--${item.kind}`}>{item.kind === 'audio' ? 'Audio' : 'Document'}</span>
+              <span className="visually-hidden">:</span>{' '}
               <span className="board-card__title">{item.title}</span>
+              <span className="visually-hidden">,</span>{' '}
               <span className="board-card__reference">{item.reference}</span>
             </button>
           );

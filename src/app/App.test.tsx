@@ -228,9 +228,9 @@ describe('shift flow', () => {
     expect(screen.getByText(/No connections yet/)).toBeTruthy();
 
     // Tapping two cards fills the form.
-    fireEvent.pointerDown(screen.getByRole('button', { name: /^Incident report/ }), { pointerId: 1, button: 0 });
-    fireEvent.pointerUp(screen.getByRole('button', { name: /^Incident report/ }), { pointerId: 1 });
-    fireEvent.keyDown(screen.getByRole('button', { name: /^Duty roster/ }), { key: 'Enter' });
+    fireEvent.pointerDown(screen.getByRole('button', { name: /^Document: Incident report/ }), { pointerId: 1, button: 0 });
+    fireEvent.pointerUp(screen.getByRole('button', { name: /^Document: Incident report/ }), { pointerId: 1 });
+    fireEvent.keyDown(screen.getByRole('button', { name: /^Document: Duty roster/ }), { key: 'Enter' });
     expect((screen.getByLabelText('First item') as HTMLSelectElement).value).toBe('c001-incident-report');
     expect((screen.getByLabelText('Second item') as HTMLSelectElement).value).toBe('c001-duty-roster');
     fireEvent.click(screen.getByRole('button', { name: 'Add connection' }));
@@ -252,7 +252,7 @@ describe('shift flow', () => {
     expect(screen.getByText('That connection is already on the board.')).toBeTruthy();
 
     // Keyboard moves a card.
-    fireEvent.keyDown(screen.getByRole('button', { name: /^Night timetable/ }), { key: 'ArrowRight' });
+    fireEvent.keyDown(screen.getByRole('button', { name: /^Document: Night timetable/ }), { key: 'ArrowRight' });
 
     await waitFor(() => {
       const board = (repo.stored() as SaveGame).cases['case-001']?.board;
@@ -264,7 +264,7 @@ describe('shift flow', () => {
     expect(screen.getByText('1 supported · 0 hypotheses')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('radio', { name: 'List' }));
-    expect(screen.queryByRole('button', { name: /^Incident report, File 001/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Document: Incident report, File 001/ })).toBeNull();
     expect(screen.getByText('Incident report — contradicts — Duty roster')).toBeTruthy();
   });
 
