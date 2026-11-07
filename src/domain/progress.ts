@@ -1,11 +1,12 @@
 import type { CaseId } from './case';
 import { EMPTY_BOARD, type BoardState } from './board';
+import { isSolved, type DeductionAttempt } from './deduction';
 import type { EvidenceId } from './evidence';
 import { SAVE_VERSION, type CaseProgress, type ResumePoint, type SaveGame } from './save';
 
 /** Game-progress rules. Pure functions: each returns a new SaveGame. */
 
-export type CaseStatus = 'new' | 'opened';
+export type CaseStatus = 'new' | 'opened' | 'closed';
 
 export function createSave(now: Date): SaveGame {
   const stamp = now.toISOString();
@@ -19,7 +20,9 @@ export function createSave(now: Date): SaveGame {
 }
 
 export function caseStatus(save: SaveGame | null, id: CaseId): CaseStatus {
-  return save?.cases[id] ? 'opened' : 'new';
+  const progress = save?.cases[id];
+  if (!progress) return 'new';
+  return isSolved(progress.attempts) ? 'closed' : 'opened';
 }
 
 export function caseProgress(save: SaveGame | null, id: CaseId): CaseProgress | undefined {
@@ -31,7 +34,14 @@ export function isExamined(save: SaveGame | null, caseIdValue: CaseId, id: Evide
 }
 
 function newCaseProgress(stamp: string): CaseProgress {
-  return { status: 'opened', firstOpenedAt: stamp, examined: [], discoveries: [], board: EMPTY_BOARD };
+  return {
+    status: 'opened',
+    firstOpenedAt: stamp,
+    examined: [],
+    discoveries: [],
+    board: EMPTY_BOARD,
+    attempts: [],
+  };
 }
 
 function sameResume(a: ResumePoint, b: ResumePoint): boolean {
@@ -104,5 +114,18 @@ export function updateBoard(
     ...save,
     updatedAt: stamp,
     cases: { ...save.cases, [caseIdValue]: { ...before, board } },
+  };
+}
+
+/** Appends a deduction attempt. Attempts are never edited or removed. */
+export function recordAttempt(save: SaveGame, caseIdValue: CaseId, attempt: DeductionAttempt): SaveGame {
+  const before = save.cases[caseIdValue] ?? newCaseProgress(attempt.submittedAt);
+  return {
+    ...save,
+    updatedAt: attempt.submittedAt,
+    cases: {
+      ...save.cases,
+      [caseIdValue]: { ...before, attempts: [...before.attempts, attempt] },
+    },
   };
 }

@@ -3,6 +3,7 @@
  * game logic read them. Nothing here depends on React.
  */
 import type { BoardRule } from './board';
+import type { DeductionQuestion } from './deduction';
 import type { DocumentEvidence, EvidenceId, EvidenceItem } from './evidence';
 
 declare const caseIdBrand: unique symbol;
@@ -43,6 +44,8 @@ export interface CaseDefinition {
   readonly evidence: readonly EvidenceItem[];
   /** Relationships the records support. Unlisted connections stay hypotheses. */
   readonly boardRules: readonly BoardRule[];
+  /** Findings the player must establish to close the case. */
+  readonly questions: readonly DeductionQuestion[];
 }
 
 export function findEvidence(caseFile: CaseDefinition, id: string): EvidenceItem | undefined {

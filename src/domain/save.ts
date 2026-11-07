@@ -1,5 +1,6 @@
 import type { CaseId } from './case';
 import { EMPTY_BOARD, isRelationType, type BoardLink, type BoardPosition, type BoardState } from './board';
+import type { DeductionAttempt, DeductionOutcome } from './deduction';
 import type { EvidenceId } from './evidence';
 
 /**
@@ -13,8 +14,9 @@ import type { EvidenceId } from './evidence';
  *       evidence resume points.
  * - v3: per-case evidence board (card positions and connections); board
  *       resume point.
+ * - v4: per-case deduction attempts; findings resume point.
  */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 /** Where Continue returns the player to. Only resumable screens appear here. */
 export type ResumePoint =
@@ -22,6 +24,7 @@ export type ResumePoint =
   | { readonly screen: 'briefing'; readonly caseId: CaseId }
   | { readonly screen: 'investigation'; readonly caseId: CaseId }
   | { readonly screen: 'board'; readonly caseId: CaseId }
+  | { readonly screen: 'findings'; readonly caseId: CaseId }
   | { readonly screen: 'evidence'; readonly caseId: CaseId; readonly evidenceId: EvidenceId };
 
 export interface CaseProgress {
@@ -33,6 +36,8 @@ export interface CaseProgress {
   /** Discovery IDs the player has made (see UnlockRule). */
   readonly discoveries: readonly string[];
   readonly board: BoardState;
+  /** Every submitted set of findings, oldest first. */
+  readonly attempts: readonly DeductionAttempt[];
 }
 
 export interface SaveGame {
@@ -85,6 +90,15 @@ const MIGRATIONS: Readonly<Record<number, (data: RawRecord) => RawRecord>> = {
     }
     return { ...data, version: 3, cases };
   },
+  3: (data) => {
+    const cases: RawRecord = {};
+    if (isRecord(data.cases)) {
+      for (const [id, entry] of Object.entries(data.cases)) {
+        cases[id] = isRecord(entry) ? { ...entry, attempts: [] } : entry;
+      }
+    }
+    return { ...data, version: 4, cases };
+  },
 };
 
 function isIsoTimestamp(value: unknown): value is string {
@@ -101,6 +115,7 @@ function parseResume(value: unknown, content: ContentIndex): ResumePoint {
     case 'briefing':
     case 'investigation':
     case 'board':
+    case 'findings':
       return { screen: value.screen, caseId: id };
     case 'evidence':
       if (typeof value.evidenceId === 'string' && content.isKnownEvidence(id, value.evidenceId)) {
@@ -148,6 +163,38 @@ function parseBoard(value: unknown, caseIdValue: string, content: ContentIndex):
   return { positions, links };
 }
 
+const OUTCOMES: readonly DeductionOutcome[] = ['correct', 'partial', 'incomplete', 'incorrect'];
+
+function parseAttempts(value: unknown, caseIdValue: string, content: ContentIndex): DeductionAttempt[] {
+  if (!Array.isArray(value)) return [];
+  const attempts: DeductionAttempt[] = [];
+  for (const entry of value) {
+    if (
+      !isRecord(entry) ||
+      !isIsoTimestamp(entry.submittedAt) ||
+      !OUTCOMES.includes(entry.outcome as DeductionOutcome) ||
+      !isRecord(entry.answers) ||
+      !isRecord(entry.citations)
+    ) {
+      continue;
+    }
+    const answers: Record<string, string> = {};
+    for (const [q, a] of Object.entries(entry.answers)) if (typeof a === 'string') answers[q] = a;
+    const citations: Record<string, EvidenceId[]> = {};
+    for (const [q, ids] of Object.entries(entry.citations)) {
+      citations[q] = uniqueStrings(ids, (e) => content.isKnownEvidence(caseIdValue, e)) as EvidenceId[];
+    }
+    // The outcome is kept as recorded: it is the history of what was submitted.
+    attempts.push({
+      submittedAt: entry.submittedAt,
+      outcome: entry.outcome as DeductionOutcome,
+      answers,
+      citations,
+    });
+  }
+  return attempts;
+}
+
 function parseCases(value: unknown, content: ContentIndex): Record<string, CaseProgress> {
   const cases: Record<string, CaseProgress> = {};
   if (!isRecord(value)) return cases;
@@ -162,6 +209,7 @@ function parseCases(value: unknown, content: ContentIndex): Record<string, CaseP
       examined: uniqueStrings(entry.examined, (e) => content.isKnownEvidence(id, e)) as EvidenceId[],
       discoveries: uniqueStrings(entry.discoveries, () => true),
       board: parseBoard(entry.board, id, content),
+      attempts: parseAttempts(entry.attempts, id, content),
     };
   }
   return cases;

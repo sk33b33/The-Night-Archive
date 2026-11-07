@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.6.0 — Phase 6 (assumed): case findings and deductions (2026-11-07)
+
+`docs/ROADMAP.md` is still absent. This adds deduction submission to complete
+the Case 001 investigation loop. The end anomaly (File 0091) is not started.
+
+### Added
+- Deduction domain (`src/domain/deduction.ts`): authored questions with a
+  single supported answer and evidence requirements (`allOf` / `anyOf`);
+  deterministic outcomes `correct`, `partial`, `incomplete`, `incorrect`;
+  progressive hints keyed to the first finding that does not hold.
+- Case 001 questions from canon: the report is unreliable/incomplete; the
+  recording contains information the report omits; the caller's identity
+  remains unknown. Options naming Elias Ward, Mara, or the second voice are
+  never accepted. The case can close without the filtered segment.
+- Case findings screen: answers, citations per question, procedural feedback,
+  a "Reviewer's note" hint, submission count, and accepted findings once
+  closed. The form starts from the last submission.
+- Case status `closed` (archive chip) once findings are accepted.
+- Save format v4: every attempt is stored with its answers, cited evidence
+  IDs, outcome, and time; findings resume point; v3 → v4 migration.
+
 ## 0.5.0 — Phase 5 (assumed): evidence board (2026-11-07)
 
 `docs/ROADMAP.md` is still absent. Case 001 has no photo, CCTV, or object

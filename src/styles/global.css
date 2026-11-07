@@ -1400,3 +1400,125 @@ p {
   border: 1px dashed var(--color-amber);
   color: var(--color-amber);
 }
+
+/* ---------- Case findings ---------- */
+
+.chip--closed {
+  color: var(--color-amber);
+}
+
+.case-actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+@media (min-width: 480px) {
+  .case-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.question__prompt {
+  font-size: var(--text-lg);
+  line-height: 1.35;
+}
+
+.question__number {
+  font-family: var(--font-mono);
+  color: var(--color-amber);
+}
+
+.citations {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.citations__legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.citations__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.citation {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.citation:has(input:checked) {
+  border-color: var(--color-accent);
+  background: rgb(79 184 176 / 0.12);
+}
+
+.citation:has(input:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.citation input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.citation input:focus-visible {
+  outline: none;
+}
+
+.result {
+  border-left-width: 4px;
+}
+
+.result--correct {
+  border-left-color: var(--color-accent);
+}
+
+.result--partial,
+.result--incomplete {
+  border-left-color: var(--color-amber);
+}
+
+.result--incorrect {
+  border-left-color: var(--color-danger);
+}
+
+.result__title {
+  font-size: var(--text-lg);
+}
+
+.result__hint {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-amber-soft);
+}
+
+.result__hint-label {
+  font-weight: 700;
+  color: var(--color-amber);
+}
+
+.accepted {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  font-weight: 600;
+}

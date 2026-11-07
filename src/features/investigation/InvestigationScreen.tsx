@@ -12,6 +12,7 @@ interface InvestigationScreenProps {
   readonly onOpenEvidence: (id: EvidenceId) => void;
   readonly onOpenBriefing: () => void;
   readonly onOpenBoard: () => void;
+  readonly onOpenFindings: () => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
   readonly notice?: ReactNode;
@@ -24,6 +25,7 @@ export function InvestigationScreen({
   onOpenEvidence,
   onOpenBriefing,
   onOpenBoard,
+  onOpenFindings,
   onBack,
   focusOnMount,
   notice,
@@ -45,9 +47,12 @@ export function InvestigationScreen({
         </button>
       </div>
 
-      <Button variant="primary" onClick={onOpenBoard}>
-        Open evidence board
-      </Button>
+      <div className="case-actions">
+        <Button variant="primary" onClick={onOpenBoard}>
+          Open evidence board
+        </Button>
+        <Button onClick={onOpenFindings}>Case findings</Button>
+      </div>
 
       <section className="panel" aria-labelledby="inventory-heading">
         <h2 id="inventory-heading" className="panel__title">

@@ -10,6 +10,7 @@ interface CaseCardProps {
 const STATUS_LABEL: Record<CaseStatus, string> = {
   new: 'New',
   opened: 'Opened',
+  closed: 'Closed',
 };
 
 export function CaseCard({ caseFile, status, onOpen }: CaseCardProps) {

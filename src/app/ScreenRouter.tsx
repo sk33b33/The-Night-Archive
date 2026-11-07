@@ -9,6 +9,7 @@ import { BriefingScreen } from '../features/briefing/BriefingScreen';
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { EvidenceScreen } from '../features/evidence/EvidenceScreen';
 import { BoardScreen } from '../features/evidence-board/BoardScreen';
+import { FindingsScreen } from '../features/deductions/FindingsScreen';
 import { InvestigationScreen } from '../features/investigation/InvestigationScreen';
 import { MainMenu } from '../features/menu/MainMenu';
 import { SettingsScreen } from '../features/settings/SettingsScreen';
@@ -112,6 +113,7 @@ export function ScreenRouter(props: ScreenRouterProps) {
           }
           onOpenBriefing={() => navigate({ id: 'briefing', caseId: caseFile.id })}
           onOpenBoard={() => navigate({ id: 'board', caseId: caseFile.id })}
+          onOpenFindings={() => navigate({ id: 'findings', caseId: caseFile.id })}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}
@@ -124,6 +126,18 @@ export function ScreenRouter(props: ScreenRouterProps) {
           evidence={evidence}
           board={progress?.board ?? EMPTY_BOARD}
           onChange={(change) => saveGame.updateBoard(caseFile.id, change)}
+          focusOnMount={focusOnMount}
+          onBack={back}
+          notice={notice}
+        />
+      );
+    case 'findings':
+      return (
+        <FindingsScreen
+          caseFile={caseFile}
+          evidence={evidence}
+          attempts={progress?.attempts ?? []}
+          onSubmit={(attempt) => saveGame.submitAttempt(caseFile.id, attempt)}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}

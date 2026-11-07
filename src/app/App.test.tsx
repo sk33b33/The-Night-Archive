@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { caseId } from '../domain/case';
 import { evidenceId } from '../domain/evidence';
@@ -266,6 +266,61 @@ describe('shift flow', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'List' }));
     expect(screen.queryByRole('button', { name: /^Incident report, File 001/ })).toBeNull();
     expect(screen.getByText('Incident report — contradicts — Duty roster')).toBeTruthy();
+  });
+
+  it('submits findings, gets a hint, then closes the case', async () => {
+    const repo = createMemoryRepository();
+    await renderReady(repo);
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Case findings' }));
+    expect(heading('Case findings')).toBeTruthy();
+
+    const submit = screen.getByRole('button', { name: 'Submit findings' });
+    expect(submit.getAttribute('aria-disabled')).toBe('true');
+    expect(screen.getByText('Answer every question before submitting.')).toBeTruthy();
+
+    const q = (prompt: RegExp) => {
+      const section = screen.getByRole('heading', { name: prompt }).closest('section');
+      if (!section) throw new Error('question section missing');
+      return within(section);
+    };
+    const reliability = q(/relied on/);
+    const recording = q(/recording show/);
+    const caller = q(/Who made the call/);
+
+    reliability.getByRole('radio', { name: /unreliable or incomplete/ }).click();
+    reliability.getByRole('checkbox', { name: 'Duty roster' }).click();
+    recording.getByRole('radio', { name: /leaves out/ }).click();
+    recording.getByRole('checkbox', { name: 'Incident report' }).click();
+    recording.getByRole('checkbox', { name: 'Audio reel' }).click();
+    caller.getByRole('radio', { name: 'Mara.' }).click();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Submit findings' }));
+    expect(screen.getByRole('heading', { name: 'Findings partly accepted' })).toBeTruthy();
+    expect(screen.getByText(/Ask what the records actually establish/)).toBeTruthy();
+
+    caller.getByRole('radio', { name: /cannot establish/ }).click();
+    fireEvent.click(screen.getByRole('button', { name: 'Submit findings' }));
+    expect(screen.getByRole('heading', { name: 'Findings incomplete' })).toBeTruthy();
+    expect(screen.getByText(/Cite the record that casts doubt/)).toBeTruthy();
+
+    caller.getByRole('checkbox', { name: 'Duty roster' }).click();
+    fireEvent.click(screen.getByRole('button', { name: 'Submit findings' }));
+    expect(screen.getByRole('heading', { name: 'Findings accepted' })).toBeTruthy();
+    expect(screen.getByText('The caller’s identity remains unknown.')).toBeTruthy();
+    expect(screen.getByText('3 submissions recorded')).toBeTruthy();
+
+    await waitFor(() => {
+      const attempts = (repo.stored() as SaveGame).cases['case-001']?.attempts ?? [];
+      expect(attempts.map((a) => a.outcome)).toEqual(['partial', 'incomplete', 'correct']);
+      expect(attempts[2]?.citations['caller-identity']).toEqual(['c001-duty-roster']);
+      expect(attempts[0]?.answers['caller-identity']).toBe('mara');
+    });
+
+    simulateBack([{ id: 'menu' }, { id: 'archive' }]);
+    expect(screen.getByText('Closed')).toBeTruthy();
   });
 
   it('Continue resumes at saved evidence with Back leading to the case files', async () => {

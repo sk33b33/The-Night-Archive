@@ -6,6 +6,7 @@ import {
   SECOND_VOICE_DISCOVERY,
   VOICE_ISOLATION,
 } from './case-001-audio';
+import { CASE_001_QUESTIONS } from './case-001-deduction';
 
 /**
  * Case 001 — The Missing Recording. Canon lives in CLAUDE.md.
@@ -228,4 +229,5 @@ export const CASE_001: CaseDefinition = {
       reason: 'The filtered segment is a processed copy of 0:30–0:46 of the reel.',
     },
   ],
+  questions: CASE_001_QUESTIONS,
 };

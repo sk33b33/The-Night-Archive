@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { caseId } from './case';
 import { evidenceId } from './evidence';
-import { caseStatus, createSave, isExamined, recordDiscovery, recordVisit, updateBoard } from './progress';
+import {
+  caseStatus,
+  createSave,
+  isExamined,
+  recordAttempt,
+  recordDiscovery,
+  recordVisit,
+  updateBoard,
+} from './progress';
 import { moveCard } from './board';
 import { SAVE_VERSION, migrateSave, type ContentIndex } from './save';
 
@@ -47,6 +55,7 @@ describe('migrateSave', () => {
             examined: [],
             discoveries: [],
             board: { positions: {}, links: [] },
+            attempts: [],
           },
         },
       },
@@ -75,6 +84,7 @@ describe('migrateSave', () => {
       examined: ['ev-a'],
       discoveries: ['d-1'],
       board: { positions: {}, links: [] },
+      attempts: [],
     });
     expect(result.ok && result.save.resume).toEqual(v2.resume);
   });
@@ -176,8 +186,57 @@ describe('migrateSave', () => {
         examined: ['ev-a'],
         discoveries: ['d-1'],
         board: { positions: {}, links: [] },
+        attempts: [],
       },
     });
+  });
+
+  it('upgrades a v3 save and keeps valid attempts, dropping malformed ones', () => {
+    const v3 = {
+      version: 3,
+      createdAt: T0.toISOString(),
+      updatedAt: T1.toISOString(),
+      resume: { screen: 'board', caseId: 'case-001' },
+      cases: {
+        'case-001': {
+          status: 'opened',
+          firstOpenedAt: T1.toISOString(),
+          examined: [],
+          discoveries: [],
+          board: { positions: {}, links: [] },
+        },
+      },
+    };
+    const upgraded = migrateSave(v3, content);
+    expect(upgraded.ok && upgraded.save.cases['case-001']?.attempts).toEqual([]);
+    expect(upgraded.ok && upgraded.save.resume).toEqual({ screen: 'board', caseId: 'case-001' });
+
+    const withAttempts = {
+      ...createSave(T0),
+      cases: {
+        'case-001': {
+          status: 'opened',
+          firstOpenedAt: T1.toISOString(),
+          examined: [],
+          discoveries: [],
+          board: { positions: {}, links: [] },
+          attempts: [
+            {
+              submittedAt: T2.toISOString(),
+              outcome: 'partial',
+              answers: { q1: 'a', q2: 7 },
+              citations: { q1: ['ev-a', 'ev-gone'] },
+            },
+            { submittedAt: T2.toISOString(), outcome: 'triumphant', answers: {}, citations: {} },
+            { outcome: 'correct', answers: {}, citations: {} },
+          ],
+        },
+      },
+    };
+    const parsed = migrateSave(withAttempts, content);
+    expect(parsed.ok && parsed.save.cases['case-001']?.attempts).toEqual([
+      { submittedAt: T2.toISOString(), outcome: 'partial', answers: { q1: 'a' }, citations: { q1: ['ev-a'] } },
+    ]);
   });
 });
 
@@ -244,5 +303,14 @@ describe('progress', () => {
     const save = updateBoard(createSave(T0), CASE_001, (b) => moveCard(b, EV_A, { x: 40, y: 40 }), T1);
     expect(save.cases[CASE_001]?.board.positions[EV_A]).toEqual({ x: 40, y: 40 });
     expect(updateBoard(save, CASE_001, (b) => b, T2)).toBe(save);
+  });
+
+  it('records attempts in order and closes the case on a correct one', () => {
+    const base = { answers: {}, citations: {} };
+    let save = recordAttempt(createSave(T0), CASE_001, { ...base, submittedAt: T1.toISOString(), outcome: 'partial' });
+    expect(caseStatus(save, CASE_001)).toBe('opened');
+    save = recordAttempt(save, CASE_001, { ...base, submittedAt: T2.toISOString(), outcome: 'correct' });
+    expect(save.cases[CASE_001]?.attempts.map((a) => a.outcome)).toEqual(['partial', 'correct']);
+    expect(caseStatus(save, CASE_001)).toBe('closed');
   });
 });

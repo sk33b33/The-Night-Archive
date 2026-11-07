@@ -2,7 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONTENT_INDEX } from '../../content/cases';
 import type { CaseId } from '../../domain/case';
 import type { BoardState } from '../../domain/board';
-import { createSave, recordDiscovery, recordVisit, updateBoard } from '../../domain/progress';
+import type { DeductionAttempt } from '../../domain/deduction';
+import {
+  createSave,
+  recordAttempt,
+  recordDiscovery,
+  recordVisit,
+  updateBoard,
+} from '../../domain/progress';
 import { migrateSave, type LoadProblem, type ResumePoint, type SaveGame } from '../../domain/save';
 import type { SaveRepository } from './saveRepository';
 
@@ -30,6 +37,8 @@ export interface SaveController {
   readonly discover: (caseId: CaseId, discoveryId: string) => void;
   /** Applies a change to a case's evidence board. */
   readonly updateBoard: (caseId: CaseId, change: (board: BoardState) => BoardState) => void;
+  /** Stores a submitted set of findings. */
+  readonly submitAttempt: (caseId: CaseId, attempt: DeductionAttempt) => void;
   readonly erase: () => Promise<boolean>;
 }
 
@@ -123,6 +132,15 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     [commit],
   );
 
+  const submitAttempt = useCallback(
+    (caseIdValue: CaseId, attempt: DeductionAttempt) => {
+      if (!loadedRef.current) return;
+      const current = saveRef.current ?? createSave(new Date(attempt.submittedAt));
+      commit(recordAttempt(current, caseIdValue, attempt));
+    },
+    [commit],
+  );
+
   const erase = useCallback(async () => {
     if (!repository || blockedRef.current) return false;
     const cleared = writeQueue.current.then(() => repository.clear());
@@ -137,5 +155,5 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     return true;
   }, [repository]);
 
-  return { state, visit, discover, updateBoard: changeBoard, erase };
+  return { state, visit, discover, updateBoard: changeBoard, submitAttempt, erase };
 }
