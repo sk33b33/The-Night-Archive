@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONTENT_INDEX } from '../../content/cases';
 import type { CaseId } from '../../domain/case';
-import { createSave, recordDiscovery, recordVisit } from '../../domain/progress';
+import type { BoardState } from '../../domain/board';
+import { createSave, recordDiscovery, recordVisit, updateBoard } from '../../domain/progress';
 import { migrateSave, type LoadProblem, type ResumePoint, type SaveGame } from '../../domain/save';
 import type { SaveRepository } from './saveRepository';
 
@@ -27,6 +28,8 @@ export interface SaveController {
   readonly visit: (point: ResumePoint) => void;
   /** Records a discovery for a case. No-op until the save has loaded. */
   readonly discover: (caseId: CaseId, discoveryId: string) => void;
+  /** Applies a change to a case's evidence board. */
+  readonly updateBoard: (caseId: CaseId, change: (board: BoardState) => BoardState) => void;
   readonly erase: () => Promise<boolean>;
 }
 
@@ -109,6 +112,17 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     [commit],
   );
 
+  const changeBoard = useCallback(
+    (caseIdValue: CaseId, change: (board: BoardState) => BoardState) => {
+      if (!loadedRef.current) return;
+      const now = new Date();
+      const current = saveRef.current;
+      const next = updateBoard(current ?? createSave(now), caseIdValue, change, now);
+      if (next !== current) commit(next);
+    },
+    [commit],
+  );
+
   const erase = useCallback(async () => {
     if (!repository || blockedRef.current) return false;
     const cleared = writeQueue.current.then(() => repository.clear());
@@ -123,5 +137,5 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     return true;
   }, [repository]);
 
-  return { state, visit, discover, erase };
+  return { state, visit, discover, updateBoard: changeBoard, erase };
 }

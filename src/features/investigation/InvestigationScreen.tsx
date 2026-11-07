@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Button } from '../../components/Button';
 import { ScreenLayout } from '../../components/ScreenLayout';
 import type { CaseDefinition } from '../../domain/case';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
@@ -10,6 +11,7 @@ interface InvestigationScreenProps {
   readonly isExamined: (id: EvidenceId) => boolean;
   readonly onOpenEvidence: (id: EvidenceId) => void;
   readonly onOpenBriefing: () => void;
+  readonly onOpenBoard: () => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
   readonly notice?: ReactNode;
@@ -21,6 +23,7 @@ export function InvestigationScreen({
   isExamined,
   onOpenEvidence,
   onOpenBriefing,
+  onOpenBoard,
   onBack,
   focusOnMount,
   notice,
@@ -41,6 +44,10 @@ export function InvestigationScreen({
           Review briefing
         </button>
       </div>
+
+      <Button variant="primary" onClick={onOpenBoard}>
+        Open evidence board
+      </Button>
 
       <section className="panel" aria-labelledby="inventory-heading">
         <h2 id="inventory-heading" className="panel__title">

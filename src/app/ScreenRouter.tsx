@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { CASES, findCase } from '../content/cases';
+import { EMPTY_BOARD } from '../domain/board';
 import { findEvidence, type CaseDefinition } from '../domain/case';
 import { availableEvidence, evidenceUnlockedBy } from '../domain/evidence';
 import { caseProgress, caseStatus } from '../domain/progress';
@@ -7,6 +8,7 @@ import { ArchiveScreen } from '../features/archive/ArchiveScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { EvidenceScreen } from '../features/evidence/EvidenceScreen';
+import { BoardScreen } from '../features/evidence-board/BoardScreen';
 import { InvestigationScreen } from '../features/investigation/InvestigationScreen';
 import { MainMenu } from '../features/menu/MainMenu';
 import { SettingsScreen } from '../features/settings/SettingsScreen';
@@ -109,6 +111,19 @@ export function ScreenRouter(props: ScreenRouterProps) {
             navigate({ id: 'evidence', caseId: caseFile.id, evidenceId })
           }
           onOpenBriefing={() => navigate({ id: 'briefing', caseId: caseFile.id })}
+          onOpenBoard={() => navigate({ id: 'board', caseId: caseFile.id })}
+          focusOnMount={focusOnMount}
+          onBack={back}
+          notice={notice}
+        />
+      );
+    case 'board':
+      return (
+        <BoardScreen
+          caseFile={caseFile}
+          evidence={evidence}
+          board={progress?.board ?? EMPTY_BOARD}
+          onChange={(change) => saveGame.updateBoard(caseFile.id, change)}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}

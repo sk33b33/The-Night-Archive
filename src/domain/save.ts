@@ -1,4 +1,5 @@
 import type { CaseId } from './case';
+import { EMPTY_BOARD, isRelationType, type BoardLink, type BoardPosition, type BoardState } from './board';
 import type { EvidenceId } from './evidence';
 
 /**
@@ -10,14 +11,17 @@ import type { EvidenceId } from './evidence';
  * - v1: resume point (archive/briefing) and opened cases.
  * - v2: per-case examined evidence and discoveries; investigation and
  *       evidence resume points.
+ * - v3: per-case evidence board (card positions and connections); board
+ *       resume point.
  */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 /** Where Continue returns the player to. Only resumable screens appear here. */
 export type ResumePoint =
   | { readonly screen: 'archive' }
   | { readonly screen: 'briefing'; readonly caseId: CaseId }
   | { readonly screen: 'investigation'; readonly caseId: CaseId }
+  | { readonly screen: 'board'; readonly caseId: CaseId }
   | { readonly screen: 'evidence'; readonly caseId: CaseId; readonly evidenceId: EvidenceId };
 
 export interface CaseProgress {
@@ -28,6 +32,7 @@ export interface CaseProgress {
   readonly examined: readonly EvidenceId[];
   /** Discovery IDs the player has made (see UnlockRule). */
   readonly discoveries: readonly string[];
+  readonly board: BoardState;
 }
 
 export interface SaveGame {
@@ -71,6 +76,15 @@ const MIGRATIONS: Readonly<Record<number, (data: RawRecord) => RawRecord>> = {
     }
     return { ...data, version: 2, cases };
   },
+  2: (data) => {
+    const cases: RawRecord = {};
+    if (isRecord(data.cases)) {
+      for (const [id, entry] of Object.entries(data.cases)) {
+        cases[id] = isRecord(entry) ? { ...entry, board: { positions: {}, links: [] } } : entry;
+      }
+    }
+    return { ...data, version: 3, cases };
+  },
 };
 
 function isIsoTimestamp(value: unknown): value is string {
@@ -86,6 +100,7 @@ function parseResume(value: unknown, content: ContentIndex): ResumePoint {
   switch (value.screen) {
     case 'briefing':
     case 'investigation':
+    case 'board':
       return { screen: value.screen, caseId: id };
     case 'evidence':
       if (typeof value.evidenceId === 'string' && content.isKnownEvidence(id, value.evidenceId)) {
@@ -103,6 +118,36 @@ function uniqueStrings(value: unknown, keep: (item: string) => boolean): string[
   return [...new Set(value.filter((item): item is string => typeof item === 'string' && keep(item)))];
 }
 
+function parseBoard(value: unknown, caseIdValue: string, content: ContentIndex): BoardState {
+  if (!isRecord(value)) return EMPTY_BOARD;
+  const known = (id: unknown): id is EvidenceId =>
+    typeof id === 'string' && content.isKnownEvidence(caseIdValue, id);
+
+  const positions: Record<string, BoardPosition> = {};
+  if (isRecord(value.positions)) {
+    for (const [id, pos] of Object.entries(value.positions)) {
+      if (known(id) && isRecord(pos) && Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
+        positions[id] = { x: pos.x as number, y: pos.y as number };
+      }
+    }
+  }
+  const links: BoardLink[] = [];
+  if (Array.isArray(value.links)) {
+    for (const link of value.links) {
+      if (
+        isRecord(link) &&
+        known(link.from) &&
+        known(link.to) &&
+        link.from !== link.to &&
+        isRelationType(link.relation)
+      ) {
+        links.push({ from: link.from, to: link.to, relation: link.relation });
+      }
+    }
+  }
+  return { positions, links };
+}
+
 function parseCases(value: unknown, content: ContentIndex): Record<string, CaseProgress> {
   const cases: Record<string, CaseProgress> = {};
   if (!isRecord(value)) return cases;
@@ -116,6 +161,7 @@ function parseCases(value: unknown, content: ContentIndex): Record<string, CaseP
       // Evidence removed from content is dropped; progress on the rest is kept.
       examined: uniqueStrings(entry.examined, (e) => content.isKnownEvidence(id, e)) as EvidenceId[],
       discoveries: uniqueStrings(entry.discoveries, () => true),
+      board: parseBoard(entry.board, id, content),
     };
   }
   return cases;

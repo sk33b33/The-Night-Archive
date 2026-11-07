@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { caseId } from './case';
 import { evidenceId } from './evidence';
-import { caseStatus, createSave, isExamined, recordDiscovery, recordVisit } from './progress';
+import { caseStatus, createSave, isExamined, recordDiscovery, recordVisit, updateBoard } from './progress';
+import { moveCard } from './board';
 import { SAVE_VERSION, migrateSave, type ContentIndex } from './save';
 
 const content: ContentIndex = {
@@ -45,9 +46,64 @@ describe('migrateSave', () => {
             firstOpenedAt: '2026-01-01T22:05:00.000Z',
             examined: [],
             discoveries: [],
+            board: { positions: {}, links: [] },
           },
         },
       },
+    });
+  });
+
+  it('upgrades a v2 save, keeping examined evidence and discoveries', () => {
+    const v2 = {
+      version: 2,
+      createdAt: '2026-01-01T22:00:00.000Z',
+      updatedAt: '2026-01-01T22:05:00.000Z',
+      resume: { screen: 'evidence', caseId: 'case-001', evidenceId: 'ev-a' },
+      cases: {
+        'case-001': {
+          status: 'opened',
+          firstOpenedAt: '2026-01-01T22:05:00.000Z',
+          examined: ['ev-a'],
+          discoveries: ['d-1'],
+        },
+      },
+    };
+    const result = migrateSave(v2, content);
+    expect(result.ok && result.save.cases['case-001']).toEqual({
+      status: 'opened',
+      firstOpenedAt: '2026-01-01T22:05:00.000Z',
+      examined: ['ev-a'],
+      discoveries: ['d-1'],
+      board: { positions: {}, links: [] },
+    });
+    expect(result.ok && result.save.resume).toEqual(v2.resume);
+  });
+
+  it('keeps valid board data and drops invalid positions and links', () => {
+    const raw = {
+      ...createSave(T0),
+      cases: {
+        'case-001': {
+          status: 'opened',
+          firstOpenedAt: T1.toISOString(),
+          examined: [],
+          discoveries: [],
+          board: {
+            positions: { 'ev-a': { x: 10, y: 20 }, 'ev-gone': { x: 1, y: 1 }, 'ev-b': { x: 'left' } },
+            links: [
+              { from: 'ev-a', to: 'ev-b', relation: 'contradicts' },
+              { from: 'ev-a', to: 'ev-a', relation: 'contradicts' },
+              { from: 'ev-a', to: 'ev-gone', relation: 'contradicts' },
+              { from: 'ev-a', to: 'ev-b', relation: 'proves' },
+            ],
+          },
+        },
+      },
+    };
+    const result = migrateSave(raw, content);
+    expect(result.ok && result.save.cases['case-001']?.board).toEqual({
+      positions: { 'ev-a': { x: 10, y: 20 } },
+      links: [{ from: 'ev-a', to: 'ev-b', relation: 'contradicts' }],
     });
   });
 
@@ -119,6 +175,7 @@ describe('migrateSave', () => {
         firstOpenedAt: T1.toISOString(),
         examined: ['ev-a'],
         discoveries: ['d-1'],
+        board: { positions: {}, links: [] },
       },
     });
   });
@@ -181,5 +238,11 @@ describe('progress', () => {
     expect(recordDiscovery(save, CASE_001, 'd-1', T2)).toBe(save);
     const visited = recordVisit(save, { screen: 'archive' }, T2);
     expect(visited.cases[CASE_001]?.discoveries).toEqual(['d-1']);
+  });
+
+  it('updates a case board and skips unchanged boards', () => {
+    const save = updateBoard(createSave(T0), CASE_001, (b) => moveCard(b, EV_A, { x: 40, y: 40 }), T1);
+    expect(save.cases[CASE_001]?.board.positions[EV_A]).toEqual({ x: 40, y: 40 });
+    expect(updateBoard(save, CASE_001, (b) => b, T2)).toBe(save);
   });
 });

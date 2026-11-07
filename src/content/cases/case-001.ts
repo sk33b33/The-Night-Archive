@@ -58,7 +58,7 @@ export const CASE_001: CaseDefinition = {
               { label: 'Date', value: '14 October 1981' },
               { label: 'Report time', value: '03:40' },
               { label: 'Location', value: 'Bellwether Railway Station' },
-              { label: 'Caller', value: 'Elias Ward' },
+              { label: 'Caller', value: 'Elias Ward (station staff)' },
               { label: 'Outcome', value: 'No incident confirmed' },
             ],
           },
@@ -184,6 +184,48 @@ export const CASE_001: CaseDefinition = {
           },
         ],
       },
+    },
+  ],
+  boardRules: [
+    {
+      from: CASE_001_IDS.report,
+      to: CASE_001_IDS.roster,
+      relation: 'contradicts',
+      reason:
+        'The report names Elias Ward, station staff, as the caller. The night roster for Bellwether does not list him.',
+    },
+    {
+      from: CASE_001_IDS.report,
+      to: CASE_001_IDS.audioReel,
+      relation: 'omits',
+      reason:
+        'The reel was filed with the report, but the report does not mention anything heard on it, including the words about the east door.',
+    },
+    {
+      from: CASE_001_IDS.report,
+      to: CASE_001_IDS.filteredSegment,
+      relation: 'omits',
+      reason: 'The second voice on the reel is not mentioned anywhere in the report.',
+    },
+    {
+      from: CASE_001_IDS.audioReel,
+      to: CASE_001_IDS.timetable,
+      relation: 'corroborates',
+      reason:
+        'The announcement on the reel and the timetable both record the 02:10 service as cancelled.',
+    },
+    {
+      from: CASE_001_IDS.audioReel,
+      to: CASE_001_IDS.maintenance,
+      relation: 'same-subject',
+      reason:
+        'The voice on the reel refers to the east door. The works register records that door as sealed since 1979.',
+    },
+    {
+      from: CASE_001_IDS.filteredSegment,
+      to: CASE_001_IDS.audioReel,
+      relation: 'derived-from',
+      reason: 'The filtered segment is a processed copy of 0:30–0:46 of the reel.',
     },
   ],
 };

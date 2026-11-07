@@ -2,6 +2,7 @@
  * Case domain model. Content files describe cases with these types; UI and
  * game logic read them. Nothing here depends on React.
  */
+import type { BoardRule } from './board';
 import type { DocumentEvidence, EvidenceId, EvidenceItem } from './evidence';
 
 declare const caseIdBrand: unique symbol;
@@ -40,6 +41,8 @@ export interface CaseDefinition {
   readonly briefing: CaseBriefing;
   /** All evidence for the case, in inventory order, including locked items. */
   readonly evidence: readonly EvidenceItem[];
+  /** Relationships the records support. Unlisted connections stay hypotheses. */
+  readonly boardRules: readonly BoardRule[];
 }
 
 export function findEvidence(caseFile: CaseDefinition, id: string): EvidenceItem | undefined {

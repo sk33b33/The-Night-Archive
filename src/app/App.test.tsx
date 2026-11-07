@@ -104,7 +104,7 @@ describe('shift flow', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     expect(heading('The Missing Recording')).toBeTruthy();
-    expect(screen.getByText('Elias Ward')).toBeTruthy();
+    expect(screen.getByText('Elias Ward (station staff)')).toBeTruthy();
     expect(screen.getByText('No incident confirmed')).toBeTruthy();
 
     await waitFor(() => {
@@ -215,6 +215,57 @@ describe('shift flow', () => {
     expect(screen.getByText(/Sound is not available on this device/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Clock chime/ }));
     expect(screen.getByText('[A station clock chimes]')).toBeTruthy();
+  });
+
+  it('creates board connections, shows supported vs hypothesis, and saves them', async () => {
+    const repo = createMemoryRepository();
+    await renderReady(repo);
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open evidence board' }));
+    expect(heading('Evidence board')).toBeTruthy();
+    expect(screen.getByText(/No connections yet/)).toBeTruthy();
+
+    // Tapping two cards fills the form.
+    fireEvent.pointerDown(screen.getByRole('button', { name: /^Incident report/ }), { pointerId: 1, button: 0 });
+    fireEvent.pointerUp(screen.getByRole('button', { name: /^Incident report/ }), { pointerId: 1 });
+    fireEvent.keyDown(screen.getByRole('button', { name: /^Duty roster/ }), { key: 'Enter' });
+    expect((screen.getByLabelText('First item') as HTMLSelectElement).value).toBe('c001-incident-report');
+    expect((screen.getByLabelText('Second item') as HTMLSelectElement).value).toBe('c001-duty-roster');
+    fireEvent.click(screen.getByRole('button', { name: 'Add connection' }));
+    expect(screen.getByText(/Supported by the records: The report names Elias Ward/)).toBeTruthy();
+    expect(screen.getByText('Incident report — contradicts — Duty roster')).toBeTruthy();
+
+    // An unsupported connection becomes a hypothesis, with no penalty.
+    fireEvent.change(screen.getByLabelText('First item'), { target: { value: 'c001-timetable' } });
+    fireEvent.change(screen.getByLabelText('Relationship'), { target: { value: 'contradicts' } });
+    fireEvent.change(screen.getByLabelText('Second item'), { target: { value: 'c001-maintenance-record' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add connection' }));
+    expect(screen.getByText(/added as a hypothesis/)).toBeTruthy();
+    expect(screen.getByText('1 supported · 1 hypothesis')).toBeTruthy();
+
+    // Duplicates are explained, not added.
+    fireEvent.change(screen.getByLabelText('First item'), { target: { value: 'c001-duty-roster' } });
+    fireEvent.change(screen.getByLabelText('Second item'), { target: { value: 'c001-incident-report' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add connection' }));
+    expect(screen.getByText('That connection is already on the board.')).toBeTruthy();
+
+    // Keyboard moves a card.
+    fireEvent.keyDown(screen.getByRole('button', { name: /^Night timetable/ }), { key: 'ArrowRight' });
+
+    await waitFor(() => {
+      const board = (repo.stored() as SaveGame).cases['case-001']?.board;
+      expect(board?.links).toHaveLength(2);
+      expect(board?.positions['c001-timetable']).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Remove connection: Night timetable/ }));
+    expect(screen.getByText('1 supported · 0 hypotheses')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'List' }));
+    expect(screen.queryByRole('button', { name: /^Incident report, File 001/ })).toBeNull();
+    expect(screen.getByText('Incident report — contradicts — Duty roster')).toBeTruthy();
   });
 
   it('Continue resumes at saved evidence with Back leading to the case files', async () => {

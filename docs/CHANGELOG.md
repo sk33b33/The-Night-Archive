@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.5.0 — Phase 5 (assumed): evidence board (2026-11-07)
+
+`docs/ROADMAP.md` is still absent. Case 001 has no photo, CCTV, or object
+evidence, so the next step in its loop is the board. Deductions and the end
+anomaly are not started.
+
+### Added
+- Board domain (`src/domain/board.ts`): relations (contradicts, corroborates,
+  same subject, leaves out, derived from), add/remove/move with duplicate and
+  self-link guards, clamped positions, and line/edge geometry.
+- Authored Case 001 board rules. A connection matching a rule is **Supported**
+  and shows what the records say; anything else stays a **Hypothesis** with
+  no penalty and nothing blocked.
+- Board view: SVG connections (solid teal = supported, dashed amber =
+  hypothesis, arrows for directed relations); cards drag by mouse, touch, or
+  pen, move with arrow keys, and select with tap/Enter to fill the form.
+- List view and connection form as the accessible alternative; narrow screens
+  start in the list view.
+- Save format v3: per-case board positions and connections, board resume
+  point, and a v2 → v3 migration.
+
+### Changed
+- The incident report's caller field reads "Elias Ward (station staff)" so
+  the roster contradiction is fair. It still only records whom the report
+  names; it does not establish who called.
+
 ## 0.4.0 — Phase 4 (assumed): audio evidence (2026-11-07)
 
 `docs/ROADMAP.md` is still absent; this continues the CLAUDE.md evidence order

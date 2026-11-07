@@ -12,6 +12,7 @@ export type Screen =
   | { readonly id: 'settings' }
   | { readonly id: 'briefing'; readonly caseId: CaseId }
   | { readonly id: 'investigation'; readonly caseId: CaseId }
+  | { readonly id: 'board'; readonly caseId: CaseId }
   | { readonly id: 'evidence'; readonly caseId: CaseId; readonly evidenceId: EvidenceId };
 
 export type ScreenId = Screen['id'];
@@ -34,6 +35,7 @@ export function screenKey(screen: Screen): string {
   switch (screen.id) {
     case 'briefing':
     case 'investigation':
+    case 'board':
       return `${screen.id}:${screen.caseId}`;
     case 'evidence':
       return `evidence:${screen.caseId}:${screen.evidenceId}`;
@@ -65,6 +67,7 @@ export function parseScreen(value: unknown, content: ContentIndex): Screen | nul
       return { id: record.id };
     case 'briefing':
     case 'investigation':
+    case 'board':
     case 'evidence': {
       const caseIdValue = record.caseId;
       if (typeof caseIdValue !== 'string' || !content.isKnownCase(caseIdValue)) return null;
@@ -88,6 +91,7 @@ export function toResumePoint(screen: Screen): ResumePoint | null {
       return { screen: 'archive' };
     case 'briefing':
     case 'investigation':
+    case 'board':
       return { screen: screen.id, caseId: screen.caseId };
     case 'evidence':
       return { screen: 'evidence', caseId: screen.caseId, evidenceId: screen.evidenceId };
@@ -108,6 +112,15 @@ export function stackForResume(point: ResumePoint): NavigationState {
       return { stack: [MENU, ARCHIVE, { id: 'briefing', caseId: point.caseId }] };
     case 'investigation':
       return { stack: [MENU, ARCHIVE, { id: 'investigation', caseId: point.caseId }] };
+    case 'board':
+      return {
+        stack: [
+          MENU,
+          ARCHIVE,
+          { id: 'investigation', caseId: point.caseId },
+          { id: 'board', caseId: point.caseId },
+        ],
+      };
     case 'evidence':
       return {
         stack: [

@@ -96,7 +96,10 @@ export function App({ repository, createEngine }: AppProps) {
   const screen = currentScreen(nav);
 
   return (
-    <main className="app-shell" key={screenKey(screen)}>
+    <main
+      className={screen.id === 'board' ? 'app-shell app-shell--wide' : 'app-shell'}
+      key={screenKey(screen)}
+    >
       <ScreenRouter
         screen={screen}
         focusOnMount={hasNavigated}

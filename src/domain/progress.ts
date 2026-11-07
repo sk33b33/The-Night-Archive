@@ -1,4 +1,5 @@
 import type { CaseId } from './case';
+import { EMPTY_BOARD, type BoardState } from './board';
 import type { EvidenceId } from './evidence';
 import { SAVE_VERSION, type CaseProgress, type ResumePoint, type SaveGame } from './save';
 
@@ -30,7 +31,7 @@ export function isExamined(save: SaveGame | null, caseIdValue: CaseId, id: Evide
 }
 
 function newCaseProgress(stamp: string): CaseProgress {
-  return { status: 'opened', firstOpenedAt: stamp, examined: [], discoveries: [] };
+  return { status: 'opened', firstOpenedAt: stamp, examined: [], discoveries: [], board: EMPTY_BOARD };
 }
 
 function sameResume(a: ResumePoint, b: ResumePoint): boolean {
@@ -85,5 +86,23 @@ export function recordDiscovery(
     ...save,
     updatedAt: stamp,
     cases: { ...save.cases, [caseIdValue]: { ...base, discoveries: [...base.discoveries, discoveryId] } },
+  };
+}
+
+/** Applies a board change for a case. Returns the same save if nothing changed. */
+export function updateBoard(
+  save: SaveGame,
+  caseIdValue: CaseId,
+  change: (board: BoardState) => BoardState,
+  now: Date,
+): SaveGame {
+  const stamp = now.toISOString();
+  const before = save.cases[caseIdValue] ?? newCaseProgress(stamp);
+  const board = change(before.board);
+  if (board === before.board) return save;
+  return {
+    ...save,
+    updatedAt: stamp,
+    cases: { ...save.cases, [caseIdValue]: { ...before, board } },
   };
 }
