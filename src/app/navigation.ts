@@ -1,5 +1,6 @@
 import type { CaseId } from '../domain/case';
-import type { ResumePoint } from '../domain/save';
+import type { EvidenceId } from '../domain/evidence';
+import type { ContentIndex, ResumePoint } from '../domain/save';
 
 /**
  * Screen navigation model. Pure and framework-free so it can be tested
@@ -9,7 +10,9 @@ export type Screen =
   | { readonly id: 'menu' }
   | { readonly id: 'archive' }
   | { readonly id: 'settings' }
-  | { readonly id: 'briefing'; readonly caseId: CaseId };
+  | { readonly id: 'briefing'; readonly caseId: CaseId }
+  | { readonly id: 'investigation'; readonly caseId: CaseId }
+  | { readonly id: 'evidence'; readonly caseId: CaseId; readonly evidenceId: EvidenceId };
 
 export type ScreenId = Screen['id'];
 
@@ -23,11 +26,24 @@ export type NavigationAction =
   | { readonly type: 'home' };
 
 export const MENU: Screen = { id: 'menu' };
+const ARCHIVE: Screen = { id: 'archive' };
 export const initialNavigation: NavigationState = { stack: [MENU] };
 
+/** A stable string key per screen, also used as the React key. */
+export function screenKey(screen: Screen): string {
+  switch (screen.id) {
+    case 'briefing':
+    case 'investigation':
+      return `${screen.id}:${screen.caseId}`;
+    case 'evidence':
+      return `evidence:${screen.caseId}:${screen.evidenceId}`;
+    default:
+      return screen.id;
+  }
+}
+
 export function sameScreen(a: Screen, b: Screen): boolean {
-  if (a.id !== b.id) return false;
-  return a.id !== 'briefing' || (b.id === 'briefing' && a.caseId === b.caseId);
+  return screenKey(a) === screenKey(b);
 }
 
 export function currentScreen(state: NavigationState): Screen {
@@ -39,7 +55,7 @@ export function canGoBack(state: NavigationState): boolean {
 }
 
 /** Validates an untrusted value (e.g. from history.state) as a Screen. */
-export function parseScreen(value: unknown, isKnownCase: (id: string) => boolean): Screen | null {
+export function parseScreen(value: unknown, content: ContentIndex): Screen | null {
   if (typeof value !== 'object' || value === null) return null;
   const record = value as Record<string, unknown>;
   switch (record.id) {
@@ -48,9 +64,18 @@ export function parseScreen(value: unknown, isKnownCase: (id: string) => boolean
     case 'settings':
       return { id: record.id };
     case 'briefing':
-      return typeof record.caseId === 'string' && isKnownCase(record.caseId)
-        ? { id: 'briefing', caseId: record.caseId as CaseId }
-        : null;
+    case 'investigation':
+    case 'evidence': {
+      const caseIdValue = record.caseId;
+      if (typeof caseIdValue !== 'string' || !content.isKnownCase(caseIdValue)) return null;
+      const id = caseIdValue as CaseId;
+      if (record.id !== 'evidence') return { id: record.id, caseId: id };
+      const evidenceIdValue = record.evidenceId;
+      if (typeof evidenceIdValue !== 'string' || !content.isKnownEvidence(id, evidenceIdValue)) {
+        return null;
+      }
+      return { id: 'evidence', caseId: id, evidenceId: evidenceIdValue as EvidenceId };
+    }
     default:
       return null;
   }
@@ -58,17 +83,41 @@ export function parseScreen(value: unknown, isKnownCase: (id: string) => boolean
 
 /** The screen a player is on, if it is one Continue can return to. */
 export function toResumePoint(screen: Screen): ResumePoint | null {
-  if (screen.id === 'archive') return { screen: 'archive' };
-  if (screen.id === 'briefing') return { screen: 'briefing', caseId: screen.caseId };
-  return null;
+  switch (screen.id) {
+    case 'archive':
+      return { screen: 'archive' };
+    case 'briefing':
+    case 'investigation':
+      return { screen: screen.id, caseId: screen.caseId };
+    case 'evidence':
+      return { screen: 'evidence', caseId: screen.caseId, evidenceId: screen.evidenceId };
+    default:
+      return null;
+  }
 }
 
-/** The navigation stack Continue rebuilds for a saved resume point. */
+/**
+ * The navigation stack Continue rebuilds for a saved resume point, so Back
+ * walks up through the case: evidence → workspace → archive → menu.
+ */
 export function stackForResume(point: ResumePoint): NavigationState {
-  const archive: Screen = { id: 'archive' };
-  return point.screen === 'briefing'
-    ? { stack: [MENU, archive, { id: 'briefing', caseId: point.caseId }] }
-    : { stack: [MENU, archive] };
+  switch (point.screen) {
+    case 'archive':
+      return { stack: [MENU, ARCHIVE] };
+    case 'briefing':
+      return { stack: [MENU, ARCHIVE, { id: 'briefing', caseId: point.caseId }] };
+    case 'investigation':
+      return { stack: [MENU, ARCHIVE, { id: 'investigation', caseId: point.caseId }] };
+    case 'evidence':
+      return {
+        stack: [
+          MENU,
+          ARCHIVE,
+          { id: 'investigation', caseId: point.caseId },
+          { id: 'evidence', caseId: point.caseId, evidenceId: point.evidenceId },
+        ],
+      };
+  }
 }
 
 export function navigationReducer(

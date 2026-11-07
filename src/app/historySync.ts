@@ -1,4 +1,4 @@
-import { isKnownCaseId } from '../content/cases';
+import { CONTENT_INDEX } from '../content/cases';
 import { initialNavigation, parseScreen, type NavigationState, type Screen } from './navigation';
 
 /**
@@ -21,7 +21,7 @@ export function fromHistoryState(raw: unknown): NavigationState | null {
   if (!Array.isArray(stored) || stored.length === 0) return null;
   const stack: Screen[] = [];
   for (const entry of stored) {
-    const screen = parseScreen(entry, isKnownCaseId);
+    const screen = parseScreen(entry, CONTENT_INDEX);
     if (!screen) return null;
     stack.push(screen);
   }

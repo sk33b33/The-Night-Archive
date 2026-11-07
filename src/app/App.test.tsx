@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { caseId } from '../domain/case';
+import { evidenceId } from '../domain/evidence';
 import { createSave, recordVisit } from '../domain/progress';
 import { SAVE_VERSION, type SaveGame } from '../domain/save';
 import { createMemoryRepository, type SaveRepository } from '../services/persistence/saveRepository';
@@ -90,9 +91,6 @@ describe('shift flow', () => {
     expect(heading('The Missing Recording')).toBeTruthy();
     expect(screen.getByText('Elias Ward')).toBeTruthy();
     expect(screen.getByText('No incident confirmed')).toBeTruthy();
-    const begin = screen.getByRole('button', { name: 'Begin investigation' });
-    expect(begin.getAttribute('aria-disabled')).toBe('true');
-    expect(screen.getByText(/workspace is not available/)).toBeTruthy();
 
     await waitFor(() => {
       const stored = repo.stored() as SaveGame;
@@ -104,24 +102,93 @@ describe('shift flow', () => {
     expect(screen.getByText('Opened')).toBeTruthy();
   });
 
-  it('Continue resumes at the saved briefing with Back leading to the archive', async () => {
+  it('opens the case files, examines a document, and searches it', async () => {
+    const repo = createMemoryRepository();
+    await renderReady(repo);
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+
+    expect(screen.getByText('0 of 5 items examined')).toBeTruthy();
+    const audio = screen.getByRole('button', { name: /Audio reel/ });
+    expect(audio.getAttribute('aria-disabled')).toBe('true');
+    expect(screen.getByText('Audio playback is not available in this build yet.')).toBeTruthy();
+    fireEvent.click(audio);
+    expect(screen.getByText('0 of 5 items examined')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /Night timetable/ }));
+    expect(heading('Night timetable')).toBeTruthy();
+    expect(screen.getByRole('table', { name: 'Departures after 23:00' })).toBeTruthy();
+
+    const search = screen.getByRole('searchbox', { name: 'Search this document' });
+    fireEvent.change(search, { target: { value: 'carrow' } });
+    expect(screen.getByRole('status').textContent).toBe('3 matches');
+    expect(document.querySelectorAll('mark').length).toBe(3);
+    fireEvent.change(search, { target: { value: 'zzz' } });
+    expect(screen.getByRole('status').textContent).toBe('0 matches');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(document.querySelectorAll('mark').length).toBe(0);
+
+    await waitFor(() => {
+      const stored = repo.stored() as SaveGame;
+      expect(stored.cases['case-001']?.examined).toEqual(['c001-timetable']);
+      expect(stored.resume).toEqual({
+        screen: 'evidence',
+        caseId: 'case-001',
+        evidenceId: 'c001-timetable',
+      });
+    });
+
+    simulateBack([{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-001' }]);
+    expect(screen.getByText('1 of 5 items examined')).toBeTruthy();
+    expect(screen.getByText('Examined')).toBeTruthy();
+  });
+
+  it('Continue resumes at saved evidence with Back leading to the case files', async () => {
     const saved = recordVisit(
       createSave(new Date('2026-01-01T00:00:00Z')),
-      { screen: 'briefing', caseId: CASE_001 },
+      { screen: 'evidence', caseId: CASE_001, evidenceId: evidenceId('c001-duty-roster') },
       new Date('2026-01-01T00:01:00Z'),
     );
     await renderReady(createMemoryRepository(saved));
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(heading('The Missing Recording')).toBeTruthy();
-    expect(window.history.state).toEqual({
-      nightArchiveStack: [{ id: 'menu' }, { id: 'archive' }, { id: 'briefing', caseId: 'case-001' }],
-    });
+    expect(heading('Duty roster')).toBeTruthy();
 
     // The in-app Back button defers to the browser history; wait for the
     // real popstate so it cannot leak into the next test.
-    fireEvent.click(screen.getByRole('button', { name: /Archive/ }));
-    await waitFor(() => expect(heading('Archive dashboard')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /Case files/ }));
+    await waitFor(() => expect(screen.getByText('1 of 5 items examined')).toBeTruthy());
+  });
+
+  it('upgrades a version 1 save and resumes from it', async () => {
+    const v1 = {
+      version: 1,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:01:00.000Z',
+      resume: { screen: 'briefing', caseId: 'case-001' },
+      cases: { 'case-001': { status: 'opened', firstOpenedAt: '2026-01-01T00:01:00.000Z' } },
+    };
+    await renderReady(createMemoryRepository(v1));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(heading('The Missing Recording')).toBeTruthy();
+  });
+
+  it('ignores history entries that point at unknown evidence', async () => {
+    window.history.replaceState(
+      {
+        nightArchiveStack: [
+          { id: 'menu' },
+          { id: 'evidence', caseId: 'case-001', evidenceId: 'c001-not-real' },
+        ],
+      },
+      '',
+    );
+    await act(async () => {
+      render(<App repository={createMemoryRepository()} />);
+    });
+    // Unknown evidence is rejected while parsing history, so the app starts at the menu.
+    expect(heading('The Night Archive')).toBeTruthy();
   });
 
   it('restores the current screen from history after a refresh', async () => {

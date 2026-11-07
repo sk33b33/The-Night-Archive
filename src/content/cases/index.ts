@@ -1,4 +1,6 @@
-import type { CaseDefinition, CaseId } from '../../domain/case';
+import { findEvidence, type CaseDefinition, type CaseId } from '../../domain/case';
+import type { EvidenceId } from '../../domain/evidence';
+import type { ContentIndex } from '../../domain/save';
 import { CASE_001 } from './case-001';
 
 /** All cases available in this build, in archive order. */
@@ -11,3 +13,14 @@ export function findCase(id: string): CaseDefinition | undefined {
 export function isKnownCaseId(id: unknown): id is CaseId {
   return typeof id === 'string' && findCase(id) !== undefined;
 }
+
+export function isKnownEvidenceId(caseIdValue: string, id: unknown): id is EvidenceId {
+  const caseFile = findCase(caseIdValue);
+  return typeof id === 'string' && caseFile !== undefined && findEvidence(caseFile, id) !== undefined;
+}
+
+/** Lookups the save and navigation layers use to validate stored IDs. */
+export const CONTENT_INDEX: ContentIndex = {
+  isKnownCase: isKnownCaseId,
+  isKnownEvidence: isKnownEvidenceId,
+};

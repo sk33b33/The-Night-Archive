@@ -1,0 +1,136 @@
+import type { ReactNode } from 'react';
+import { CASES, findCase } from '../content/cases';
+import { findEvidence, type CaseDefinition } from '../domain/case';
+import { availableEvidence } from '../domain/evidence';
+import { caseProgress, caseStatus } from '../domain/progress';
+import { ArchiveScreen } from '../features/archive/ArchiveScreen';
+import { BriefingScreen } from '../features/briefing/BriefingScreen';
+import { EvidenceScreen } from '../features/evidence/EvidenceScreen';
+import { InvestigationScreen } from '../features/investigation/InvestigationScreen';
+import { MainMenu } from '../features/menu/MainMenu';
+import { SettingsScreen } from '../features/settings/SettingsScreen';
+import type { SaveController } from '../services/persistence/useSaveGame';
+import type { PreferencesController } from '../services/preferences/usePreferences';
+import type { Screen } from './navigation';
+
+export interface ScreenRouterProps {
+  readonly screen: Screen;
+  readonly focusOnMount: boolean;
+  readonly saveGame: SaveController;
+  readonly preferences: PreferencesController;
+  readonly notice: ReactNode;
+  readonly navigate: (to: Screen) => void;
+  readonly back: () => void;
+  readonly onContinue: () => void;
+}
+
+function Unavailable({ title, body, onBack }: { title: string; body: string; onBack: () => void }) {
+  return (
+    <div className="empty-state" role="alert">
+      <p className="empty-state__lead">{title}</p>
+      <p className="empty-state__body">{body}</p>
+      <button type="button" className="back-button" onClick={onBack}>
+        <span aria-hidden="true">←</span> Back
+      </button>
+    </div>
+  );
+}
+
+/** Maps the current screen to its feature component. No navigation state here. */
+export function ScreenRouter(props: ScreenRouterProps) {
+  const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
+  const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
+
+  switch (screen.id) {
+    case 'menu':
+      return (
+        <MainMenu
+          focusOnMount={focusOnMount}
+          saveState={saveGame.state}
+          onContinue={props.onContinue}
+          onOpenArchive={() => navigate({ id: 'archive' })}
+          onOpenSettings={() => navigate({ id: 'settings' })}
+        />
+      );
+    case 'settings':
+      return (
+        <SettingsScreen
+          focusOnMount={focusOnMount}
+          preferences={props.preferences.preferences}
+          onChange={props.preferences.update}
+          persistFailed={props.preferences.persistFailed}
+          saveState={saveGame.state}
+          onEraseProgress={saveGame.erase}
+          onBack={back}
+        />
+      );
+    case 'archive':
+      return (
+        <ArchiveScreen
+          cases={CASES}
+          statusOf={(id) => caseStatus(save, id)}
+          onOpenCase={(caseId) => navigate({ id: 'briefing', caseId })}
+          focusOnMount={focusOnMount}
+          onBack={back}
+          notice={notice}
+        />
+      );
+    default:
+      break;
+  }
+
+  const caseFile: CaseDefinition | undefined = findCase(screen.caseId);
+  if (!caseFile) {
+    return <Unavailable title="File not found." body="This case file is not in the archive." onBack={back} />;
+  }
+  const progress = caseProgress(save, caseFile.id);
+  const evidence = availableEvidence(caseFile.evidence, progress?.discoveries ?? []);
+
+  switch (screen.id) {
+    case 'briefing':
+      return (
+        <BriefingScreen
+          caseFile={caseFile}
+          onBeginInvestigation={() => navigate({ id: 'investigation', caseId: caseFile.id })}
+          focusOnMount={focusOnMount}
+          onBack={back}
+          notice={notice}
+        />
+      );
+    case 'investigation':
+      return (
+        <InvestigationScreen
+          caseFile={caseFile}
+          evidence={evidence}
+          isExamined={(id) => progress?.examined.includes(id) ?? false}
+          onOpenEvidence={(evidenceId) =>
+            navigate({ id: 'evidence', caseId: caseFile.id, evidenceId })
+          }
+          onOpenBriefing={() => navigate({ id: 'briefing', caseId: caseFile.id })}
+          focusOnMount={focusOnMount}
+          onBack={back}
+          notice={notice}
+        />
+      );
+    case 'evidence': {
+      const item = findEvidence(caseFile, screen.evidenceId);
+      if (!item || !evidence.includes(item)) {
+        return (
+          <Unavailable
+            title="Item not available."
+            body="This evidence has not been filed with your case yet."
+            onBack={back}
+          />
+        );
+      }
+      return (
+        <EvidenceScreen
+          item={item}
+          focusOnMount={focusOnMount}
+          onBack={back}
+          notice={notice}
+        />
+      );
+    }
+  }
+}

@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.0 — Phase 3 (assumed): investigation workspace, evidence inventory, documents (2026-11-07)
+
+`docs/ROADMAP.md` is still absent; this follows the CLAUDE.md core-screen order
+(investigation workspace and evidence inventory, then document inspection).
+The evidence board and deductions are not started.
+
+### Added
+- Evidence domain model (`src/domain/evidence.ts`): typed document blocks,
+  audio catalogue entries, and deterministic unlock rules (`initial`,
+  `discovery`).
+- Case 001 records authored from canon: incident report, night timetable
+  (02:10 cancelled), works register (east door sealed 1979), duty roster
+  (Elias Ward not listed), and the audio reel catalogue entry. No record
+  interprets the evidence or names the second voice.
+- Investigation workspace with the evidence inventory and examined progress.
+- Document viewer with in-document search, match count (announced), and
+  highlighted matches. Tables scroll inside the record on narrow screens.
+- Save format v2: per-case examined evidence and discoveries; workspace and
+  evidence resume points. A v1 → v2 migration upgrades existing saves.
+- Briefing now opens the case files; Continue can resume on an evidence item.
+
+### Notes
+- The audio reel is listed but disabled with an explanation until the audio
+  viewer exists. The filtered segment is not authored yet.
+- Screen rendering moved from `App.tsx` into `src/app/ScreenRouter.tsx`.
+
 ## 0.2.0 — Phase 2 (assumed): case model, briefing, save/resume (2026-11-07)
 
 `docs/ROADMAP.md` is still absent, so this slice was chosen as the smallest next

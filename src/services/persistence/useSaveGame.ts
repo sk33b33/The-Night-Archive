@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { isKnownCaseId } from '../../content/cases';
+import { CONTENT_INDEX } from '../../content/cases';
 import { createSave, recordVisit } from '../../domain/progress';
 import { migrateSave, type LoadProblem, type ResumePoint, type SaveGame } from '../../domain/save';
 import type { SaveRepository } from './saveRepository';
@@ -55,7 +55,7 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     repository.load().then(
       (raw) => {
         if (raw === undefined) return finish(null, null);
-        const result = migrateSave(raw, isKnownCaseId);
+        const result = migrateSave(raw, CONTENT_INDEX);
         if (result.ok) finish(result.save, null);
         else finish(null, result.problem);
       },
