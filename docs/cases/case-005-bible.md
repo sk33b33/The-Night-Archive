@@ -1,9 +1,20 @@
-# Case bible — Case 005: The Wrong Date (DRAFT for review)
+# Case bible — Case 005: The Wrong Date
 
-Status: **proposal**. CLAUDE.md gives the title only. It inherits the open
-question from Case 004 (approved scope guard): *when* was the File 0091
-photograph taken? Everything below is **[Proposed]** unless marked
-**[Canon]** or **[Rule]**. Nothing is built until approved.
+Status: **approved** (2026-11-07), implemented in `src/content/cases/case-005*.ts`.
+All proposals approved; **end beat B** chosen (the File 0091 print gains an
+earlier custody entry); fictional brands approved.
+
+**Changes at implementation:**
+- The print's paper is dated to **1980** (backprint code K80), not "1980–82",
+  so the ordering question has one unambiguous answer. The data sheet still
+  gives a two-year shelf life.
+- A fifth finding was added for conclusion 4 ("how was it made?" → cannot be
+  established), so the "unknown" is something the player records, not a
+  leftover.
+
+**Details chosen at implementation [Added]:** catalogue says "Introduced
+March 1996"; installation photo mount dated Monday 2 February 1998; the
+camera's year range is 1980–2019; Estates comparison note wording.
 
 ## Scope guard
 

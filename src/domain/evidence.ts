@@ -120,6 +120,14 @@ export interface ObjectEvidence extends EvidenceBase {
   readonly provenance: readonly ProvenanceEntry[];
   /** Records the property store cross-references. */
   readonly linked: readonly EvidenceId[];
+  /** Custody entries that appear once a case closes, placed before the rest. */
+  readonly amendments?: readonly ObjectAmendment[];
+}
+
+export interface ObjectAmendment {
+  readonly id: string;
+  readonly whenCaseClosed: CaseId;
+  readonly prependProvenance: ProvenanceEntry;
 }
 
 export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence | ObjectEvidence;
@@ -230,11 +238,35 @@ export function effectiveDocument(
   return { ...item.document, blocks };
 }
 
-/** Applies amendments to a document item, leaving other kinds unchanged. */
+/** The chain of custody as it currently reads, including amendments. */
+export function effectiveProvenance(
+  item: ObjectEvidence,
+  isClosed: (caseId: CaseId) => boolean,
+): readonly ProvenanceEntry[] {
+  const added = (item.amendments ?? []).filter((a) => isClosed(a.whenCaseClosed));
+  if (added.length === 0) return item.provenance;
+  return [...added.map((a) => a.prependProvenance), ...item.provenance];
+}
+
+/** Applies amendments to documents and objects, leaving other kinds unchanged. */
 export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseId: CaseId) => boolean): T {
-  if (item.kind !== 'document' || !item.amendments?.length) return item;
-  const document = effectiveDocument(item, isClosed);
-  return document === item.document ? item : { ...item, document };
+  if (item.kind === 'document' && item.amendments?.length) {
+    const document = effectiveDocument(item, isClosed);
+    return document === item.document ? item : { ...item, document };
+  }
+  if (item.kind === 'object' && item.amendments?.length) {
+    const provenance = effectiveProvenance(item, isClosed);
+    return provenance === item.provenance ? item : { ...item, provenance };
+  }
+  return item;
+}
+
+/** Whether any amendment on this item is in effect. */
+export function isAmended(item: EvidenceItem, isClosed: (caseId: CaseId) => boolean): boolean {
+  return (
+    (item.kind === 'document' || item.kind === 'object') &&
+    (item.amendments ?? []).some((a) => isClosed(a.whenCaseClosed))
+  );
 }
 
 /** Every passage key the document can ever have, amendments included. */

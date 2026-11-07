@@ -14,4 +14,5 @@ export const PHOTO_ARTWORK: Readonly<Record<string, (props: { readonly alt: stri
   // File 0091: the same photograph shown by the Case 001 anomaly.
   'workstation-na07': ({ alt }) => <WorkstationPhoto dateStamp="14 OCT 1981" alt={alt} />,
   'desk-papers': DeskPapers,
+  'reading-room-1998': ({ alt }) => <WorkstationPhoto variant="installation" alt={alt} />,
 };

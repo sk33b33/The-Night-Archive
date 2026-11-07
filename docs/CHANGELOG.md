@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.14.0 — Case 005: The Wrong Date (2026-11-07)
+
+Built from the approved case bible (`docs/cases/case-005-bible.md`). Proves
+the File 0091 date wrong and the records contradictory; never explains how.
+
+### Added
+- Engine: **photo comparison**. Photographs can be opened side by side with
+  "Keep views in step"; choosing a region present in both zooms each to it,
+  and a region marked `revealsOnMatch` records a discovery.
+- Engine: `PhotoViewer` supports a controlled view (shared between viewers).
+- Engine: **object amendments** add custody entries ahead of the existing
+  ones once a case closes; case cards count amended objects too.
+- Artwork: HALDEN 486 maker's badge on the File 0091 terminal; a daylight
+  1998 installation photograph of the same desk (no lamp, no papers, position
+  tag, no imprint).
+- Case 005 content: File 0091 photograph (badge region), installation
+  photograph, Estates comparison note (required, unlocked by matching the
+  badge), camera manual, Halden catalogue, paper data sheet, companies
+  register, asset register; six board rules; five findings (choice,
+  select-all, ordering).
+- End beat B: once Case 005 closes, the File 0091 print's chain of custody
+  shows an earlier entry: "14 Oct 1981 · Night archivist (Workstation NA-07)
+  · Unfiled tray · Placed." Unexplained.
+
+### Fixed
+- A switch placed directly in a screen column no longer stretches tall.
+
+### Verified
+- Chromium at 360px and 1280px, Cases 001–005 in one save through the UI;
+  axe: no violations; no overflow; no console errors.
+
 ## 0.13.0 — Case 004: File 0091 (2026-11-07)
 
 Built from the approved case bible (`docs/cases/case-004-bible.md`).

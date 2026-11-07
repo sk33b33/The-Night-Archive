@@ -113,6 +113,19 @@ export const CASE_004: CaseDefinition = {
         },
       ],
       linked: [CASE_004_IDS.orders, CASE_004_IDS.ledger],
+      // Approved Case 005 end beat B: an earlier entry appears. Never explained.
+      amendments: [
+        {
+          id: 'placed-1981',
+          whenCaseClosed: caseId('case-005'),
+          prependProvenance: {
+            date: '14 Oct 1981',
+            holder: `Night archivist (Workstation ${ARCHIVE_DESK.workstation})`,
+            location: 'Unfiled tray, reading room',
+            action: 'Placed',
+          },
+        },
+      ],
     },
     {
       id: CASE_004_IDS.ledger,

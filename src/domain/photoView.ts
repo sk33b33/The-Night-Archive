@@ -22,6 +22,11 @@ export interface PhotoRegion {
   readonly height: number;
   /** Discovery recorded when the player examines this region. */
   readonly revealsDiscovery?: string;
+  /**
+   * Discovery recorded when this region is matched against a region with the
+   * same ID in a compared photograph.
+   */
+  readonly revealsOnMatch?: string;
 }
 
 export const MIN_SCALE = 1;

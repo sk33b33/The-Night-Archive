@@ -2014,3 +2014,23 @@ tr.is-marked td {
   border-left-color: #1e6f69;
   background: rgb(30 111 105 / 0.12);
 }
+
+/* ---------- Photo comparison ---------- */
+
+.photo-compare__notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.compare .print {
+  padding-bottom: var(--space-3);
+}
+
+/* A compact switch placed directly in a screen's column must not grow tall. */
+.screen__body > .switch {
+  flex: none;
+  width: 100%;
+  max-width: var(--content-width);
+}

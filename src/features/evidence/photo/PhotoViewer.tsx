@@ -27,6 +27,15 @@ interface PhotoViewerProps {
   readonly regions: readonly PhotoRegion[];
   /** Called when the player examines a region from the list. */
   readonly onExamine?: (region: PhotoRegion) => void;
+  /** Controlled view, e.g. to keep two photographs in step. */
+  readonly view?: PhotoView;
+  readonly onViewChange?: (view: PhotoView) => void;
+  /** Region to outline as active when controlled from outside. */
+  readonly activeRegionId?: string | null;
+  /** Hide the built-in regions list (a parent shows its own). */
+  readonly hideRegionList?: boolean;
+  /** Accessible name for the photograph's viewport. */
+  readonly label?: string;
 }
 
 interface Gesture {
@@ -40,19 +49,33 @@ interface Gesture {
  * (drag, pinch, double-tap), mouse (drag, double-click, Ctrl+wheel), and
  * keyboard (+/−/0 and arrows). Every action also has a visible button.
  */
-export function PhotoViewer({ children, regions, onExamine }: PhotoViewerProps) {
+export function PhotoViewer({
+  children,
+  regions,
+  onExamine,
+  view: controlledView,
+  onViewChange,
+  activeRegionId,
+  hideRegionList = false,
+  label = 'Photograph',
+}: PhotoViewerProps) {
   const id = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<PhotoView>(FULL_VIEW);
-  const [activeRegion, setActiveRegion] = useState<string | null>(null);
+  const [innerView, setInnerView] = useState<PhotoView>(FULL_VIEW);
+  const view = controlledView ?? innerView;
+  const setView = (next: PhotoView) => (onViewChange ? onViewChange(next) : setInnerView(next));
+  const [innerActive, setActiveRegion] = useState<string | null>(null);
+  const activeRegion = activeRegionId !== undefined ? activeRegionId : innerActive;
   const [showRegions, setShowRegions] = useState(true);
   const [gesturing, setGesturing] = useState(false);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const gesture = useRef<Gesture | null>(null);
   const viewRef = useRef(view);
+  const setViewRef = useRef(setView);
   useEffect(() => {
     viewRef.current = view;
-  }, [view]);
+    setViewRef.current = setView;
+  });
 
   /** Pointer position as a fraction of the viewport. */
   const toFraction = (clientX: number, clientY: number) => {
@@ -126,7 +149,8 @@ export function PhotoViewer({ children, regions, onExamine }: PhotoViewerProps) 
       event.preventDefault();
       const rect = node.getBoundingClientRect();
       const factor = Math.exp(-event.deltaY / 200);
-      setView((v) =>
+      const v = viewRef.current;
+      setViewRef.current(
         zoomAt(v, v.scale * factor, (event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height),
       );
     };
@@ -170,7 +194,7 @@ export function PhotoViewer({ children, regions, onExamine }: PhotoViewerProps) 
         tabIndex={0}
         role="group"
         aria-roledescription="zoomable photograph"
-        aria-label="Photograph"
+        aria-label={label}
         aria-describedby={`${id}-help`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -236,7 +260,7 @@ export function PhotoViewer({ children, regions, onExamine }: PhotoViewerProps) 
         </button>
       </div>
 
-      {regions.length > 0 && (
+      {regions.length > 0 && !hideRegionList && (
         <section className="photo-regions" aria-labelledby={`${id}-regions`}>
           <div className="photo-regions__head">
             <h2 id={`${id}-regions`} className="panel__title">

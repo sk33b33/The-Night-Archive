@@ -13,6 +13,7 @@ import {
 import {
   availableEvidence,
   evidenceUnlockedBy,
+  isAmended,
   withAmendments,
   type DocumentEvidence,
 } from '../domain/evidence';
@@ -56,9 +57,7 @@ function Unavailable({ title, body, onBack }: { title: string; body: string; onB
 
 /** How many of a case's records currently carry an amendment. */
 function amendedRecords(caseFile: CaseDefinition, isClosed: (id: CaseId) => boolean): number {
-  return caseFile.evidence.filter(
-    (e) => e.kind === 'document' && (e.amendments ?? []).some((a) => isClosed(a.whenCaseClosed)),
-  ).length;
+  return caseFile.evidence.filter((e) => isAmended(e, isClosed)).length;
 }
 
 /** Maps the current screen to its feature component. No navigation state here. */

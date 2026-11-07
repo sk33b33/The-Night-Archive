@@ -2,7 +2,14 @@ import { useId } from 'react';
 import { ARCHIVE_DESK } from '../../content/archive';
 
 interface WorkstationPhotoProps {
-  readonly dateStamp: string;
+  /** Camera date imprint; omit for a print without one. */
+  readonly dateStamp?: string;
+  /**
+   * night: the File 0091 photograph (lamp lit, papers, dark window).
+   * installation: the Estates photograph of 2 Feb 1998 (daylight, no lamp,
+   * no papers, position tag on the desk edge).
+   */
+  readonly variant?: 'night' | 'installation';
   readonly alt: string;
 }
 
@@ -10,7 +17,8 @@ interface WorkstationPhotoProps {
  * A faded night photograph of the player's workstation, drawn as SVG.
  * Static: no animation, so nothing to reduce for reduced-motion users.
  */
-export function WorkstationPhoto({ dateStamp, alt }: WorkstationPhotoProps) {
+export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: WorkstationPhotoProps) {
+  const night = variant === 'night';
   const id = useId().replace(/:/g, '');
   return (
     <svg
@@ -48,8 +56,8 @@ export function WorkstationPhoto({ dateStamp, alt }: WorkstationPhotoProps) {
         {/* Room */}
         <rect width="400" height="300" fill="#2a241e" />
         <rect y="0" width="400" height="168" fill="#332c25" />
-        {/* Window blinds, dark outside */}
-        <rect x="26" y="22" width="110" height="96" fill="#14161a" />
+        {/* Window blinds: dark outside at night, daylight at installation */}
+        <rect x="26" y="22" width="110" height="96" fill={night ? '#14161a' : '#b9bdb8'} />
         {Array.from({ length: 9 }, (_, i) => (
           <rect key={i} x="26" y={24 + i * 10.5} width="110" height="4" fill="#4a4238" opacity="0.8" />
         ))}
@@ -62,8 +70,9 @@ export function WorkstationPhoto({ dateStamp, alt }: WorkstationPhotoProps) {
         <rect x="304" y="22" width="22" height="6" fill="#d8ccb2" opacity="0.7" />
         <rect x="350" y="24" width="22" height="6" fill="#d8ccb2" opacity="0.7" />
 
-        {/* Lamp glow */}
-        <rect width="400" height="300" fill={`url(#${id}-lamp)`} />
+        {/* Lamp glow (night only) */}
+        {night && <rect width="400" height="300" fill={`url(#${id}-lamp)`} />}
+        {!night && <rect width="400" height="300" fill="#d8dcd6" opacity="0.12" />}
 
         {/* Desk */}
         <rect x="0" y="168" width="400" height="132" fill="#4a3a2b" />
@@ -76,6 +85,11 @@ export function WorkstationPhoto({ dateStamp, alt }: WorkstationPhotoProps) {
         <rect x="150" y="96" width="74" height="3" fill="#7fb8a8" opacity="0.45" />
         <rect x="150" y="104" width="40" height="3" fill="#7fb8a8" opacity="0.45" />
         <rect x="150" y="112" width="8" height="5" fill="#9fd8c8" opacity="0.8" />
+        {/* Maker's badge, lower right of the casing */}
+        <rect x="214" y="157" width="34" height="7" rx="1" fill="#8e8572" />
+        <text x="231" y="162.5" textAnchor="middle" fontSize="4.6" fontFamily="sans-serif" fontWeight="700" fill="#e6dfcc" letterSpacing="0.3">
+          HALDEN 486
+        </text>
         <rect x="146" y="156" width="40" height="9" rx="1" fill="#e8e2d2" />
         <text x="166" y="163" textAnchor="middle" fontSize="7" fontFamily="monospace" fill="#2a2620">
           {ARCHIVE_DESK.workstation}
@@ -96,23 +110,36 @@ export function WorkstationPhoto({ dateStamp, alt }: WorkstationPhotoProps) {
           />
         ))}
 
-        {/* Desk lamp */}
-        <rect x="300" y="196" width="40" height="6" rx="2" fill="#262420" />
-        <path d="M318 198 L308 140 L334 114" stroke="#262420" strokeWidth="4" fill="none" />
-        <path d="M322 104 L356 118 L344 134 Z" fill="#2f3a36" />
+        {night ? (
+          <>
+            {/* Desk lamp */}
+            <rect x="300" y="196" width="40" height="6" rx="2" fill="#262420" />
+            <path d="M318 198 L308 140 L334 114" stroke="#262420" strokeWidth="4" fill="none" />
+            <path d="M322 104 L356 118 L344 134 Z" fill="#2f3a36" />
 
-        {/* Papers */}
-        <path d="M40 200 L104 194 L110 236 L44 242 Z" fill="#d9d1bd" />
-        <path d="M52 206 L96 202" stroke="#8c8370" strokeWidth="1.5" />
-        <path d="M54 214 L98 210" stroke="#8c8370" strokeWidth="1.5" />
-        <path d="M55 222 L86 219" stroke="#8c8370" strokeWidth="1.5" />
+            {/* Papers */}
+            <path d="M40 200 L104 194 L110 236 L44 242 Z" fill="#d9d1bd" />
+            <path d="M52 206 L96 202" stroke="#8c8370" strokeWidth="1.5" />
+            <path d="M54 214 L98 210" stroke="#8c8370" strokeWidth="1.5" />
+            <path d="M55 222 L86 219" stroke="#8c8370" strokeWidth="1.5" />
+          </>
+        ) : (
+          <>
+            {/* Position tag taped to the desk edge */}
+            <rect x="40" y="170" width="26" height="12" fill="#f1ece0" />
+            <text x="53" y="179" textAnchor="middle" fontSize="8" fontFamily="sans-serif" fontWeight="700" fill="#2a2620">
+              7
+            </text>
+          </>
+        )}
 
         <rect width="400" height="300" fill={`url(#${id}-vignette)`} />
-        {/* Faded print */}
-        <rect width="400" height="300" fill="#c49a5c" opacity="0.08" />
+        {/* Faded print (the File 0091 photograph only) */}
+        {night && <rect width="400" height="300" fill="#c49a5c" opacity="0.08" />}
       </g>
 
       {/* Camera date imprint */}
+      {dateStamp && (
       <text
         x="384"
         y="286"
@@ -126,6 +153,7 @@ export function WorkstationPhoto({ dateStamp, alt }: WorkstationPhotoProps) {
       >
         {dateStamp}
       </text>
+      )}
     </svg>
   );
 }

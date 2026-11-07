@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { ScreenLayout } from '../../components/ScreenLayout';
-import type { DocumentEvidence, EvidenceId, EvidenceItem } from '../../domain/evidence';
+import type { DocumentEvidence, EvidenceId, EvidenceItem, PhotoEvidence } from '../../domain/evidence';
 import type { RecordField } from '../../domain/case';
 import { AudioPlayer } from './audio/AudioPlayer';
 import { ObjectEvidenceView } from './object/ObjectEvidenceView';
@@ -42,9 +42,16 @@ export function EvidenceScreen({
   notice,
 }: EvidenceScreenProps) {
   const others = documents.filter((d) => d.id !== item.id);
+  const otherPhotos = available.filter((e): e is PhotoEvidence => e.kind === 'photo' && e.id !== item.id);
+  const comparable = item.kind === 'photo' ? otherPhotos : others;
   // Comparing needs the full width; a single record keeps the reading column.
-  const [compareId, setCompareId] = useState(() => loadCompare(item.id, others));
-  const comparing = item.kind === 'document' && others.some((o) => o.id === compareId);
+  const [compareId, setCompareId] = useState(() => loadCompare(item.id, comparable));
+  const comparing =
+    (item.kind === 'document' || item.kind === 'photo') && comparable.some((o) => o.id === compareId);
+  const changeCompare = (next: EvidenceId | '') => {
+    setCompareId(next);
+    storeCompare(item.id, next);
+  };
   return (
     <ScreenLayout
       title={item.title}
@@ -59,10 +66,7 @@ export function EvidenceScreen({
           item={item}
           others={others}
           compareId={compareId}
-          onCompareChange={(next) => {
-            setCompareId(next);
-            storeCompare(item.id, next);
-          }}
+          onCompareChange={changeCompare}
           highlightsOf={highlightsOf}
           onHighlight={onHighlight}
           onClearHighlights={onClearHighlights}
@@ -71,7 +75,15 @@ export function EvidenceScreen({
       {item.kind === 'audio' && (
         <AudioPlayer item={item} onDiscover={onDiscover} createEngine={createEngine} />
       )}
-      {item.kind === 'photo' && <PhotoEvidenceView item={item} onDiscover={onDiscover} />}
+      {item.kind === 'photo' && (
+        <PhotoEvidenceView
+          item={item}
+          others={otherPhotos}
+          compareId={compareId}
+          onCompareChange={changeCompare}
+          onDiscover={onDiscover}
+        />
+      )}
       {item.kind === 'object' && (
         <ObjectEvidenceView item={item} available={available} onOpenEvidence={onOpenEvidence} />
       )}

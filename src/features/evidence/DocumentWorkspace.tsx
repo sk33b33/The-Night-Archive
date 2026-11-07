@@ -19,7 +19,7 @@ interface DocumentWorkspaceProps {
 const compareKey = (id: string) => `night-archive:compare:${id}`;
 
 /** Remembers the comparison choice for this tab, so a refresh keeps it. */
-export function loadCompare(id: string, others: readonly DocumentEvidence[]): EvidenceId | '' {
+export function loadCompare(id: string, others: readonly { readonly id: EvidenceId }[]): EvidenceId | '' {
   try {
     const stored = window.sessionStorage.getItem(compareKey(id));
     return others.find((o) => o.id === stored)?.id ?? '';
