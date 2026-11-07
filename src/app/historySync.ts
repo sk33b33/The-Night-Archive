@@ -1,4 +1,5 @@
-import { initialNavigation, isScreenId, type NavigationState } from './navigation';
+import { isKnownCaseId } from '../content/cases';
+import { initialNavigation, parseScreen, type NavigationState, type Screen } from './navigation';
 
 /**
  * Navigation is mirrored into window.history so the Android back gesture and
@@ -6,19 +7,25 @@ import { initialNavigation, isScreenId, type NavigationState } from './navigatio
  * place instead of dropping them on the main menu.
  */
 interface HistoryEntryState {
-  readonly nightArchiveStack: readonly string[];
+  readonly nightArchiveStack: readonly Screen[];
 }
 
 export function toHistoryState(state: NavigationState): HistoryEntryState {
-  return { nightArchiveStack: [...state.stack] };
+  return { nightArchiveStack: state.stack.map((screen) => ({ ...screen })) };
 }
 
 /** Reads a navigation stack from history.state, rejecting anything malformed. */
 export function fromHistoryState(raw: unknown): NavigationState | null {
   if (typeof raw !== 'object' || raw === null) return null;
-  const stack = (raw as Record<string, unknown>).nightArchiveStack;
-  if (!Array.isArray(stack) || stack.length === 0) return null;
-  if (stack[0] !== 'menu' || !stack.every(isScreenId)) return null;
+  const stored = (raw as Record<string, unknown>).nightArchiveStack;
+  if (!Array.isArray(stored) || stored.length === 0) return null;
+  const stack: Screen[] = [];
+  for (const entry of stored) {
+    const screen = parseScreen(entry, isKnownCaseId);
+    if (!screen) return null;
+    stack.push(screen);
+  }
+  if (stack[0]?.id !== 'menu') return null;
   return { stack };
 }
 

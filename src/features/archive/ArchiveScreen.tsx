@@ -1,11 +1,27 @@
+import type { ReactNode } from 'react';
 import { ScreenLayout } from '../../components/ScreenLayout';
+import type { CaseDefinition, CaseId } from '../../domain/case';
+import type { CaseStatus } from '../../domain/progress';
+import { CaseCard } from './CaseCard';
 
 interface ArchiveScreenProps {
+  readonly cases: readonly CaseDefinition[];
+  readonly statusOf: (id: CaseId) => CaseStatus;
+  readonly onOpenCase: (id: CaseId) => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
+  /** Save-status notice, if any. */
+  readonly notice?: ReactNode;
 }
 
-export function ArchiveScreen({ onBack, focusOnMount }: ArchiveScreenProps) {
+export function ArchiveScreen({
+  cases,
+  statusOf,
+  onOpenCase,
+  onBack,
+  focusOnMount,
+  notice,
+}: ArchiveScreenProps) {
   return (
     <ScreenLayout
       title="Archive dashboard"
@@ -21,7 +37,7 @@ export function ArchiveScreen({ onBack, focusOnMount }: ArchiveScreenProps) {
         </div>
         <div className="status-strip__item">
           <dt>Assigned files</dt>
-          <dd>0</dd>
+          <dd>{cases.length}</dd>
         </div>
       </dl>
 
@@ -29,14 +45,25 @@ export function ArchiveScreen({ onBack, focusOnMount }: ArchiveScreenProps) {
         <h2 id="case-files-heading" className="panel__title">
           Case files
         </h2>
-        <div className="empty-state" role="status">
-          <p className="empty-state__lead">Your desk is clear.</p>
-          <p className="empty-state__body">
-            No files have been assigned to this shift yet. Case files will appear here in a
-            future update.
-          </p>
-        </div>
+        {cases.length === 0 ? (
+          <div className="empty-state" role="status">
+            <p className="empty-state__lead">Your desk is clear.</p>
+            <p className="empty-state__body">No files have been assigned to this shift.</p>
+          </div>
+        ) : (
+          <ul className="case-list">
+            {cases.map((caseFile) => (
+              <CaseCard
+                key={caseFile.id}
+                caseFile={caseFile}
+                status={statusOf(caseFile.id)}
+                onOpen={() => onOpenCase(caseFile.id)}
+              />
+            ))}
+          </ul>
+        )}
       </section>
+      {notice}
     </ScreenLayout>
   );
 }

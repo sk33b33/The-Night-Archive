@@ -1,15 +1,16 @@
-import { useId, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useId, type ButtonHTMLAttributes, type ReactNode, type Ref } from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'quiet';
+export type ButtonVariant = 'primary' | 'secondary' | 'quiet' | 'danger';
 
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
   readonly variant?: ButtonVariant;
+  readonly ref?: Ref<HTMLButtonElement>;
   readonly children: ReactNode;
   /**
    * When set, the button is disabled and this text is shown beneath it and
    * announced to assistive technology. Every disabled control must explain why.
    */
-  readonly disabledReason?: string;
+  readonly disabledReason?: string | undefined;
 }
 
 /**
@@ -24,6 +25,7 @@ export function Button({
   className,
   children,
   type = 'button',
+  ref,
   ...rest
 }: ButtonProps) {
   const reasonId = useId();
@@ -33,6 +35,7 @@ export function Button({
   const button = (
     <button
       {...rest}
+      ref={ref}
       type={type}
       className={classes}
       aria-disabled={disabled || undefined}

@@ -1,5 +1,7 @@
 import { OptionGroup, type Option } from '../../components/OptionGroup';
 import { ScreenLayout } from '../../components/ScreenLayout';
+import type { SaveState } from '../../services/persistence/useSaveGame';
+import { SavedProgressPanel } from './SavedProgressPanel';
 import type {
   MotionPreference,
   Preferences,
@@ -23,6 +25,8 @@ interface SettingsScreenProps {
   readonly persistFailed: boolean;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
+  readonly saveState: SaveState;
+  readonly onEraseProgress: () => Promise<boolean>;
 }
 
 export function SettingsScreen({
@@ -31,6 +35,8 @@ export function SettingsScreen({
   persistFailed,
   onBack,
   focusOnMount,
+  saveState,
+  onEraseProgress,
 }: SettingsScreenProps) {
   return (
     <ScreenLayout title="Settings" onBack={onBack} focusOnMount={focusOnMount}>
@@ -56,6 +62,7 @@ export function SettingsScreen({
           ? 'Changes apply now but could not be saved on this device. They will reset when you close the archive.'
           : 'Changes apply immediately and are saved on this device.'}
       </p>
+      <SavedProgressPanel saveState={saveState} onErase={onEraseProgress} />
     </ScreenLayout>
   );
 }

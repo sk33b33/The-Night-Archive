@@ -1,24 +1,33 @@
 import { describe, expect, it } from 'vitest';
+import { caseId } from '../domain/case';
 import {
+  MENU,
   canGoBack,
   currentScreen,
   initialNavigation,
   navigationReducer,
+  parseScreen,
+  stackForResume,
+  toResumePoint,
   type NavigationState,
+  type Screen,
 } from './navigation';
 import { fromHistoryState, toHistoryState } from './historySync';
 
+const archive: Screen = { id: 'archive' };
+const settings: Screen = { id: 'settings' };
+const briefing001: Screen = { id: 'briefing', caseId: caseId('case-001') };
+
 describe('navigationReducer', () => {
   it('starts on the main menu with no back history', () => {
-    expect(currentScreen(initialNavigation)).toBe('menu');
+    expect(currentScreen(initialNavigation)).toEqual(MENU);
     expect(canGoBack(initialNavigation)).toBe(false);
   });
 
   it('pushes screens and pops them on back', () => {
-    const atArchive = navigationReducer(initialNavigation, { type: 'navigate', to: 'archive' });
-    expect(atArchive.stack).toEqual(['menu', 'archive']);
-    const back = navigationReducer(atArchive, { type: 'back' });
-    expect(back.stack).toEqual(['menu']);
+    const atArchive = navigationReducer(initialNavigation, { type: 'navigate', to: archive });
+    expect(atArchive.stack).toEqual([MENU, archive]);
+    expect(navigationReducer(atArchive, { type: 'back' }).stack).toEqual([MENU]);
   });
 
   it('ignores back at the root', () => {
@@ -26,28 +35,60 @@ describe('navigationReducer', () => {
   });
 
   it('returns the same state when navigating to the current screen', () => {
-    const state: NavigationState = { stack: ['menu', 'settings'] };
-    expect(navigationReducer(state, { type: 'navigate', to: 'settings' })).toBe(state);
+    const state: NavigationState = { stack: [MENU, archive, briefing001] };
+    expect(
+      navigationReducer(state, { type: 'navigate', to: { id: 'briefing', caseId: caseId('case-001') } }),
+    ).toBe(state);
+  });
+
+  it('treats briefings for different cases as different screens', () => {
+    const state: NavigationState = { stack: [MENU, archive, briefing001] };
+    const other: Screen = { id: 'briefing', caseId: caseId('case-002') };
+    expect(navigationReducer(state, { type: 'navigate', to: other }).stack).toHaveLength(4);
   });
 
   it('unwinds instead of duplicating a screen already in the stack', () => {
-    const state: NavigationState = { stack: ['menu', 'archive', 'settings'] };
-    expect(navigationReducer(state, { type: 'navigate', to: 'archive' }).stack).toEqual([
-      'menu',
-      'archive',
-    ]);
-    expect(navigationReducer(state, { type: 'navigate', to: 'menu' })).toBe(initialNavigation);
+    const state: NavigationState = { stack: [MENU, archive, settings] };
+    expect(navigationReducer(state, { type: 'navigate', to: archive }).stack).toEqual([MENU, archive]);
+    expect(navigationReducer(state, { type: 'navigate', to: MENU })).toBe(initialNavigation);
   });
 
   it('returns home from anywhere', () => {
-    const state: NavigationState = { stack: ['menu', 'archive', 'settings'] };
+    const state: NavigationState = { stack: [MENU, archive, settings] };
     expect(navigationReducer(state, { type: 'home' })).toBe(initialNavigation);
   });
 });
 
-describe('history state', () => {
+describe('resume points', () => {
+  it('only archive and briefing screens are resumable', () => {
+    expect(toResumePoint(MENU)).toBeNull();
+    expect(toResumePoint(settings)).toBeNull();
+    expect(toResumePoint(archive)).toEqual({ screen: 'archive' });
+    expect(toResumePoint(briefing001)).toEqual({ screen: 'briefing', caseId: 'case-001' });
+  });
+
+  it('rebuilds a stack with the archive beneath a briefing', () => {
+    expect(stackForResume({ screen: 'briefing', caseId: caseId('case-001') }).stack).toEqual([
+      MENU,
+      archive,
+      briefing001,
+    ]);
+    expect(stackForResume({ screen: 'archive' }).stack).toEqual([MENU, archive]);
+  });
+});
+
+describe('screen parsing and history state', () => {
+  const known = (id: string) => id === 'case-001';
+
+  it('parses valid screens and rejects unknown cases', () => {
+    expect(parseScreen({ id: 'briefing', caseId: 'case-001' }, known)).toEqual(briefing001);
+    expect(parseScreen({ id: 'briefing', caseId: 'case-999' }, known)).toBeNull();
+    expect(parseScreen({ id: 'briefing' }, known)).toBeNull();
+    expect(parseScreen({ id: 'vault' }, known)).toBeNull();
+  });
+
   it('round-trips a navigation stack', () => {
-    const state: NavigationState = { stack: ['menu', 'settings'] };
+    const state: NavigationState = { stack: [MENU, archive, briefing001] };
     expect(fromHistoryState(toHistoryState(state))).toEqual(state);
   });
 
@@ -56,8 +97,9 @@ describe('history state', () => {
     'menu',
     {},
     { nightArchiveStack: [] },
-    { nightArchiveStack: ['archive'] },
-    { nightArchiveStack: ['menu', 'case-999'] },
+    { nightArchiveStack: [{ id: 'archive' }] },
+    { nightArchiveStack: ['menu'] },
+    { nightArchiveStack: [{ id: 'menu' }, { id: 'briefing', caseId: 'case-999' }] },
   ])('rejects malformed state %j', (raw) => {
     expect(fromHistoryState(raw)).toBeNull();
   });

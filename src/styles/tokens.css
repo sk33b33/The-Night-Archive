@@ -22,6 +22,10 @@
   --color-amber: #d9a441;
   --color-amber-soft: rgb(217 164 65 / 0.12);
   --color-focus: #f2c66d;
+  --color-danger: #e5826f;
+  --color-paper: #e9e4d8;
+  --color-paper-ink: #1d1f24;
+  --color-paper-muted: #545a66;
 
   --font-sans: 'Inter', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Roboto Mono', ui-monospace, 'SFMono-Regular', monospace;
