@@ -45,7 +45,7 @@ p {
 .app-shell {
   min-height: 100dvh;
   width: 100%;
-  max-width: var(--content-width);
+  max-width: 72rem;
   margin: 0 auto;
   padding:
     max(var(--space-5), env(safe-area-inset-top)) max(var(--space-4), env(safe-area-inset-right))
@@ -174,6 +174,9 @@ p {
 
 .main-menu {
   flex: 1;
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -223,6 +226,13 @@ p {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+
+.screen--wide {
+  max-width: none;
 }
 
 .screen__header {
@@ -1154,9 +1164,6 @@ p {
 
 /* ---------- Evidence board ---------- */
 
-.app-shell--wide {
-  max-width: 72rem;
-}
 
 .board-toolbar {
   display: flex;
@@ -1765,4 +1772,120 @@ body:has(.update-banner) .app-shell {
 .print .photo-viewer__viewport:focus-visible,
 .print .photo-regions__toggle:has(input:focus-visible) {
   outline-color: #1f3f7a;
+}
+
+/* ---------- Document tools: highlight and compare ---------- */
+
+.doc-tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--content-width);
+}
+
+.doc-tools__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.switch--compact {
+  flex: 1 1 16rem;
+}
+
+.passage {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.passage > :not(.mark-toggle) {
+  flex: 1;
+  min-width: 0;
+}
+
+.is-marked {
+  border-radius: 3px;
+  background: rgb(255 214 102 / 0.55);
+  box-shadow: 0 0 0 3px rgb(255 214 102 / 0.55);
+}
+
+tr.is-marked {
+  box-shadow: none;
+}
+
+tr.is-marked td {
+  background: rgb(255 214 102 / 0.55);
+}
+
+.mark-toggle {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -0.4rem 0;
+  padding: 0;
+  border: 1px solid rgb(29 31 36 / 0.3);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 0.5);
+  color: #6b4e12;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mark-toggle[aria-pressed='true'] {
+  border-color: #8a6516;
+  background: #f2c66d;
+  color: #1d1f24;
+}
+
+.document__field dd .mark-toggle {
+  margin-right: var(--space-2);
+}
+
+.document.is-marking .document__table td:first-child {
+  width: 2.75rem;
+}
+
+/* Paper surfaces use ink-blue focus rings for contrast. */
+.document :focus-visible {
+  outline-color: #1f3f7a;
+}
+
+.compare {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.compare__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.screen--wide > .screen__body > .compare__column,
+.screen--wide > .screen__body > .panel {
+  width: 100%;
+  max-width: var(--content-width);
+}
+
+.compare__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-amber);
 }

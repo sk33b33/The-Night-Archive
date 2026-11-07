@@ -6,6 +6,7 @@ import {
   documentText,
   evidenceId,
   evidenceUnlockedBy,
+  passageKeys,
   type EvidenceItem,
 } from './evidence';
 import { countMatches, splitMatches } from './textSearch';
@@ -111,5 +112,18 @@ describe('case content integrity', () => {
     expect(evidenceUnlockedBy(case001, 'c001-second-voice').map((e) => e.id)).toEqual([
       'c001-filtered-segment',
     ]);
+  });
+});
+
+describe('passage keys', () => {
+  it('lists every paragraph, field, and table row in order', async () => {
+    const { CASE_001 } = await import('../content/cases/case-001');
+    const timetable = CASE_001.evidence.find((e) => e.id === 'c001-timetable');
+    if (timetable?.kind !== 'document') throw new Error('missing timetable');
+    // One table with four rows, then one annotation.
+    expect(passageKeys(timetable.document)).toEqual(['b0.0', 'b0.1', 'b0.2', 'b0.3', 'b1']);
+    const report = CASE_001.evidence.find((e) => e.id === 'c001-incident-report');
+    if (report?.kind !== 'document') throw new Error('missing report');
+    expect(passageKeys(report.document)).toEqual(['b0.0', 'b0.1', 'b0.2', 'b0.3', 'b0.4', 'b1', 'b2']);
   });
 });

@@ -7,6 +7,8 @@ interface ScreenLayoutProps {
   readonly backLabel?: string;
   /** Move focus to the heading when the screen appears (after navigation). */
   readonly focusOnMount: boolean;
+  /** Use the full desktop width (board, side-by-side documents). */
+  readonly wide?: boolean;
   readonly children: ReactNode;
 }
 
@@ -16,6 +18,7 @@ export function ScreenLayout({
   onBack,
   backLabel = 'Back',
   focusOnMount,
+  wide = false,
   children,
 }: ScreenLayoutProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -25,7 +28,7 @@ export function ScreenLayout({
   }, [focusOnMount]);
 
   return (
-    <div className="screen">
+    <div className={wide ? 'screen screen--wide' : 'screen'}>
       <header className="screen__header">
         {onBack && (
           <button type="button" className="back-button" onClick={onBack}>

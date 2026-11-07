@@ -108,6 +108,7 @@ export function BoardScreen({
       onBack={onBack}
       backLabel="Case files"
       focusOnMount={focusOnMount}
+      wide
     >
       <div className="board-toolbar">
         <SegmentedControl legend="View" options={VIEW_OPTIONS} value={view} onChange={setView} />

@@ -4,12 +4,15 @@ import type { CaseId } from '../../domain/case';
 import type { BoardState } from '../../domain/board';
 import type { DeductionAttempt } from '../../domain/deduction';
 import {
+  clearHighlights,
   createSave,
   recordAttempt,
   recordDiscovery,
   recordVisit,
+  setHighlight,
   updateBoard,
 } from '../../domain/progress';
+import type { EvidenceId } from '../../domain/evidence';
 import { migrateSave, type LoadProblem, type ResumePoint, type SaveGame } from '../../domain/save';
 import type { SaveRepository } from './saveRepository';
 
@@ -39,6 +42,10 @@ export interface SaveController {
   readonly updateBoard: (caseId: CaseId, change: (board: BoardState) => BoardState) => void;
   /** Stores a submitted set of findings. */
   readonly submitAttempt: (caseId: CaseId, attempt: DeductionAttempt) => void;
+  /** Turns a document passage highlight on or off. */
+  readonly highlight: (caseId: CaseId, evidenceId: EvidenceId, passageKey: string, on: boolean) => void;
+  /** Removes all highlights from one document. */
+  readonly clearHighlights: (caseId: CaseId, evidenceId: EvidenceId) => void;
   readonly erase: () => Promise<boolean>;
 }
 
@@ -141,6 +148,27 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     [commit],
   );
 
+  const highlight = useCallback(
+    (caseIdValue: CaseId, evidenceIdValue: EvidenceId, passageKey: string, on: boolean) => {
+      if (!loadedRef.current) return;
+      const now = new Date();
+      const current = saveRef.current;
+      const next = setHighlight(current ?? createSave(now), caseIdValue, evidenceIdValue, passageKey, on, now);
+      if (next !== current) commit(next);
+    },
+    [commit],
+  );
+
+  const clear = useCallback(
+    (caseIdValue: CaseId, evidenceIdValue: EvidenceId) => {
+      const current = saveRef.current;
+      if (!loadedRef.current || !current) return;
+      const next = clearHighlights(current, caseIdValue, evidenceIdValue, new Date());
+      if (next !== current) commit(next);
+    },
+    [commit],
+  );
+
   const erase = useCallback(async () => {
     if (!repository || blockedRef.current) return false;
     const cleared = writeQueue.current.then(() => repository.clear());
@@ -155,5 +183,14 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     return true;
   }, [repository]);
 
-  return { state, visit, discover, updateBoard: changeBoard, submitAttempt, erase };
+  return {
+    state,
+    visit,
+    discover,
+    updateBoard: changeBoard,
+    submitAttempt,
+    highlight,
+    clearHighlights: clear,
+    erase,
+  };
 }

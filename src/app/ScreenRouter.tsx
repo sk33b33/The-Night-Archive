@@ -5,7 +5,7 @@ import { visibleAnomalies } from '../domain/anomaly';
 import { AnomalyScreen } from '../features/anomaly/AnomalyScreen';
 import { EMPTY_BOARD } from '../domain/board';
 import { findEvidence, type CaseDefinition } from '../domain/case';
-import { availableEvidence, evidenceUnlockedBy } from '../domain/evidence';
+import { availableEvidence, evidenceUnlockedBy, type DocumentEvidence } from '../domain/evidence';
 import { caseProgress, caseStatus } from '../domain/progress';
 import { ArchiveScreen } from '../features/archive/ArchiveScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
@@ -172,6 +172,10 @@ export function ScreenRouter(props: ScreenRouterProps) {
       return (
         <EvidenceScreen
           item={item}
+          documents={evidence.filter((e): e is DocumentEvidence => e.kind === 'document')}
+          highlightsOf={(id) => progress?.highlights[id] ?? []}
+          onHighlight={(id, key, on) => saveGame.highlight(caseFile.id, id, key, on)}
+          onClearHighlights={(id) => saveGame.clearHighlights(caseFile.id, id)}
           onDiscover={(discoveryId) => {
             const alreadyKnown = progress?.discoveries.includes(discoveryId) ?? false;
             saveGame.discover(caseFile.id, discoveryId);

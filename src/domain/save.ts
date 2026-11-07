@@ -15,8 +15,9 @@ import type { EvidenceId } from './evidence';
  * - v3: per-case evidence board (card positions and connections); board
  *       resume point.
  * - v4: per-case deduction attempts; findings resume point.
+ * - v5: per-case document highlights.
  */
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 /** Where Continue returns the player to. Only resumable screens appear here. */
 export type ResumePoint =
@@ -38,6 +39,8 @@ export interface CaseProgress {
   readonly board: BoardState;
   /** Every submitted set of findings, oldest first. */
   readonly attempts: readonly DeductionAttempt[];
+  /** Highlighted passage keys per document (see passageKeys). */
+  readonly highlights: Readonly<Record<string, readonly string[]>>;
 }
 
 export interface SaveGame {
@@ -53,6 +56,7 @@ export interface ContentIndex {
   readonly isKnownCase: (caseId: string) => boolean;
   readonly isKnownEvidence: (caseId: string, evidenceId: string) => boolean;
   readonly isKnownAnomaly: (anomalyId: string) => boolean;
+  readonly isKnownPassage: (caseId: string, evidenceId: string, passageKey: string) => boolean;
 }
 
 export type LoadProblem = 'corrupt' | 'newer-version';
@@ -99,6 +103,15 @@ const MIGRATIONS: Readonly<Record<number, (data: RawRecord) => RawRecord>> = {
       }
     }
     return { ...data, version: 4, cases };
+  },
+  4: (data) => {
+    const cases: RawRecord = {};
+    if (isRecord(data.cases)) {
+      for (const [id, entry] of Object.entries(data.cases)) {
+        cases[id] = isRecord(entry) ? { ...entry, highlights: {} } : entry;
+      }
+    }
+    return { ...data, version: 5, cases };
   },
 };
 
@@ -196,6 +209,22 @@ function parseAttempts(value: unknown, caseIdValue: string, content: ContentInde
   return attempts;
 }
 
+function parseHighlights(
+  value: unknown,
+  caseIdValue: string,
+  content: ContentIndex,
+): Record<string, string[]> {
+  const highlights: Record<string, string[]> = {};
+  if (!isRecord(value)) return highlights;
+  for (const [evidenceIdValue, keys] of Object.entries(value)) {
+    if (!content.isKnownEvidence(caseIdValue, evidenceIdValue)) continue;
+    // Passages removed from the content are dropped; the rest are kept.
+    const kept = uniqueStrings(keys, (k) => content.isKnownPassage(caseIdValue, evidenceIdValue, k));
+    if (kept.length > 0) highlights[evidenceIdValue] = kept;
+  }
+  return highlights;
+}
+
 function parseCases(value: unknown, content: ContentIndex): Record<string, CaseProgress> {
   const cases: Record<string, CaseProgress> = {};
   if (!isRecord(value)) return cases;
@@ -211,6 +240,7 @@ function parseCases(value: unknown, content: ContentIndex): Record<string, CaseP
       discoveries: uniqueStrings(entry.discoveries, () => true),
       board: parseBoard(entry.board, id, content),
       attempts: parseAttempts(entry.attempts, id, content),
+      highlights: parseHighlights(entry.highlights, id, content),
     };
   }
   return cases;

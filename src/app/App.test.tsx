@@ -373,6 +373,51 @@ describe('shift flow', () => {
     expect(screen.getByText('There is no record of this file.')).toBeTruthy();
   });
 
+  it('highlights passages, compares two records, and keeps both after a refresh', async () => {
+    window.sessionStorage.clear();
+    const repo = createMemoryRepository();
+    await renderReady(repo);
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+    fireEvent.click(screen.getByRole('button', { name: /Incident report/ }));
+
+    expect(screen.queryByRole('button', { name: /^Highlight:/ })).toBeNull();
+    fireEvent.click(screen.getByRole('switch', { name: /Highlight passages/ }));
+    const caller = screen.getByRole('button', { name: 'Highlight: Caller: Elias Ward (station staff)' });
+    expect(caller.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(caller);
+    expect(caller.getAttribute('aria-pressed')).toBe('true');
+
+    fireEvent.change(screen.getByLabelText('Compare with'), { target: { value: 'c001-duty-roster' } });
+    expect(screen.getByRole('table', { name: 'Rostered staff' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^Highlight: R\. Hale/ }));
+
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search both records' }), { target: { value: 'ward' } });
+    expect(screen.getByText(/1 in Incident report · 0 in Duty roster/)).toBeTruthy();
+
+    await waitFor(() => {
+      expect((repo.stored() as SaveGame).cases['case-001']?.highlights).toEqual({
+        'c001-incident-report': ['b0.3'],
+        'c001-duty-roster': ['b0.0'],
+      });
+    });
+
+    // Refresh: highlights come from the save, the comparison from the tab.
+    cleanup();
+    await act(async () => {
+      render(<App repository={repo} />);
+    });
+    expect(heading('Incident report')).toBeTruthy();
+    expect((screen.getByLabelText('Compare with') as HTMLSelectElement).value).toBe('c001-duty-roster');
+    expect(document.querySelectorAll('.is-marked')).toHaveLength(2);
+    expect(screen.getByText('2 marked')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear highlights on this record' }));
+    expect(document.querySelectorAll('.is-marked')).toHaveLength(1);
+    window.sessionStorage.clear();
+  });
+
   it('Continue resumes at saved evidence with Back leading to the case files', async () => {
     const saved = recordVisit(
       createSave(new Date('2026-01-01T00:00:00Z')),

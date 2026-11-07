@@ -1,5 +1,5 @@
 import { findEvidence, type CaseDefinition, type CaseId } from '../../domain/case';
-import type { EvidenceId } from '../../domain/evidence';
+import { passageKeys, type EvidenceId } from '../../domain/evidence';
 import type { ContentIndex } from '../../domain/save';
 import { findAnomaly } from '../anomalies/file-0091';
 import { CASE_001 } from './case-001';
@@ -25,4 +25,9 @@ export const CONTENT_INDEX: ContentIndex = {
   isKnownCase: isKnownCaseId,
   isKnownEvidence: isKnownEvidenceId,
   isKnownAnomaly: (id) => findAnomaly(id) !== undefined,
+  isKnownPassage: (caseIdValue, evidenceIdValue, key) => {
+    const caseFile = findCase(caseIdValue);
+    const item = caseFile && findEvidence(caseFile, evidenceIdValue);
+    return item?.kind === 'document' && passageKeys(item.document).includes(key);
+  },
 };

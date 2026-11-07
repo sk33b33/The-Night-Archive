@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.10.0 — Document highlighting and comparison (2026-11-07)
+
+Completes the CLAUDE.md document tools (read, search, highlight, compare).
+
+### Added
+- Highlight passages: a "Highlight passages" mode adds a star toggle
+  (`aria-pressed`, named by the passage text) to each paragraph, field, and
+  table row. Marked passages keep a marker background; "Clear highlights on
+  this record" removes them.
+- Compare with: shows a second document beside the first (stacked on narrow
+  screens). Search covers both, with per-record counts. The choice is kept
+  for the tab in session storage.
+- Save format v5: highlights per document, validated against the content
+  (`passageKeys`) so removed passages are dropped; v4 → v5 migration.
+
+### Changed
+- Wide layouts are a `ScreenLayout` option (`wide`) instead of an app-shell
+  special case; the board and document comparison use it.
+- Focus rings on paper records use ink blue.
+
+### Verified
+- axe audit including highlight mode and comparison: no violations.
+- 360px and 1280px: no horizontal overflow; two columns only when wide.
+
 ## 0.9.0 — Photo inspection (2026-11-07)
 
 General photo viewer from the CLAUDE.md evidence list (zoom, pan, regions),

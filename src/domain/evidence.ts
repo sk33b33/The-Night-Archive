@@ -119,3 +119,29 @@ export function documentText(doc: DocumentContent): string[] {
   }
   return parts;
 }
+
+/**
+ * Stable keys for highlightable passages: `b{block}` for paragraphs,
+ * headings, and annotations; `b{block}.{n}` for a field or table row.
+ * Keys follow authored order, so editing a document's block order should be
+ * paired with a save migration if highlights must survive.
+ */
+export function passageKeys(doc: DocumentContent): string[] {
+  const keys: string[] = [];
+  doc.blocks.forEach((block, i) => {
+    switch (block.type) {
+      case 'heading':
+      case 'paragraph':
+      case 'annotation':
+        keys.push(`b${i}`);
+        break;
+      case 'fields':
+        block.fields.forEach((_, j) => keys.push(`b${i}.${j}`));
+        break;
+      case 'table':
+        block.rows.forEach((_, j) => keys.push(`b${i}.${j}`));
+        break;
+    }
+  });
+  return keys;
+}

@@ -41,6 +41,7 @@ function newCaseProgress(stamp: string): CaseProgress {
     discoveries: [],
     board: EMPTY_BOARD,
     attempts: [],
+    highlights: {},
   };
 }
 
@@ -127,5 +128,47 @@ export function recordAttempt(save: SaveGame, caseIdValue: CaseId, attempt: Dedu
       ...save.cases,
       [caseIdValue]: { ...before, attempts: [...before.attempts, attempt] },
     },
+  };
+}
+
+/** Turns a passage highlight on or off. Returns the same save if unchanged. */
+export function setHighlight(
+  save: SaveGame,
+  caseIdValue: CaseId,
+  evidenceIdValue: EvidenceId,
+  passageKey: string,
+  on: boolean,
+  now: Date,
+): SaveGame {
+  const stamp = now.toISOString();
+  const before = save.cases[caseIdValue] ?? newCaseProgress(stamp);
+  const current = before.highlights[evidenceIdValue] ?? [];
+  if (current.includes(passageKey) === on) return save;
+  const next = on ? [...current, passageKey] : current.filter((k) => k !== passageKey);
+  const others = Object.entries(before.highlights).filter(([id]) => id !== evidenceIdValue);
+  const highlights = Object.fromEntries(next.length > 0 ? [...others, [evidenceIdValue, next]] : others);
+  return {
+    ...save,
+    updatedAt: stamp,
+    cases: { ...save.cases, [caseIdValue]: { ...before, highlights } },
+  };
+}
+
+/** Removes every highlight on one document. */
+export function clearHighlights(
+  save: SaveGame,
+  caseIdValue: CaseId,
+  evidenceIdValue: EvidenceId,
+  now: Date,
+): SaveGame {
+  const before = save.cases[caseIdValue];
+  if (!before?.highlights[evidenceIdValue]) return save;
+  const highlights = Object.fromEntries(
+    Object.entries(before.highlights).filter(([id]) => id !== evidenceIdValue),
+  );
+  return {
+    ...save,
+    updatedAt: now.toISOString(),
+    cases: { ...save.cases, [caseIdValue]: { ...before, highlights } },
   };
 }

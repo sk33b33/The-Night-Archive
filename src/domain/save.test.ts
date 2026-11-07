@@ -8,6 +8,8 @@ import {
   recordAttempt,
   recordDiscovery,
   recordVisit,
+  clearHighlights,
+  setHighlight,
   updateBoard,
 } from './progress';
 import { moveCard } from './board';
@@ -17,6 +19,7 @@ const content: ContentIndex = {
   isKnownCase: (id) => id === 'case-001',
   isKnownEvidence: (c, e) => c === 'case-001' && ['ev-a', 'ev-b'].includes(e),
   isKnownAnomaly: () => false,
+  isKnownPassage: (_c, e, k) => e === 'ev-a' && ['b0', 'b1.2'].includes(k),
 };
 const T0 = new Date('2026-01-01T22:00:00.000Z');
 const T1 = new Date('2026-01-01T22:05:00.000Z');
@@ -57,6 +60,7 @@ describe('migrateSave', () => {
             discoveries: [],
             board: { positions: {}, links: [] },
             attempts: [],
+            highlights: {},
           },
         },
       },
@@ -86,6 +90,7 @@ describe('migrateSave', () => {
       discoveries: ['d-1'],
       board: { positions: {}, links: [] },
       attempts: [],
+      highlights: {},
     });
     expect(result.ok && result.save.resume).toEqual(v2.resume);
   });
@@ -188,8 +193,42 @@ describe('migrateSave', () => {
         discoveries: ['d-1'],
         board: { positions: {}, links: [] },
         attempts: [],
+        highlights: {},
       },
     });
+  });
+
+  it('upgrades a v4 save and keeps only highlights on known passages', () => {
+    const v4 = {
+      version: 4,
+      createdAt: T0.toISOString(),
+      updatedAt: T1.toISOString(),
+      resume: { screen: 'archive' },
+      cases: {
+        'case-001': {
+          status: 'opened',
+          firstOpenedAt: T1.toISOString(),
+          examined: [],
+          discoveries: [],
+          board: { positions: {}, links: [] },
+          attempts: [],
+        },
+      },
+    };
+    const upgraded = migrateSave(v4, content);
+    expect(upgraded.ok && upgraded.save.cases['case-001']?.highlights).toEqual({});
+
+    const withHighlights = {
+      ...createSave(T0),
+      cases: {
+        'case-001': {
+          ...(upgraded.ok ? upgraded.save.cases['case-001'] : {}),
+          highlights: { 'ev-a': ['b0', 'b9', 'b1.2', 'b0'], 'ev-gone': ['b0'], 'ev-b': ['nope'] },
+        },
+      },
+    };
+    const parsed = migrateSave(withHighlights, content);
+    expect(parsed.ok && parsed.save.cases['case-001']?.highlights).toEqual({ 'ev-a': ['b0', 'b1.2'] });
   });
 
   it('upgrades a v3 save and keeps valid attempts, dropping malformed ones', () => {
@@ -313,5 +352,18 @@ describe('progress', () => {
     save = recordAttempt(save, CASE_001, { ...base, submittedAt: T2.toISOString(), outcome: 'correct' });
     expect(save.cases[CASE_001]?.attempts.map((a) => a.outcome)).toEqual(['partial', 'correct']);
     expect(caseStatus(save, CASE_001)).toBe('closed');
+  });
+
+  it('sets, unsets, and clears highlights per document', () => {
+    let save = setHighlight(createSave(T0), CASE_001, EV_A, 'b0', true, T1);
+    save = setHighlight(save, CASE_001, EV_A, 'b1.2', true, T1);
+    save = setHighlight(save, CASE_001, EV_B, 'b0', true, T1);
+    expect(save.cases[CASE_001]?.highlights).toEqual({ 'ev-a': ['b0', 'b1.2'], 'ev-b': ['b0'] });
+    expect(setHighlight(save, CASE_001, EV_A, 'b0', true, T2)).toBe(save);
+    save = setHighlight(save, CASE_001, EV_B, 'b0', false, T2);
+    expect(save.cases[CASE_001]?.highlights).toEqual({ 'ev-a': ['b0', 'b1.2'] });
+    save = clearHighlights(save, CASE_001, EV_A, T2);
+    expect(save.cases[CASE_001]?.highlights).toEqual({});
+    expect(clearHighlights(save, CASE_001, EV_A, T2)).toBe(save);
   });
 });
