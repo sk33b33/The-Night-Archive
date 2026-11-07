@@ -1522,3 +1522,61 @@ p {
   padding-left: var(--space-5);
   font-weight: 600;
 }
+
+/* ---------- Anomaly ---------- */
+
+.panel--unfiled {
+  border-color: rgb(217 164 65 / 0.35);
+  animation: unfiled-enter calc(var(--duration-base) * 6) var(--ease-out);
+}
+
+@keyframes unfiled-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+.case-card--anomaly {
+  border-style: dashed;
+  border-color: rgb(217 164 65 / 0.5);
+}
+
+.case-card--anomaly:hover {
+  border-color: var(--color-amber);
+}
+
+.chip--anomaly {
+  color: var(--color-amber);
+  border-style: dashed;
+}
+
+.print {
+  margin: 0;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: #e9e4d8;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+  transform: rotate(-0.8deg);
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  background: #1a1612;
+}
+
+.print__caption {
+  margin-top: var(--space-3);
+  color: #3a3d44;
+  font-family: 'Segoe Print', 'Bradley Hand', 'Comic Neue', cursive;
+  font-size: var(--text-md);
+}
+
+.anomaly-note {
+  padding-top: var(--space-2);
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  text-align: center;
+}

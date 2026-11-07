@@ -319,8 +319,56 @@ describe('shift flow', () => {
       expect(attempts[0]?.answers['caller-identity']).toBe('mara');
     });
 
-    simulateBack([{ id: 'menu' }, { id: 'archive' }]);
+    fireEvent.click(screen.getByRole('button', { name: 'Return to the archive' }));
+    expect(heading('Archive dashboard')).toBeTruthy();
     expect(screen.getByText('Closed')).toBeTruthy();
+
+    // The end anomaly appears, unexplained.
+    fireEvent.click(screen.getByRole('button', { name: /File 0091/ }));
+    expect(heading('File 0091')).toBeTruthy();
+    expect(screen.getByRole('img', { name: /date imprinted in the corner reads 14 October 1981/ })).toBeTruthy();
+    expect(screen.getByText('Workstation NA-07')).toBeTruthy();
+    expect(screen.getByText('1998')).toBeTruthy();
+  });
+
+  it('keeps unsubmitted findings across a refresh', async () => {
+    window.sessionStorage.clear();
+    const repo = createMemoryRepository();
+    await renderReady(repo);
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Case findings' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Mara.' }));
+    cleanup();
+
+    window.history.replaceState(
+      { nightArchiveStack: [{ id: 'menu' }, { id: 'archive' }, { id: 'findings', caseId: 'case-001' }] },
+      '',
+    );
+    await act(async () => {
+      render(<App repository={repo} />);
+    });
+    expect((screen.getByRole('radio', { name: 'Mara.' }) as HTMLInputElement).checked).toBe(true);
+    window.sessionStorage.clear();
+  });
+
+  it('shows the workstation on the dashboard and no anomaly before the case closes', async () => {
+    await renderReady();
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    expect(screen.getByText('NA-07')).toBeTruthy();
+    expect(screen.queryByText('File 0091')).toBeNull();
+  });
+
+  it('refuses to open the anomaly from history before the case is closed', async () => {
+    window.history.replaceState(
+      { nightArchiveStack: [{ id: 'menu' }, { id: 'anomaly', anomalyId: 'file-0091' }] },
+      '',
+    );
+    await act(async () => {
+      render(<App repository={createMemoryRepository()} />);
+    });
+    expect(screen.getByText('There is no record of this file.')).toBeTruthy();
   });
 
   it('Continue resumes at saved evidence with Back leading to the case files', async () => {

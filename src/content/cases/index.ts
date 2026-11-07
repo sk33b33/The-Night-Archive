@@ -1,6 +1,7 @@
 import { findEvidence, type CaseDefinition, type CaseId } from '../../domain/case';
 import type { EvidenceId } from '../../domain/evidence';
 import type { ContentIndex } from '../../domain/save';
+import { findAnomaly } from '../anomalies/file-0091';
 import { CASE_001 } from './case-001';
 
 /** All cases available in this build, in archive order. */
@@ -23,4 +24,5 @@ export function isKnownEvidenceId(caseIdValue: string, id: unknown): id is Evide
 export const CONTENT_INDEX: ContentIndex = {
   isKnownCase: isKnownCaseId,
   isKnownEvidence: isKnownEvidenceId,
+  isKnownAnomaly: (id) => findAnomaly(id) !== undefined,
 };

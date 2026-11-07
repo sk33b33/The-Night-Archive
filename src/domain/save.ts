@@ -52,6 +52,7 @@ export interface SaveGame {
 export interface ContentIndex {
   readonly isKnownCase: (caseId: string) => boolean;
   readonly isKnownEvidence: (caseId: string, evidenceId: string) => boolean;
+  readonly isKnownAnomaly: (anomalyId: string) => boolean;
 }
 
 export type LoadProblem = 'corrupt' | 'newer-version';

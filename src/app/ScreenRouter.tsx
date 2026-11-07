@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
+import { ANOMALIES } from '../content/anomalies/file-0091';
 import { CASES, findCase } from '../content/cases';
+import { visibleAnomalies } from '../domain/anomaly';
+import { AnomalyScreen } from '../features/anomaly/AnomalyScreen';
 import { EMPTY_BOARD } from '../domain/board';
 import { findEvidence, type CaseDefinition } from '../domain/case';
 import { availableEvidence, evidenceUnlockedBy } from '../domain/evidence';
@@ -45,6 +48,7 @@ function Unavailable({ title, body, onBack }: { title: string; body: string; onB
 export function ScreenRouter(props: ScreenRouterProps) {
   const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
   const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
+  const anomalies = visibleAnomalies(ANOMALIES, (id) => caseStatus(save, id) === 'closed');
 
   switch (screen.id) {
     case 'menu':
@@ -75,11 +79,21 @@ export function ScreenRouter(props: ScreenRouterProps) {
           cases={CASES}
           statusOf={(id) => caseStatus(save, id)}
           onOpenCase={(caseId) => navigate({ id: 'briefing', caseId })}
+          anomalies={anomalies}
+          onOpenAnomaly={(anomalyId) => navigate({ id: 'anomaly', anomalyId })}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}
         />
       );
+    case 'anomaly': {
+      const anomaly = anomalies.find((a) => a.id === screen.anomalyId);
+      return anomaly ? (
+        <AnomalyScreen anomaly={anomaly} onBack={back} focusOnMount={focusOnMount} />
+      ) : (
+        <Unavailable title="File not found." body="There is no record of this file." onBack={back} />
+      );
+    }
     default:
       break;
   }
@@ -138,6 +152,7 @@ export function ScreenRouter(props: ScreenRouterProps) {
           evidence={evidence}
           attempts={progress?.attempts ?? []}
           onSubmit={(attempt) => saveGame.submitAttempt(caseFile.id, attempt)}
+          onReturnToArchive={() => navigate({ id: 'archive' })}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}

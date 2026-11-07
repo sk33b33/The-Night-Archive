@@ -104,6 +104,7 @@ describe('screen parsing and history state', () => {
   const known: ContentIndex = {
     isKnownCase: (id) => id === 'case-001',
     isKnownEvidence: (c, e) => c === 'case-001' && e === 'c001-timetable',
+    isKnownAnomaly: (id) => id === 'file-0091',
   };
 
   it('parses evidence screens only for known evidence', () => {

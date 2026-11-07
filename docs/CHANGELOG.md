@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.7.0 — Phase 7 (assumed): Case 001 end anomaly (2026-11-07)
+
+`docs/ROADMAP.md` is still absent. This completes the Case 001 loop with the
+canon end anomaly. No later cases are started.
+
+### Added
+- Anomaly model (`src/domain/anomaly.ts`) and File 0091 content
+  (`src/content/anomalies/file-0091.ts`): appears in an **Unfiled** section of
+  the archive once Case 001 is closed. It holds a photograph of workstation
+  NA-07 with a 14 OCT 1981 date imprint, beside an asset-register entry
+  showing NA-07 was installed in 1998. Nothing explains it.
+- The archive dashboard shows the player's workstation (NA-07) from the
+  first shift, so the photograph is recognisable.
+- The photograph is a static SVG with a full text alternative.
+- "Return to the archive" on accepted findings.
+
+### Fixed
+- Unsubmitted findings are kept in session storage, so a refresh no longer
+  loses answers in progress. Submitting clears the draft.
+
 ## 0.6.0 — Phase 6 (assumed): case findings and deductions (2026-11-07)
 
 `docs/ROADMAP.md` is still absent. This adds deduction submission to complete

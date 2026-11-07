@@ -16,6 +16,7 @@ import { SAVE_VERSION, migrateSave, type ContentIndex } from './save';
 const content: ContentIndex = {
   isKnownCase: (id) => id === 'case-001',
   isKnownEvidence: (c, e) => c === 'case-001' && ['ev-a', 'ev-b'].includes(e),
+  isKnownAnomaly: () => false,
 };
 const T0 = new Date('2026-01-01T22:00:00.000Z');
 const T1 = new Date('2026-01-01T22:05:00.000Z');

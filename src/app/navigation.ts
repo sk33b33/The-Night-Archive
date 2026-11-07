@@ -10,6 +10,7 @@ export type Screen =
   | { readonly id: 'menu' }
   | { readonly id: 'archive' }
   | { readonly id: 'settings' }
+  | { readonly id: 'anomaly'; readonly anomalyId: string }
   | { readonly id: 'briefing'; readonly caseId: CaseId }
   | { readonly id: 'investigation'; readonly caseId: CaseId }
   | { readonly id: 'board'; readonly caseId: CaseId }
@@ -41,6 +42,8 @@ export function screenKey(screen: Screen): string {
       return `${screen.id}:${screen.caseId}`;
     case 'evidence':
       return `evidence:${screen.caseId}:${screen.evidenceId}`;
+    case 'anomaly':
+      return `anomaly:${screen.anomalyId}`;
     default:
       return screen.id;
   }
@@ -67,6 +70,10 @@ export function parseScreen(value: unknown, content: ContentIndex): Screen | nul
     case 'archive':
     case 'settings':
       return { id: record.id };
+    case 'anomaly':
+      return typeof record.anomalyId === 'string' && content.isKnownAnomaly(record.anomalyId)
+        ? { id: 'anomaly', anomalyId: record.anomalyId }
+        : null;
     case 'briefing':
     case 'investigation':
     case 'board':

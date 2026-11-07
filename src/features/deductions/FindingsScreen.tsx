@@ -11,6 +11,7 @@ import {
   type DeductionSubmission,
 } from '../../domain/deduction';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
+import { loadDraft, saveDraft, sessionStore } from '../../services/persistence/findingsDraft';
 import { OUTCOME_TEXT } from './outcomeText';
 import { QuestionField } from './QuestionField';
 
@@ -19,6 +20,7 @@ interface FindingsScreenProps {
   readonly evidence: readonly EvidenceItem[];
   readonly attempts: readonly DeductionAttempt[];
   readonly onSubmit: (attempt: DeductionAttempt) => void;
+  readonly onReturnToArchive: () => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
   readonly notice?: ReactNode;
@@ -31,16 +33,26 @@ export function FindingsScreen({
   evidence,
   attempts,
   onSubmit,
+  onReturnToArchive,
   onBack,
   focusOnMount,
   notice,
 }: FindingsScreenProps) {
   const { questions } = caseFile;
-  // Start from the last submission so a revisit does not lose the player's work.
+  // Start from an unsubmitted draft, else the last submission, so neither a
+  // revisit nor a refresh loses the player's work.
   const [draft, setDraft] = useState<DeductionSubmission>(() => {
+    const saved = loadDraft(sessionStore(), caseFile.id);
+    if (saved) return saved;
     const latest = attempts[attempts.length - 1];
     return latest ? { answers: latest.answers, citations: latest.citations } : EMPTY;
   });
+  const editedRef = useRef(false);
+
+  // Keep edits in session storage until they are submitted.
+  useEffect(() => {
+    if (editedRef.current) saveDraft(sessionStore(), caseFile.id, draft);
+  }, [draft, caseFile.id]);
   const [submittedThisVisit, setSubmittedThisVisit] = useState(false);
   const resultRef = useRef<HTMLHeadingElement>(null);
   const latest = attempts[attempts.length - 1];
@@ -50,15 +62,19 @@ export function FindingsScreen({
     if (submittedThisVisit) resultRef.current?.focus();
   }, [submittedThisVisit, attempts.length]);
 
-  const setAnswer = (questionId: string, optionId: string) =>
+  const setAnswer = (questionId: string, optionId: string) => {
+    editedRef.current = true;
     setDraft((d) => ({ ...d, answers: { ...d.answers, [questionId]: optionId } }));
+  };
 
-  const setCited = (questionId: string, id: EvidenceId, on: boolean) =>
+  const setCited = (questionId: string, id: EvidenceId, on: boolean) => {
+    editedRef.current = true;
     setDraft((d) => {
       const current = d.citations[questionId] ?? [];
       const next = on ? [...current.filter((c) => c !== id), id] : current.filter((c) => c !== id);
       return { ...d, citations: { ...d.citations, [questionId]: next } };
     });
+  };
 
   const submit = () => {
     // Only cite items the player can currently see.
@@ -73,6 +89,8 @@ export function FindingsScreen({
       submittedAt: new Date().toISOString(),
       outcome: evaluateDeduction(questions, submission).outcome,
     });
+    editedRef.current = false;
+    saveDraft(sessionStore(), caseFile.id, null);
     setSubmittedThisVisit(true);
   };
 
@@ -119,6 +137,9 @@ export function FindingsScreen({
             ))}
           </ol>
           <p className="prose">This file is closed.</p>
+          <Button variant="primary" onClick={onReturnToArchive}>
+            Return to the archive
+          </Button>
         </section>
       ) : (
         <>
