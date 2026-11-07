@@ -2002,3 +2002,15 @@ tr.is-marked td {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
+
+/* Notices inside a photo print sit on light paper: use dark ink. */
+.print .notice,
+.print .notice--filed,
+.print .notice--warning {
+  color: #1d1f24;
+}
+
+.print .notice--filed {
+  border-left-color: #1e6f69;
+  background: rgb(30 111 105 / 0.12);
+}

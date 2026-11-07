@@ -66,8 +66,11 @@ export function ScreenRouter(props: ScreenRouterProps) {
   const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
   const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
   const isClosed = (id: CaseId) => caseStatus(save, id) === 'closed';
-  const anomalies = visibleAnomalies(ANOMALIES, isClosed);
   const cases = CASES.filter((c) => isCaseAvailable(c, isClosed));
+  // An anomaly taken over by an available case leaves the Unfiled section.
+  const replaced = new Set(cases.flatMap((c) => (c.replacesAnomaly ? [c.replacesAnomaly] : [])));
+  const anomalies = visibleAnomalies(ANOMALIES, isClosed).filter((a) => !replaced.has(a.id));
+  const anomalyRoute = visibleAnomalies(ANOMALIES, isClosed);
 
   switch (screen.id) {
     case 'menu':
@@ -110,7 +113,8 @@ export function ScreenRouter(props: ScreenRouterProps) {
         />
       );
     case 'anomaly': {
-      const anomaly = anomalies.find((a) => a.id === screen.anomalyId);
+      // Still reachable after a case takes it over (e.g. from history).
+      const anomaly = anomalyRoute.find((a) => a.id === screen.anomalyId);
       return anomaly ? (
         <AnomalyScreen anomaly={anomaly} onBack={back} focusOnMount={focusOnMount} />
       ) : (

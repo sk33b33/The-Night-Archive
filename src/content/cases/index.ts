@@ -5,9 +5,10 @@ import { findAnomaly } from '../anomalies/file-0091';
 import { CASE_001 } from './case-001';
 import { CASE_002 } from './case-002';
 import { CASE_003 } from './case-003';
+import { CASE_004 } from './case-004';
 
 /** All cases available in this build, in archive order. */
-export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002, CASE_003];
+export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002, CASE_003, CASE_004];
 
 export function findCase(id: string): CaseDefinition | undefined {
   return CASES.find((c) => c.id === id);

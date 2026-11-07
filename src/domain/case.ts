@@ -41,6 +41,8 @@ export interface CaseDefinition {
   readonly accessLevel: AccessLevel;
   /** Held back until this case is closed; absent for cases open from the start. */
   readonly availableAfter?: CaseId;
+  /** An Unfiled anomaly this case takes over once it is available. */
+  readonly replacesAnomaly?: string;
   readonly briefing: CaseBriefing;
   /** All evidence for the case, in inventory order, including locked items. */
   readonly evidence: readonly EvidenceItem[];

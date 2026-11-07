@@ -56,7 +56,35 @@ export interface OrderingQuestion extends QuestionBase {
   readonly supportedOrder: readonly string[];
 }
 
-export type DeductionQuestion = ChoiceQuestion | OrderingQuestion;
+/**
+ * Select all that apply. The answer is the selected IDs joined by commas
+ * (sorted), and holds only if it is exactly the supported set.
+ */
+export interface MultiQuestion extends QuestionBase {
+  readonly kind: 'multi';
+  readonly options: readonly DeductionOption[];
+  readonly supportedOptionIds: readonly string[];
+  /** Shown when the selection leaves out supported options. */
+  readonly missingHint: string;
+  /** Shown when the selection includes unsupported options. */
+  readonly extraHint: string;
+}
+
+export type DeductionQuestion = ChoiceQuestion | OrderingQuestion | MultiQuestion;
+
+export function isMulti(question: DeductionQuestion): question is MultiQuestion {
+  return question.kind === 'multi';
+}
+
+/** Selected option IDs for a multi question, ignoring unknown or repeated IDs. */
+export function selectionOf(question: MultiQuestion, answer: string | undefined): string[] {
+  const known = new Set(question.options.map((o) => o.id));
+  return [...new Set((answer ?? '').split(',').filter((id) => known.has(id)))].sort();
+}
+
+export function encodeSelection(ids: readonly string[]): string {
+  return [...new Set(ids)].sort().join(',');
+}
 
 export function isOrdering(question: DeductionQuestion): question is OrderingQuestion {
   return question.kind === 'ordering';
@@ -106,9 +134,14 @@ export function evaluateFinding(
   submission: DeductionSubmission,
 ): FindingResult {
   const answer = submission.answers[question.id];
-  const supported = isOrdering(question)
-    ? encodeOrder(orderOf(question, answer)) === encodeOrder(question.supportedOrder)
-    : answer === question.supportedOptionId;
+  let supported: boolean;
+  if (isOrdering(question)) {
+    supported = encodeOrder(orderOf(question, answer)) === encodeOrder(question.supportedOrder);
+  } else if (isMulti(question)) {
+    supported = encodeSelection(selectionOf(question, answer)) === encodeSelection(question.supportedOptionIds);
+  } else {
+    supported = answer === question.supportedOptionId;
+  }
   if (!supported) return 'unsupported';
   return citationsSatisfy(question.requires, submission.citations[question.id] ?? [])
     ? 'holds'
@@ -138,11 +171,13 @@ export function evaluateDeduction(
   return { outcome, results };
 }
 
-/** Every choice question answered. Ordering questions always have an order. */
+/** Every choice answered and every multi question has a selection. Ordering always has an order. */
 export function isComplete(questions: readonly DeductionQuestion[], submission: DeductionSubmission): boolean {
-  return questions.every(
-    (q) => isOrdering(q) || q.options.some((o) => o.id === submission.answers[q.id]),
-  );
+  return questions.every((q) => {
+    if (isOrdering(q)) return true;
+    if (isMulti(q)) return selectionOf(q, submission.answers[q.id]).length > 0;
+    return q.options.some((o) => o.id === submission.answers[q.id]);
+  });
 }
 
 export function isSolved(attempts: readonly DeductionAttempt[]): boolean {
@@ -163,6 +198,12 @@ export function hintFor(
   const question = questions.find((q) => results[q.id] !== 'holds');
   if (!question) return null;
   if (results[question.id] === 'uncited') return question.citationHint;
+  if (isMulti(question)) {
+    // Point at the kind of mistake: something left out, or something extra.
+    const chosen = selectionOf(question, latest.answers[question.id]);
+    const extra = chosen.some((id) => !question.supportedOptionIds.includes(id));
+    return extra ? question.extraHint : question.missingHint;
+  }
   const failed = attempts.filter((a) => a.outcome !== 'correct').length;
   return question.hints[Math.min(failed, question.hints.length) - 1] ?? null;
 }

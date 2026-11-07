@@ -1,10 +1,14 @@
 import { useId, useState } from 'react';
 import {
   encodeOrder,
+  encodeSelection,
+  isMulti,
   isOrdering,
   orderOf,
+  selectionOf,
   type ChoiceQuestion,
   type DeductionQuestion,
+  type MultiQuestion,
   type OrderingQuestion,
 } from '../../domain/deduction';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
@@ -34,9 +38,9 @@ export function QuestionField({
       <h2 id={`${name}-prompt`} className="question__prompt">
         <span className="question__number">{number}.</span> {question.prompt}
       </h2>
-      {isOrdering(question) ? (
-        <OrderingField question={question} answer={answer} onAnswer={onAnswer} />
-      ) : (
+      {isOrdering(question) && <OrderingField question={question} answer={answer} onAnswer={onAnswer} />}
+      {isMulti(question) && <MultiField question={question} answer={answer} onAnswer={onAnswer} />}
+      {!isOrdering(question) && !isMulti(question) && (
         <ChoiceField name={name} question={question} answer={answer} onAnswer={onAnswer} />
       )}
       <Citations evidence={evidence} cited={cited} onCite={onCite} />
@@ -67,6 +71,40 @@ function ChoiceField({
               value={option.id}
               checked={answer === option.id}
               onChange={() => onAnswer(option.id)}
+            />
+            <span className="option__text">
+              <span className="option__label">{option.text}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+/** Select all that apply: native checkboxes. */
+function MultiField({
+  question,
+  answer,
+  onAnswer,
+}: {
+  readonly question: MultiQuestion;
+  readonly answer: string;
+  readonly onAnswer: (answer: string) => void;
+}) {
+  const selected = selectionOf(question, answer);
+  const toggle = (id: string, on: boolean) =>
+    onAnswer(encodeSelection(on ? [...selected, id] : selected.filter((s) => s !== id)));
+  return (
+    <fieldset className="option-group">
+      <legend className="prose">Select all that apply.</legend>
+      <div className="option-group__options">
+        {question.options.map((option) => (
+          <label key={option.id} className="option">
+            <input
+              type="checkbox"
+              checked={selected.includes(option.id)}
+              onChange={(event) => toggle(option.id, event.target.checked)}
             />
             <span className="option__text">
               <span className="option__label">{option.text}</span>

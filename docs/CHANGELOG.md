@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.13.0 — Case 004: File 0091 (2026-11-07)
+
+Built from the approved case bible (`docs/cases/case-004-bible.md`).
+Provenance only; the photograph's date is left for Case 005.
+
+### Added
+- Engine: **select-all-that-apply** questions, evaluated as an exact set,
+  with distinct hints for a missing record and an extra one.
+- Engine: a case can **take over an Unfiled anomaly** (`replacesAnomaly`);
+  File 0091's card becomes Case 004 once it is available.
+- Engine: amendments can **change a single table cell**.
+- Artwork: the File 0091 photograph is registered as case evidence, plus a
+  desk-papers enlargement (an intake-ledger page with 0091 freshly written).
+- Case 004 content: photograph (new "papers on the desk" region, required
+  discovery), the print as an object (custody begins with the player),
+  intake ledger (0091 voided), Kessler Photo order book, building history,
+  asset register; six board rules; four findings including select-all.
+- End beat A: once Case 004 closes, the voided 0091 line is dated "14 Oct".
+
+### Fixed
+- Notices shown inside a photo print (e.g. "Added to the case files") now
+  use dark text on the light paper (axe colour-contrast).
+
+### Verified
+- Chromium at 360px and 1280px, Cases 001–004 in one save through the UI;
+  axe: no violations; no overflow; no console errors; region alignment
+  checked by screenshot.
+
 ## 0.12.0 — Case 003: The Unknown Caller (2026-11-07)
 
 Built from the approved case bible (`docs/cases/case-003-bible.md`).

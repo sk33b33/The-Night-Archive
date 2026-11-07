@@ -65,6 +65,15 @@ export type DocumentAmendment = {
   | { readonly block: DocumentBlock }
   /** Adds a row to an existing table block (by block index). */
   | { readonly appendRow: { readonly blockIndex: number; readonly row: readonly string[] } }
+  /** Changes one existing table cell. Passage keys are unaffected. */
+  | {
+      readonly setCell: {
+        readonly blockIndex: number;
+        readonly row: number;
+        readonly column: number;
+        readonly value: string;
+      };
+    }
 );
 
 export interface DocumentEvidence extends EvidenceBase {
@@ -204,10 +213,19 @@ export function effectiveDocument(
       blocks.push(amendment.block);
       continue;
     }
-    // Rows are appended, so existing row passage keys keep their numbers.
-    const { blockIndex, row } = amendment.appendRow;
+    if ('appendRow' in amendment) {
+      // Rows are appended, so existing row passage keys keep their numbers.
+      const { blockIndex, row } = amendment.appendRow;
+      const target = blocks[blockIndex];
+      if (target?.type === 'table') blocks[blockIndex] = { ...target, rows: [...target.rows, row] };
+      continue;
+    }
+    const { blockIndex, row, column, value } = amendment.setCell;
     const target = blocks[blockIndex];
-    if (target?.type === 'table') blocks[blockIndex] = { ...target, rows: [...target.rows, row] };
+    if (target?.type === 'table' && target.rows[row]?.[column] !== undefined) {
+      const rows = target.rows.map((r, i) => (i === row ? r.map((c, j) => (j === column ? value : c)) : r));
+      blocks[blockIndex] = { ...target, rows };
+    }
   }
   return { ...item.document, blocks };
 }

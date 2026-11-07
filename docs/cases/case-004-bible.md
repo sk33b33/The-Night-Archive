@@ -1,10 +1,16 @@
-# Case bible — Case 004: File 0091 (DRAFT for review)
+# Case bible — Case 004: File 0091
 
-Status: **proposal**. CLAUDE.md gives the title and the Case 001 end anomaly
-(**[Canon]**: File 0091 holds a photograph of the player's workstation dated
-14 October 1981; the asset register says the workstation was installed in
-1998; unexplained). Everything else is **[Proposed]**. Nothing is built until
-approved.
+Status: **approved** (2026-11-07), implemented in `src/content/cases/case-004*.ts`.
+**[Canon]** from CLAUDE.md: File 0091 holds a photograph of the player's
+workstation dated 14 October 1981; the asset register says it was installed in
+1998; unexplained. All proposals below approved as written, with **end beat
+A** and the Unfiled card **replaced** by the Case 004 card.
+
+**Details chosen at implementation [Added]:** Kessler Photo at 3 Market
+Street; orders 4469–4471; intake entries filed by "R.K."; ledger descriptions
+for 0089, 0090, 0092; building history years 1962 / 1981 / 1997–98 / 1998
+(workstations NA-01 to NA-12); the print's custody entry is dated "Current
+shift".
 
 ## Scope guard
 
