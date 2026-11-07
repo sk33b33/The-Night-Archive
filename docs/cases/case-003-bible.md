@@ -1,8 +1,16 @@
-# Case bible — Case 003: The Unknown Caller (DRAFT for review)
+# Case bible — Case 003: The Unknown Caller
 
-Status: **proposal**. CLAUDE.md gives only the title. Everything below is
-**[Proposed]** unless marked **[Canon]** or **[Rule]**. Nothing is built until
-approved.
+Status: **approved** (2026-11-07), implemented in `src/content/cases/case-003*.ts`.
+All proposals approved as written. The background-filter discovery is
+**optional** (the call-box finding can be cited from the fault report or the
+handset record).
+
+**Details chosen at implementation [Added]:** addresses 4 Mill Street,
+27 Church Road, 9 Canal Row, 2 Station Road, 12 Harrow Lane; call times
+23:10–23:25; kiosk 3; property tag PS/86/1101; trace requested Fri 7 Nov 09:00;
+engineer's background note dated Mon 10 Nov 1986. The ordering question uses
+Move up / Move down buttons (no drag); they work identically for touch, mouse,
+keyboard, and screen readers.
 
 ## Premise
 

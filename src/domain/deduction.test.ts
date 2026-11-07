@@ -6,6 +6,7 @@ import {
   evaluateDeduction,
   hintFor,
   isComplete,
+  isOrdering,
   isSolved,
   type DeductionAttempt,
   type DeductionSubmission,
@@ -143,6 +144,7 @@ describe('hints', () => {
 describe('Case 001 question content', () => {
   it('every question has a valid supported option, hints, and a finding', () => {
     for (const q of questions) {
+      if (isOrdering(q)) throw new Error('Case 001 has no ordering questions');
       expect(q.options.map((o) => o.id)).toContain(q.supportedOptionId);
       expect(q.hints.length).toBeGreaterThanOrEqual(2);
       expect(q.finding.length).toBeGreaterThan(10);

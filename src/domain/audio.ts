@@ -34,6 +34,21 @@ export type SoundLayer =
       readonly level: number;
     }
   | {
+      /** A clock ticking: short clicks at a steady rate across the segment. */
+      readonly type: 'tick';
+      readonly perSecond: number;
+      readonly level: number;
+      readonly filtered?: FilterResponse;
+    }
+  | {
+      /** A kettle coming to the boil: rising rush that ends in a whistle. */
+      readonly type: 'kettle';
+      readonly start: number;
+      readonly end: number;
+      readonly level: number;
+      readonly filtered?: FilterResponse;
+    }
+  | {
       /** Unintelligible speech-like sound. The words are in the transcript. */
       readonly type: 'voice';
       readonly pitch: 'low' | 'mid' | 'high';

@@ -1906,3 +1906,99 @@ tr.is-marked td {
   font-weight: 600;
   color: var(--color-amber);
 }
+
+/* ---------- Case 003 additions: ordering and objects ---------- */
+
+.kind--object {
+  color: #8fc0e8;
+}
+
+.ordering__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ordering__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-deep);
+}
+
+.ordering__position {
+  flex: none;
+  width: 1.75rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-amber);
+}
+
+.ordering__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ordering__buttons {
+  flex: none;
+  display: flex;
+  gap: var(--space-1);
+}
+
+.icon-button--dark {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.icon-button--dark[aria-disabled='true'] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.provenance {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0 0 0 var(--space-5);
+  list-style: none;
+  border-left: 2px solid var(--color-border-strong);
+}
+
+.provenance__entry {
+  position: relative;
+}
+
+.provenance__entry::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--space-5) - 6px);
+  top: 0.35rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.provenance__date {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-amber);
+}
+
+.provenance__action {
+  font-weight: 700;
+}
+
+.provenance__where {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}

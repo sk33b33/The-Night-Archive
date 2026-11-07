@@ -3,6 +3,7 @@ import { ScreenLayout } from '../../components/ScreenLayout';
 import type { DocumentEvidence, EvidenceId, EvidenceItem } from '../../domain/evidence';
 import type { RecordField } from '../../domain/case';
 import { AudioPlayer } from './audio/AudioPlayer';
+import { ObjectEvidenceView } from './object/ObjectEvidenceView';
 import { PhotoEvidenceView } from './photo/PhotoEvidenceView';
 import type { EngineFactory } from './audio/useReelPlayer';
 import { DocumentWorkspace, loadCompare, storeCompare } from './DocumentWorkspace';
@@ -12,6 +13,9 @@ interface EvidenceScreenProps {
   /** Records a discovery; returns titles of evidence newly filed by it. */
   /** Documents available in the case, for comparison. */
   readonly documents: readonly DocumentEvidence[];
+  /** All evidence available in the case, for linked records. */
+  readonly available: readonly EvidenceItem[];
+  readonly onOpenEvidence: (id: EvidenceId) => void;
   readonly highlightsOf: (id: EvidenceId) => readonly string[];
   readonly onHighlight: (id: EvidenceId, passageKey: string, on: boolean) => void;
   readonly onClearHighlights: (id: EvidenceId) => void;
@@ -26,6 +30,8 @@ interface EvidenceScreenProps {
 export function EvidenceScreen({
   item,
   documents,
+  available,
+  onOpenEvidence,
   highlightsOf,
   onHighlight,
   onClearHighlights,
@@ -66,7 +72,10 @@ export function EvidenceScreen({
         <AudioPlayer item={item} onDiscover={onDiscover} createEngine={createEngine} />
       )}
       {item.kind === 'photo' && <PhotoEvidenceView item={item} onDiscover={onDiscover} />}
-      {item.kind !== 'document' && <Catalogue fields={item.catalogue} />}
+      {item.kind === 'object' && (
+        <ObjectEvidenceView item={item} available={available} onOpenEvidence={onOpenEvidence} />
+      )}
+      {(item.kind === 'audio' || item.kind === 'photo') && <Catalogue fields={item.catalogue} />}
       {notice}
     </ScreenLayout>
   );

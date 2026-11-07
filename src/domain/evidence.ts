@@ -58,11 +58,14 @@ interface EvidenceBase {
  * "change". Appended after the original blocks so existing passage keys,
  * and the player's highlights on them, stay valid.
  */
-export interface DocumentAmendment {
+export type DocumentAmendment = {
   readonly id: string;
   readonly whenCaseClosed: CaseId;
-  readonly block: DocumentBlock;
-}
+} & (
+  | { readonly block: DocumentBlock }
+  /** Adds a row to an existing table block (by block index). */
+  | { readonly appendRow: { readonly blockIndex: number; readonly row: readonly string[] } }
+);
 
 export interface DocumentEvidence extends EvidenceBase {
   readonly kind: 'document';
@@ -92,7 +95,25 @@ export interface PhotoEvidence extends EvidenceBase {
   readonly catalogue: readonly RecordField[];
 }
 
-export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence;
+/** One step in an object's chain of custody. */
+export interface ProvenanceEntry {
+  readonly date: string;
+  readonly holder: string;
+  readonly location: string;
+  readonly action: string;
+}
+
+export interface ObjectEvidence extends EvidenceBase {
+  readonly kind: 'object';
+  /** What the object is and its condition. */
+  readonly details: readonly RecordField[];
+  /** Chain of custody, oldest first. */
+  readonly provenance: readonly ProvenanceEntry[];
+  /** Records the property store cross-references. */
+  readonly linked: readonly EvidenceId[];
+}
+
+export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence | ObjectEvidence;
 export type EvidenceKind = EvidenceItem['kind'];
 
 export function isUnlocked(item: EvidenceItem, discoveries: ReadonlySet<string>): boolean {
@@ -177,7 +198,18 @@ export function effectiveDocument(
 ): DocumentContent {
   const added = (item.amendments ?? []).filter((a) => isClosed(a.whenCaseClosed));
   if (added.length === 0) return item.document;
-  return { ...item.document, blocks: [...item.document.blocks, ...added.map((a) => a.block)] };
+  const blocks = [...item.document.blocks];
+  for (const amendment of added) {
+    if ('block' in amendment) {
+      blocks.push(amendment.block);
+      continue;
+    }
+    // Rows are appended, so existing row passage keys keep their numbers.
+    const { blockIndex, row } = amendment.appendRow;
+    const target = blocks[blockIndex];
+    if (target?.type === 'table') blocks[blockIndex] = { ...target, rows: [...target.rows, row] };
+  }
+  return { ...item.document, blocks };
 }
 
 /** Applies amendments to a document item, leaving other kinds unchanged. */

@@ -201,6 +201,8 @@ export function ScreenRouter(props: ScreenRouterProps) {
         <EvidenceScreen
           item={item}
           documents={evidence.filter((e): e is DocumentEvidence => e.kind === 'document')}
+          available={evidence}
+          onOpenEvidence={(evidenceId) => navigate({ id: 'evidence', caseId: caseFile.id, evidenceId })}
           highlightsOf={(id) => progress?.highlights[id] ?? []}
           onHighlight={(id, key, on) => saveGame.highlight(caseFile.id, id, key, on)}
           onClearHighlights={(id) => saveGame.clearHighlights(caseFile.id, id)}

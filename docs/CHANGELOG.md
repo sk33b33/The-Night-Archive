@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.12.0 — Case 003: The Unknown Caller (2026-11-07)
+
+Built from the approved case bible (`docs/cases/case-003-bible.md`).
+
+### Added
+- Engine: **object evidence** with property record, chain of custody, and
+  linked records that open directly.
+- Engine: **ordering questions** (put events in order) with Move up / Move
+  down buttons and announced moves; answers stored as strings, so no save
+  migration. Buttons at the ends stay focusable (`aria-disabled`).
+- Engine: amendments can **append a table row**; existing passage keys and
+  highlights are unaffected.
+- Synth: clock-tick and kettle sound layers for the background filter.
+- Case 003 content: call log, recording of call 5 with a background-isolation
+  filter that files an optional engineer's analysis, fault report, call box
+  handset (object), malicious-call trace (subscriber redacted), attendance
+  notes; six board rules; four findings including the ordering question.
+- End beat: after Case 003 closes, the call log shows a sixth call —
+  "Records facility, night entrance", "Not attended." Unexplained.
+- Tests: ordering logic, Case 003 content and findings, the row amendment,
+  synth output, and a full Case 003 playthrough.
+
+### Verified
+- Chromium at 360px and 1280px, Cases 001–003 played in sequence through the
+  UI; ordering solved with the keyboard; axe: no violations; no overflow; no
+  console errors.
+
 ## 0.11.0 — Case 002: The Empty House (2026-11-07)
 
 Built from the approved case bible (`docs/cases/case-002-bible.md`).

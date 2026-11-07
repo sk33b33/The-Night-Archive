@@ -24,12 +24,9 @@ export interface EvidenceRequirement {
   readonly anyOf: readonly EvidenceId[];
 }
 
-export interface DeductionQuestion {
+interface QuestionBase {
   readonly id: string;
   readonly prompt: string;
-  readonly options: readonly DeductionOption[];
-  /** The only answer the records support. */
-  readonly supportedOptionId: string;
   readonly requires: EvidenceRequirement;
   /** Progressive hints, gentlest first. */
   readonly hints: readonly string[];
@@ -37,6 +34,45 @@ export interface DeductionQuestion {
   readonly citationHint: string;
   /** The accepted finding, as recorded once the case closes. */
   readonly finding: string;
+}
+
+/** Choose one answer. */
+export interface ChoiceQuestion extends QuestionBase {
+  readonly kind?: 'choice';
+  readonly options: readonly DeductionOption[];
+  /** The only answer the records support. */
+  readonly supportedOptionId: string;
+}
+
+/**
+ * Put events in order. The answer is stored as the item IDs joined by
+ * commas, so attempts keep the same save shape as choice questions.
+ */
+export interface OrderingQuestion extends QuestionBase {
+  readonly kind: 'ordering';
+  /** Items in the order first shown to the player (not the answer). */
+  readonly items: readonly DeductionOption[];
+  /** The only order the records support. */
+  readonly supportedOrder: readonly string[];
+}
+
+export type DeductionQuestion = ChoiceQuestion | OrderingQuestion;
+
+export function isOrdering(question: DeductionQuestion): question is OrderingQuestion {
+  return question.kind === 'ordering';
+}
+
+export function encodeOrder(ids: readonly string[]): string {
+  return ids.join(',');
+}
+
+/** The player's current order for an ordering question (initial order if untouched). */
+export function orderOf(question: OrderingQuestion, answer: string | undefined): string[] {
+  const known = new Set(question.items.map((i) => i.id));
+  const ids = (answer ?? '').split(',').filter((id) => known.has(id));
+  return ids.length === question.items.length && new Set(ids).size === ids.length
+    ? ids
+    : question.items.map((i) => i.id);
 }
 
 export interface DeductionSubmission {
@@ -69,7 +105,11 @@ export function evaluateFinding(
   question: DeductionQuestion,
   submission: DeductionSubmission,
 ): FindingResult {
-  if (submission.answers[question.id] !== question.supportedOptionId) return 'unsupported';
+  const answer = submission.answers[question.id];
+  const supported = isOrdering(question)
+    ? encodeOrder(orderOf(question, answer)) === encodeOrder(question.supportedOrder)
+    : answer === question.supportedOptionId;
+  if (!supported) return 'unsupported';
   return citationsSatisfy(question.requires, submission.citations[question.id] ?? [])
     ? 'holds'
     : 'uncited';
@@ -98,8 +138,11 @@ export function evaluateDeduction(
   return { outcome, results };
 }
 
+/** Every choice question answered. Ordering questions always have an order. */
 export function isComplete(questions: readonly DeductionQuestion[], submission: DeductionSubmission): boolean {
-  return questions.every((q) => q.options.some((o) => o.id === submission.answers[q.id]));
+  return questions.every(
+    (q) => isOrdering(q) || q.options.some((o) => o.id === submission.answers[q.id]),
+  );
 }
 
 export function isSolved(attempts: readonly DeductionAttempt[]): boolean {

@@ -96,6 +96,39 @@ function renderLayer(
       });
       return;
     }
+    case 'tick': {
+      const from = toIndex(segmentStart);
+      const to = toIndex(segmentEnd);
+      const interval = Math.max(1, Math.round(sampleRate / layer.perSecond));
+      const clickLength = Math.round(0.006 * sampleRate);
+      for (let start = from; start < to; start += interval) {
+        for (let i = 0; i < clickLength && start + i < to; i++) {
+          const t = i / sampleRate;
+          const click = Math.sin(2 * Math.PI * 3200 * t) * Math.exp(-t * 900);
+          out[start + i] = (out[start + i] ?? 0) + click * level * 3;
+        }
+      }
+      return;
+    }
+    case 'kettle': {
+      const random = rng(Math.round(segmentStart * 100) + 5);
+      const filter = new BandPass(sampleRate);
+      const from = toIndex(segmentStart + layer.start);
+      const to = toIndex(Math.min(segmentEnd, segmentStart + layer.end));
+      const span = Math.max(1, to - from);
+      let phase = 0;
+      for (let i = from; i < to; i++) {
+        const progress = (i - from) / span;
+        if ((i - from) % 256 === 0) filter.set(400 + progress * 2600, 3 + progress * 6);
+        const rush = filter.process(random() * 2 - 1) * (0.3 + progress);
+        // The whistle comes in over the last third.
+        const whistleLevel = Math.max(0, (progress - 0.66) * 3);
+        phase += (1800 + progress * 600) / sampleRate;
+        const whistle = Math.sin(2 * Math.PI * phase) * whistleLevel * 0.5;
+        out[i] = (out[i] ?? 0) + (rush + whistle) * level * 2;
+      }
+      return;
+    }
     case 'voice': {
       const random = rng(layer.seed);
       const f1 = new BandPass(sampleRate);
