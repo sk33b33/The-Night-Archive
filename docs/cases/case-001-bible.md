@@ -60,6 +60,7 @@ remain hypotheses. **[Rule]** Reasons state what the records show, never why.
 | Workstation ID "NA-07", shown on the dashboard from the first shift | [Added] |
 | "Previous asset at this position: None recorded" | [Added] |
 | No intake record; filed by "Not recorded" | [Added] |
+| Photo regions: asset label, terminal screen (on; text unreadable), date imprint | [Added] |
 
 **[Rule]** Leave it unexplained. Tests reject explanatory wording in its content.
 Case 004 is titled "File 0091": nothing here may pre-empt it.

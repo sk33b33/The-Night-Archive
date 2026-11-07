@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.9.0 — Photo inspection (2026-11-07)
+
+General photo viewer from the CLAUDE.md evidence list (zoom, pan, regions),
+first used by File 0091's photograph. Still within Case 001 scope.
+
+### Added
+- Viewport maths (`src/domain/photoView.ts`): clamped zoom (1×–4×) about a
+  fixed point, bounded panning, and fit-to-region. Unit tested.
+- `PhotoViewer` (`src/features/evidence/photo/`): drag to pan; pinch,
+  double-tap/double-click, and Ctrl+wheel (trackpad pinch) to zoom; keyboard
+  `+` `−` `0` and arrows; zoom buttons with a readout; Reset view. Zoom
+  transitions follow the motion setting.
+- Authored photo regions: a "Marked regions" list zooms to each region and
+  shows a neutral observation; outlines can be hidden.
+- File 0091 regions: asset label (NA-07), terminal screen, date imprint.
+  Observations only; nothing is explained.
+
+### Changed
+- Focus rings on light "paper" surfaces use ink blue for contrast.
+- The File 0091 print is no longer tilted, so pointer positions map exactly.
+
+### Verified
+- Touch pinch and pan, double-click, and Ctrl+wheel in Chromium; the page
+  itself does not scroll or zoom during photo gestures.
+- axe-core audit of all screens (now including the viewer): no violations.
+
 ## 0.8.1 — Case 001 polish and QA (2026-11-07)
 
 ### Added

@@ -1,5 +1,6 @@
 import { ScreenLayout } from '../../components/ScreenLayout';
 import type { Anomaly } from '../../domain/anomaly';
+import { PhotoViewer } from '../evidence/photo/PhotoViewer';
 import { WorkstationPhoto } from './WorkstationPhoto';
 
 interface AnomalyScreenProps {
@@ -31,7 +32,9 @@ export function AnomalyScreen({ anomaly, onBack, focusOnMount }: AnomalyScreenPr
       </section>
 
       <figure className="print">
-        <WorkstationPhoto dateStamp={photograph.dateStamp} alt={photograph.alt} />
+        <PhotoViewer regions={photograph.regions}>
+          <WorkstationPhoto dateStamp={photograph.dateStamp} alt={photograph.alt} />
+        </PhotoViewer>
         <figcaption className="print__caption">{photograph.caption}</figcaption>
       </figure>
 

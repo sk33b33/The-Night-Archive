@@ -1,4 +1,5 @@
 import type { CaseId, RecordField } from './case';
+import type { PhotoRegion } from './photoView';
 
 /**
  * Anomalies: items that appear in the archive without an intake record.
@@ -12,6 +13,8 @@ export interface AnomalyPhotograph {
   /** Full description for assistive technology. */
   readonly alt: string;
   readonly caption: string;
+  /** Marked areas the player can examine. Observations only. */
+  readonly regions: readonly PhotoRegion[];
 }
 
 export interface Anomaly {

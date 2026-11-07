@@ -329,6 +329,8 @@ describe('shift flow', () => {
     expect(screen.getByRole('img', { name: /date imprinted in the corner reads 14 October 1981/ })).toBeTruthy();
     expect(screen.getByText('Workstation NA-07')).toBeTruthy();
     expect(screen.getByText('1998')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Date imprint' }));
+    expect(screen.getByText('The camera’s date imprint reads 14 OCT 1981.')).toBeTruthy();
   });
 
   it('keeps unsubmitted findings across a refresh', async () => {
