@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.4.0 — Phase 4 (assumed): audio evidence (2026-11-07)
+
+`docs/ROADMAP.md` is still absent; this continues the CLAUDE.md evidence order
+with audio inspection. The evidence board and deductions are not started.
+
+### Added
+- Audio model (`src/domain/audio.ts`): authored timelines of segments with
+  sound layers, transcript lines, and deterministic filters that change the
+  mix and can reveal lines.
+- Playback reducer (`src/domain/playback.ts`): play/pause/seek/speed/end,
+  driven by an injected clock so it is testable without audio APIs.
+- Procedural reel synthesis (`src/services/audio/reelSynth.ts`): seeded tape
+  hiss, chimes, and speech-like voices rendered directly to samples. Words are
+  carried by captions. Mixes are cached and pre-rendered while idle.
+- Web Audio engine created on the first Play (a user gesture, as Android
+  requires). If sound is unavailable, captions and segments keep working.
+- Audio player: play/pause, scrub slider with spoken time, 0.5×–1.5× speed,
+  segment list, live captions, and filter switches.
+- Case 001 reel: announcement (02:10 cancelled), clock chime, the obscured
+  voice ("Don't open the east door."). With **Voice isolation** applied, a
+  second voice is revealed ("Mara, don't file this."), recording a discovery
+  that files the **Filtered segment** (Item 2a) to the case.
+- Speakers stay unidentified; no line attributes either voice to anyone.
+
+### Notes
+- Sound is synthesised placeholder audio by design: real recordings can
+  replace it behind the same timeline model later.
+
 ## 0.3.0 — Phase 3 (assumed): investigation workspace, evidence inventory, documents (2026-11-07)
 
 `docs/ROADMAP.md` is still absent; this follows the CLAUDE.md core-screen order

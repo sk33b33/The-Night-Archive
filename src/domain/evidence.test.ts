@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { CASES } from '../content/cases';
 import { briefingReport } from './case';
-import { availableEvidence, documentText, evidenceId, type EvidenceItem } from './evidence';
+import {
+  availableEvidence,
+  documentText,
+  evidenceId,
+  evidenceUnlockedBy,
+  type EvidenceItem,
+} from './evidence';
 import { countMatches, splitMatches } from './textSearch';
 
 const initial: EvidenceItem = {
@@ -12,6 +18,9 @@ const initial: EvidenceItem = {
   description: 'A reel.',
   unlock: { type: 'initial' },
   catalogue: [],
+  timeline: { duration: 0, segments: [] },
+  filters: [],
+  fixedFilters: [],
 };
 const hidden: EvidenceItem = {
   ...initial,
@@ -80,8 +89,27 @@ describe('case content integrity', () => {
     expect(roster?.kind === 'document' && documentText(roster.document).join(' ')).not.toContain('Ward');
   });
 
-  it('Case 001 does not reveal the second voice before the audio phase', () => {
-    const json = JSON.stringify(CASES);
-    expect(json).not.toContain('Mara');
+  it('Case 001 mentions Mara only in the filter-gated audio line', () => {
+    const case001 = CASES.find((c) => c.id === 'case-001');
+    const documents = JSON.stringify(case001?.evidence.filter((e) => e.kind === 'document'));
+    expect(documents).not.toContain('Mara');
+    const audioLines = case001?.evidence.flatMap((e) =>
+      e.kind === 'audio' ? e.timeline.segments.flatMap((s) => s.lines) : [],
+    );
+    const mentions = audioLines?.filter((l) => l.text.includes('Mara')) ?? [];
+    expect(mentions.length).toBeGreaterThan(0);
+    expect(mentions.every((l) => l.condition?.applied === true || l.condition === undefined)).toBe(true);
+  });
+
+  it('the filtered segment is locked until the second voice is revealed', () => {
+    const case001 = CASES.find((c) => c.id === 'case-001');
+    if (!case001) throw new Error('missing case');
+    const before = availableEvidence(case001.evidence, []).map((e) => e.id);
+    const after = availableEvidence(case001.evidence, ['c001-second-voice']).map((e) => e.id);
+    expect(before).not.toContain('c001-filtered-segment');
+    expect(after).toContain('c001-filtered-segment');
+    expect(evidenceUnlockedBy(case001, 'c001-second-voice').map((e) => e.id)).toEqual([
+      'c001-filtered-segment',
+    ]);
   });
 });

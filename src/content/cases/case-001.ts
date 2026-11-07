@@ -1,5 +1,11 @@
 import { caseId, type CaseDefinition } from '../../domain/case';
 import { evidenceId } from '../../domain/evidence';
+import {
+  CASE_001_FILTERED_CLIP,
+  CASE_001_REEL,
+  SECOND_VOICE_DISCOVERY,
+  VOICE_ISOLATION,
+} from './case-001-audio';
 
 /**
  * Case 001 — The Missing Recording. Canon lives in CLAUDE.md.
@@ -7,11 +13,13 @@ import { evidenceId } from '../../domain/evidence';
  * Content rules: records state only what their authors would have written.
  * Nothing here names the caller, explains the recording, or connects the
  * records for the player. Contradictions are left for the player to find.
- * The filtered audio segment is not authored yet (audio phase).
+ * The filtered segment unlocks only after the player reveals the second
+ * voice with the voice isolation filter.
  */
 export const CASE_001_IDS = {
   report: evidenceId('c001-incident-report'),
   audioReel: evidenceId('c001-audio-reel'),
+  filteredSegment: evidenceId('c001-filtered-segment'),
   timetable: evidenceId('c001-timetable'),
   maintenance: evidenceId('c001-maintenance-record'),
   roster: evidenceId('c001-duty-roster'),
@@ -73,8 +81,28 @@ export const CASE_001: CaseDefinition = {
         { label: 'Format', value: 'Quarter-inch tape reel' },
         { label: 'Source', value: 'Station announcement system, Bellwether' },
         { label: 'Filed with', value: 'Incident report, 14 October 1981' },
+        { label: 'Running time', value: '0:50' },
         { label: 'Transcript', value: 'None on file' },
       ],
+      timeline: CASE_001_REEL,
+      filters: [VOICE_ISOLATION],
+      fixedFilters: [],
+    },
+    {
+      id: CASE_001_IDS.filteredSegment,
+      kind: 'audio',
+      title: 'Filtered segment',
+      reference: 'File 001 · Item 2a',
+      description: 'A section of the audio reel, isolated with the voice filter.',
+      unlock: { type: 'discovery', discoveryId: SECOND_VOICE_DISCOVERY },
+      catalogue: [
+        { label: 'Derived from', value: 'Audio reel (File 001 · Item 2), 0:30–0:46' },
+        { label: 'Processing', value: 'Voice isolation filter' },
+        { label: 'Running time', value: '0:16' },
+      ],
+      timeline: CASE_001_FILTERED_CLIP,
+      filters: [VOICE_ISOLATION],
+      fixedFilters: [VOICE_ISOLATION.id],
     },
     {
       id: CASE_001_IDS.timetable,

@@ -15,15 +15,18 @@ import {
   type NavigationState,
   type Screen,
 } from './navigation';
+import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { ScreenRouter } from './ScreenRouter';
 
 interface AppProps {
   /** Injected in tests; defaults to IndexedDB in the browser. */
   readonly repository?: SaveRepository | null;
+  /** Injected in tests; defaults to Web Audio. */
+  readonly createEngine?: EngineFactory;
 }
 
 /** Owns navigation and wires history, saves, and preferences to the screens. */
-export function App({ repository }: AppProps) {
+export function App({ repository, createEngine }: AppProps) {
   const repo = useMemo(
     () => (repository === undefined ? browserRepository() : repository),
     [repository],
@@ -109,6 +112,7 @@ export function App({ repository }: AppProps) {
         navigate={navigate}
         back={back}
         onContinue={continueShift}
+        createEngine={createEngine}
       />
     </main>
   );

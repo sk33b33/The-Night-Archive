@@ -4,11 +4,6 @@ import type { CaseDefinition } from '../../domain/case';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
 import { EvidenceCard } from './EvidenceCard';
 
-/** Viewers available in this build. Other kinds are listed but disabled. */
-export const UNAVAILABLE_VIEWER_REASON: Partial<Record<EvidenceItem['kind'], string>> = {
-  audio: 'Audio playback is not available in this build yet.',
-};
-
 interface InvestigationScreenProps {
   readonly caseFile: CaseDefinition;
   readonly evidence: readonly EvidenceItem[];
@@ -61,7 +56,6 @@ export function InvestigationScreen({
                 item={item}
                 examined={isExamined(item.id)}
                 onOpen={() => onOpenEvidence(item.id)}
-                disabledReason={UNAVAILABLE_VIEWER_REASON[item.kind]}
               />
             ))}
           </ul>

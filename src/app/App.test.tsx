@@ -23,6 +23,21 @@ function simulateBack(stack: readonly object[]) {
   fireEvent(window, new PopStateEvent('popstate', { state: window.history.state }));
 }
 
+function fakeEngine() {
+  const engine = {
+    starts: [] as { offset: number; rate: number; filters: string }[],
+    stops: 0,
+    start(offset: number, rate: number, filters: ReadonlySet<string>) {
+      engine.starts.push({ offset: Math.round(offset), rate, filters: [...filters].join('+') });
+    },
+    stop() {
+      engine.stops += 1;
+    },
+    dispose() {},
+  };
+  return engine;
+}
+
 async function renderReady(repository: SaveRepository | null = createMemoryRepository()) {
   render(<App repository={repository} />);
   // The menu settles once the save has loaded.
@@ -110,11 +125,7 @@ describe('shift flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
 
     expect(screen.getByText('0 of 5 items examined')).toBeTruthy();
-    const audio = screen.getByRole('button', { name: /Audio reel/ });
-    expect(audio.getAttribute('aria-disabled')).toBe('true');
-    expect(screen.getByText('Audio playback is not available in this build yet.')).toBeTruthy();
-    fireEvent.click(audio);
-    expect(screen.getByText('0 of 5 items examined')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Filtered segment/ })).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: /Night timetable/ }));
     expect(heading('Night timetable')).toBeTruthy();
@@ -142,6 +153,68 @@ describe('shift flow', () => {
     simulateBack([{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-001' }]);
     expect(screen.getByText('1 of 5 items examined')).toBeTruthy();
     expect(screen.getByText('Examined')).toBeTruthy();
+  });
+
+  it('plays the reel, and the filter reveals the second voice and files a new item', async () => {
+    const engine = fakeEngine();
+    const repo = createMemoryRepository();
+    render(<App repository={repo} createEngine={() => engine} />);
+    await waitFor(() => expect(screen.getByRole('navigation').getAttribute('aria-busy')).toBe('false'));
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+    fireEvent.click(screen.getByRole('button', { name: /Audio reel/ }));
+
+    expect(heading('Audio reel')).toBeTruthy();
+    expect(screen.getByText('[Tape hiss]')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Play' }));
+    expect(engine.starts).toEqual([{ offset: 0, rate: 1, filters: '' }]);
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+    expect(engine.stops).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole('button', { name: /Announcement/ }));
+    expect(screen.getByText(/two-ten service to Carrow Junction has been cancelled/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('radio', { name: '0.5×' }));
+    expect((screen.getByRole('radio', { name: '0.5×' }) as HTMLInputElement).checked).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: /Voices/ }));
+    expect(screen.getByText('Don’t open the east door.')).toBeTruthy();
+    expect(screen.getByText('[Tape noise rises]')).toBeTruthy();
+    expect(screen.queryByText(/Mara/)).toBeNull();
+
+    fireEvent.click(screen.getByRole('switch', { name: /Voice isolation/ }));
+    expect(screen.getByText('Mara, don’t file this.')).toBeTruthy();
+    expect(screen.getByText('Added to the case files: Filtered segment.')).toBeTruthy();
+
+    await waitFor(() => {
+      const stored = repo.stored() as SaveGame;
+      expect(stored.cases['case-001']?.discoveries).toEqual(['c001-second-voice']);
+    });
+
+    simulateBack([{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-001' }]);
+    expect(screen.getByText('1 of 6 items examined')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Filtered segment/ }));
+    expect(screen.getByText('Mara, don’t file this.')).toBeTruthy();
+    const fixed = screen.getByRole('switch', { name: /Voice isolation/ }) as HTMLInputElement;
+    expect(fixed.checked).toBe(true);
+    expect(fixed.disabled).toBe(true);
+    expect(screen.getByText('Applied permanently to this copy.')).toBeTruthy();
+    // Already discovered: no repeated "added" notice.
+    expect(screen.queryByText(/Added to the case files/)).toBeNull();
+  });
+
+  it('keeps captions working when sound is unavailable', async () => {
+    render(<App repository={createMemoryRepository()} createEngine={() => null} />);
+    await waitFor(() => expect(screen.getByRole('navigation').getAttribute('aria-busy')).toBe('false'));
+    fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
+    fireEvent.click(screen.getByRole('button', { name: /Audio reel/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Play' }));
+    expect(screen.getByText(/Sound is not available on this device/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Clock chime/ }));
+    expect(screen.getByText('[A station clock chimes]')).toBeTruthy();
   });
 
   it('Continue resumes at saved evidence with Back leading to the case files', async () => {

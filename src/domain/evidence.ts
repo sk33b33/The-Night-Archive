@@ -1,3 +1,4 @@
+import type { AudioFilter, AudioTimeline } from './audio';
 import type { RecordField } from './case';
 
 /** Evidence domain model and unlock rules. Pure; no React. */
@@ -60,6 +61,11 @@ export interface AudioEvidence extends EvidenceBase {
   readonly kind: 'audio';
   /** Catalogue details for the reel or segment. */
   readonly catalogue: readonly RecordField[];
+  readonly timeline: AudioTimeline;
+  /** Filters shown on the player. */
+  readonly filters: readonly AudioFilter[];
+  /** IDs of listed filters that are permanently on, e.g. on a derived clip. */
+  readonly fixedFilters: readonly string[];
 }
 
 export type EvidenceItem = DocumentEvidence | AudioEvidence;
@@ -81,6 +87,16 @@ export function availableEvidence(
 ): EvidenceItem[] {
   const found = new Set(discoveries);
   return items.filter((item) => isUnlocked(item, found));
+}
+
+/** Items a discovery unlocks, in authored order. */
+export function evidenceUnlockedBy(
+  caseFile: { readonly evidence: readonly EvidenceItem[] },
+  discoveryId: string,
+): EvidenceItem[] {
+  return caseFile.evidence.filter(
+    (item) => item.unlock.type === 'discovery' && item.unlock.discoveryId === discoveryId,
+  );
 }
 
 /** Every searchable string in a document, in reading order. */

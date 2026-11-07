@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CONTENT_INDEX } from '../../content/cases';
-import { createSave, recordVisit } from '../../domain/progress';
+import type { CaseId } from '../../domain/case';
+import { createSave, recordDiscovery, recordVisit } from '../../domain/progress';
 import { migrateSave, type LoadProblem, type ResumePoint, type SaveGame } from '../../domain/save';
 import type { SaveRepository } from './saveRepository';
 
@@ -24,6 +25,8 @@ export interface SaveController {
    * none. Ignored until the stored save has finished loading.
    */
   readonly visit: (point: ResumePoint) => void;
+  /** Records a discovery for a case. No-op until the save has loaded. */
+  readonly discover: (caseId: CaseId, discoveryId: string) => void;
   readonly erase: () => Promise<boolean>;
 }
 
@@ -95,6 +98,17 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     [commit],
   );
 
+  const discover = useCallback(
+    (caseIdValue: CaseId, discoveryId: string) => {
+      if (!loadedRef.current) return;
+      const now = new Date();
+      const current = saveRef.current;
+      const next = recordDiscovery(current ?? createSave(now), caseIdValue, discoveryId, now);
+      if (next !== current) commit(next);
+    },
+    [commit],
+  );
+
   const erase = useCallback(async () => {
     if (!repository || blockedRef.current) return false;
     const cleared = writeQueue.current.then(() => repository.clear());
@@ -109,5 +123,5 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     return true;
   }, [repository]);
 
-  return { state, visit, erase };
+  return { state, visit, discover, erase };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { caseId } from './case';
 import { evidenceId } from './evidence';
-import { caseStatus, createSave, isExamined, recordVisit } from './progress';
+import { caseStatus, createSave, isExamined, recordDiscovery, recordVisit } from './progress';
 import { SAVE_VERSION, migrateSave, type ContentIndex } from './save';
 
 const content: ContentIndex = {
@@ -172,5 +172,14 @@ describe('progress', () => {
     recordVisit(save, { screen: 'evidence', caseId: CASE_001, evidenceId: EV_A }, T1);
     expect(save.cases).toEqual({});
     expect(save.resume).toEqual({ screen: 'archive' });
+  });
+
+  it('records a discovery once and keeps it', () => {
+    const save = recordDiscovery(createSave(T0), CASE_001, 'd-1', T1);
+    expect(save.cases[CASE_001]?.discoveries).toEqual(['d-1']);
+    expect(caseStatus(save, CASE_001)).toBe('opened');
+    expect(recordDiscovery(save, CASE_001, 'd-1', T2)).toBe(save);
+    const visited = recordVisit(save, { screen: 'archive' }, T2);
+    expect(visited.cases[CASE_001]?.discoveries).toEqual(['d-1']);
   });
 });

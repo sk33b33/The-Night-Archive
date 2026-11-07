@@ -29,6 +29,10 @@ export function isExamined(save: SaveGame | null, caseIdValue: CaseId, id: Evide
   return save?.cases[caseIdValue]?.examined.includes(id) ?? false;
 }
 
+function newCaseProgress(stamp: string): CaseProgress {
+  return { status: 'opened', firstOpenedAt: stamp, examined: [], discoveries: [] };
+}
+
 function sameResume(a: ResumePoint, b: ResumePoint): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -39,12 +43,7 @@ function visitCase(
   point: ResumePoint,
   stamp: string,
 ): CaseProgress {
-  const base: CaseProgress = progress ?? {
-    status: 'opened',
-    firstOpenedAt: stamp,
-    examined: [],
-    discoveries: [],
-  };
+  const base: CaseProgress = progress ?? newCaseProgress(stamp);
   if (point.screen === 'evidence' && !base.examined.includes(point.evidenceId)) {
     return { ...base, examined: [...base.examined, point.evidenceId] };
   }
@@ -66,4 +65,25 @@ export function recordVisit(save: SaveGame, point: ResumePoint, now: Date): Save
   }
   if (cases === save.cases && sameResume(save.resume, point)) return save;
   return { ...save, updatedAt: stamp, resume: point, cases };
+}
+
+/**
+ * Records a discovery for a case. Discoveries are permanent and can unlock
+ * evidence (see UnlockRule). Returns the same save if already recorded.
+ */
+export function recordDiscovery(
+  save: SaveGame,
+  caseIdValue: CaseId,
+  discoveryId: string,
+  now: Date,
+): SaveGame {
+  const stamp = now.toISOString();
+  const before = save.cases[caseIdValue];
+  if (before?.discoveries.includes(discoveryId)) return save;
+  const base: CaseProgress = before ?? newCaseProgress(stamp);
+  return {
+    ...save,
+    updatedAt: stamp,
+    cases: { ...save.cases, [caseIdValue]: { ...base, discoveries: [...base.discoveries, discoveryId] } },
+  };
 }

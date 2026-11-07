@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { CASES, findCase } from '../content/cases';
 import { findEvidence, type CaseDefinition } from '../domain/case';
-import { availableEvidence } from '../domain/evidence';
+import { availableEvidence, evidenceUnlockedBy } from '../domain/evidence';
 import { caseProgress, caseStatus } from '../domain/progress';
 import { ArchiveScreen } from '../features/archive/ArchiveScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
+import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { EvidenceScreen } from '../features/evidence/EvidenceScreen';
 import { InvestigationScreen } from '../features/investigation/InvestigationScreen';
 import { MainMenu } from '../features/menu/MainMenu';
@@ -22,6 +23,7 @@ export interface ScreenRouterProps {
   readonly navigate: (to: Screen) => void;
   readonly back: () => void;
   readonly onContinue: () => void;
+  readonly createEngine?: EngineFactory | undefined;
 }
 
 function Unavailable({ title, body, onBack }: { title: string; body: string; onBack: () => void }) {
@@ -126,6 +128,12 @@ export function ScreenRouter(props: ScreenRouterProps) {
       return (
         <EvidenceScreen
           item={item}
+          onDiscover={(discoveryId) => {
+            const alreadyKnown = progress?.discoveries.includes(discoveryId) ?? false;
+            saveGame.discover(caseFile.id, discoveryId);
+            return alreadyKnown ? [] : evidenceUnlockedBy(caseFile, discoveryId).map((e) => e.title);
+          }}
+          createEngine={props.createEngine}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}
