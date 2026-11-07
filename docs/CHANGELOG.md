@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.8.0 — Phase 8 (assumed): installable PWA and offline play (2026-11-07)
+
+`docs/ROADMAP.md` is still absent. With Case 001 playable end to end, this
+makes the app installable and playable offline, per the product constraints.
+
+### Added
+- `vite-plugin-pwa` (dev dependency, plus `workbox-window`): generates the
+  web app manifest and a Workbox service worker that precaches the whole
+  build, so the game runs fully offline after the first visit.
+- Manifest: name, short name, standalone display, dark theme colours, and
+  icons (192, 512, maskable 512, SVG) plus an Apple touch icon, all rendered
+  from one source SVG (`public/icons/icon.svg`).
+- Update prompt (`src/app/UpdatePrompt.tsx`): new versions wait until the
+  player chooses **Update now**; "Later" keeps the current version. An
+  "offline ready" notice appears once caching finishes. Page content is
+  padded so the banner never covers controls.
+
+### Verified
+- Chromium reports no manifest or installability errors.
+- Offline reload, Continue, and audio playback all work with the network off.
+- Shipping a new build shows the update prompt; updating keeps saved progress.
+
 ## 0.7.0 — Phase 7 (assumed): Case 001 end anomaly (2026-11-07)
 
 `docs/ROADMAP.md` is still absent. This completes the Case 001 loop with the

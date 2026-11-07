@@ -1580,3 +1580,35 @@ p {
   font-size: var(--text-sm);
   text-align: center;
 }
+
+/* ---------- Update banner ---------- */
+
+.update-banner {
+  position: fixed;
+  z-index: 10;
+  left: max(var(--space-4), env(safe-area-inset-left));
+  right: max(var(--space-4), env(safe-area-inset-right));
+  bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  max-width: 32rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+}
+
+.update-banner__actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--space-2);
+}
+
+/* Leave room so the banner never hides the last controls on the page. */
+body:has(.update-banner) .app-shell {
+  padding-bottom: calc(11rem + env(safe-area-inset-bottom));
+}
