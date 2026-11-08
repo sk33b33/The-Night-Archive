@@ -1,5 +1,6 @@
 import { ScreenLayout } from '../../components/ScreenLayout';
-import type { Anomaly } from '../../domain/anomaly';
+import { useState } from 'react';
+import { resolveDateStamp, withDate, type Anomaly } from '../../domain/anomaly';
 import { PhotoViewer } from '../evidence/photo/PhotoViewer';
 import { WorkstationPhoto } from './WorkstationPhoto';
 
@@ -12,6 +13,8 @@ interface AnomalyScreenProps {
 /** Presents an anomaly exactly as filed. It offers no interpretation. */
 export function AnomalyScreen({ anomaly, onBack, focusOnMount }: AnomalyScreenProps) {
   const { photograph, register } = anomaly;
+  // Read the clock once per visit, so a TONIGHT imprint is the player's own date.
+  const [now] = useState(() => new Date());
   return (
     <ScreenLayout
       title={anomaly.title}
@@ -32,15 +35,20 @@ export function AnomalyScreen({ anomaly, onBack, focusOnMount }: AnomalyScreenPr
       </section>
 
       <figure className="print">
-        <PhotoViewer regions={photograph.regions}>
-          <WorkstationPhoto dateStamp={photograph.dateStamp} alt={photograph.alt} />
+        <PhotoViewer
+          regions={photograph.regions.map((r) => ({ ...r, note: withDate(r.note, photograph.dateStamp, now) }))}
+        >
+          <WorkstationPhoto
+            dateStamp={resolveDateStamp(photograph.dateStamp, now)}
+            alt={withDate(photograph.alt, photograph.dateStamp, now)}
+          />
         </PhotoViewer>
-        <figcaption className="print__caption">{photograph.caption}</figcaption>
+        <figcaption className="print__caption">{withDate(photograph.caption, photograph.dateStamp, now)}</figcaption>
       </figure>
 
       <article className="document" aria-labelledby="register-heading">
         <header className="document__header">
-          <p className="document__stamp">Asset register</p>
+          <p className="document__stamp">{register.stamp}</p>
           <h2 id="register-heading" className="document__title">
             {register.heading}
           </h2>

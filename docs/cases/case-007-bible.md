@@ -1,8 +1,22 @@
-# Case bible — Case 007: The Impossible Call (DRAFT for review)
+# Case bible — Case 007: The Impossible Call
 
-Status: **proposal**. CLAUDE.md gives the title only. This is the last case
-on the roadmap, so it should pay off the season without closing every door.
-Everything below is **[Proposed]** unless marked **[Canon]** or **[Rule]**.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-007*.ts`
+and `src/content/anomalies/file-0091.ts` (File 0093).
+
+**Choices made at implementation** (the approval did not pick between the
+options; each can be switched):
+- **Reveal level 1 (restrained).** The post record shows the holder as
+  "M. —". Level 2 is a one-line content change (Holder → "Mara —") plus the
+  finding for question 4; level 1 is the one that cannot be taken back once
+  shipped the other way.
+- **Final beat A.** File 0093 appears in Unfiled; its imprint is tonight's
+  date, read from the device clock when the file is opened.
+- **No credits screen.** Case 007 is the last available case; File 0093 is
+  the closing image.
+
+**Engine notes:** audio comparison plays one recording at a time (the
+player chooses which to listen to); both caption boxes follow the same
+segment, and segments are matched by ID.
 
 ## Threads converging
 

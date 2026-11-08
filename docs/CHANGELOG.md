@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.16.0 — Case 007: The Impossible Call (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-007-bible.md`): reveal
+level 1, final beat A. All seven roadmap cases are now playable.
+
+### Added
+- Engine: **audio comparison**. Two recordings side by side; the player
+  chooses which to listen to; both caption boxes follow the same segment;
+  an aligned segment list jumps both recordings, and a segment marked
+  `revealsOnMatch` records a discovery when matched.
+- Engine: anomalies can carry an imprint dated **tonight** (device clock),
+  and their record stamp is now content rather than fixed.
+- Case 007 content: tonight's NA-07 answerphone recording (same segments as
+  the 1981 reel, clearer; voice isolation), audio comparison note (required),
+  extension log, exchange routing record (route BW-4 withdrawn 1983),
+  extension register (NA-07 created 1998), 1981 reel copy, night archivist
+  post record ("M. —"), Case 001 report copy; six board rules; five findings.
+- Final beat A: once Case 007 closes, **File 0093** appears in Unfiled: a
+  photograph of Workstation NA-07 dated tonight, intake number 0093 issued at
+  03:40, filed by M. Unexplained.
+
+### Verified
+- Chromium at 360px and 1280px, **Cases 001–007 played in one save** through
+  the UI; axe: no violations; no overflow; no console errors.
+
 ## 0.15.0 — Case 006: Someone Is Watching (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-006-bible.md`). The

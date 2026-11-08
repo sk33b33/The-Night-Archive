@@ -1,7 +1,14 @@
-import { useState, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { ScreenLayout } from '../../components/ScreenLayout';
-import type { DocumentEvidence, EvidenceId, EvidenceItem, PhotoEvidence } from '../../domain/evidence';
+import type {
+  AudioEvidence,
+  DocumentEvidence,
+  EvidenceId,
+  EvidenceItem,
+  PhotoEvidence,
+} from '../../domain/evidence';
 import type { RecordField } from '../../domain/case';
+import { AudioCompare } from './audio/AudioCompare';
 import { AudioPlayer } from './audio/AudioPlayer';
 import { CctvViewer } from './cctv/CctvViewer';
 import { ObjectEvidenceView } from './object/ObjectEvidenceView';
@@ -44,11 +51,12 @@ export function EvidenceScreen({
 }: EvidenceScreenProps) {
   const others = documents.filter((d) => d.id !== item.id);
   const otherPhotos = available.filter((e): e is PhotoEvidence => e.kind === 'photo' && e.id !== item.id);
-  const comparable = item.kind === 'photo' ? otherPhotos : others;
+  const otherAudio = available.filter((e): e is AudioEvidence => e.kind === 'audio' && e.id !== item.id);
+  const comparable = item.kind === 'photo' ? otherPhotos : item.kind === 'audio' ? otherAudio : others;
   // Comparing needs the full width; a single record keeps the reading column.
   const [compareId, setCompareId] = useState(() => loadCompare(item.id, comparable));
-  const comparing =
-    (item.kind === 'document' || item.kind === 'photo') && comparable.some((o) => o.id === compareId);
+  const comparing = item.kind !== 'object' && item.kind !== 'cctv' && comparable.some((o) => o.id === compareId);
+  const comparedAudio = otherAudio.find((o) => o.id === compareId);
   const changeCompare = (next: EvidenceId | '') => {
     setCompareId(next);
     storeCompare(item.id, next);
@@ -73,9 +81,19 @@ export function EvidenceScreen({
           onClearHighlights={onClearHighlights}
         />
       )}
-      {item.kind === 'audio' && (
-        <AudioPlayer item={item} onDiscover={onDiscover} createEngine={createEngine} />
+      {item.kind === 'audio' && otherAudio.length > 0 && (
+        <CompareSelect
+          options={otherAudio}
+          value={compareId}
+          onChange={changeCompare}
+        />
       )}
+      {item.kind === 'audio' &&
+        (comparedAudio ? (
+          <AudioCompare left={item} right={comparedAudio} onDiscover={onDiscover} createEngine={createEngine} />
+        ) : (
+          <AudioPlayer item={item} onDiscover={onDiscover} createEngine={createEngine} />
+        ))}
       {item.kind === 'photo' && (
         <PhotoEvidenceView
           item={item}
@@ -112,5 +130,30 @@ function Catalogue({ fields }: { readonly fields: readonly RecordField[] }) {
         ))}
       </dl>
     </section>
+  );
+}
+
+function CompareSelect({
+  options,
+  value,
+  onChange,
+}: {
+  readonly options: readonly { readonly id: EvidenceId; readonly title: string }[];
+  readonly value: EvidenceId | '';
+  readonly onChange: (id: EvidenceId | '') => void;
+}) {
+  const id = useId();
+  return (
+    <div className="field doc-tools">
+      <label htmlFor={id}>Compare with</label>
+      <select id={id} value={value} onChange={(event) => onChange(event.target.value as EvidenceId | '')}>
+        <option value="">No comparison</option>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.title}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }

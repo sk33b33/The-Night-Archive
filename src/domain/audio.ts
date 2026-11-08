@@ -77,6 +77,11 @@ export interface AudioSegment {
   readonly end: number;
   readonly layers: readonly SoundLayer[];
   readonly lines: readonly TranscriptLine[];
+  /**
+   * Discovery recorded when this segment is matched against a segment with
+   * the same ID in a compared recording.
+   */
+  readonly revealsOnMatch?: string;
 }
 
 export interface AudioTimeline {
@@ -148,4 +153,28 @@ export function filterKey(activeFilters: ReadonlySet<string>): string {
 /** Re-times a segment to start at `start`; used for derived clips. */
 export function retimeSegment(segment: AudioSegment, start: number): AudioSegment {
   return { ...segment, start, end: start + (segment.end - segment.start) };
+}
+
+/** Segments of two recordings paired by segment ID, in the first recording's order. */
+export interface SegmentPair {
+  readonly id: string;
+  readonly label: string;
+  readonly left?: AudioSegment | undefined;
+  readonly right?: AudioSegment | undefined;
+}
+
+export function pairSegments(left: AudioTimeline, right: AudioTimeline): SegmentPair[] {
+  const pairs = new Map<string, SegmentPair>();
+  for (const s of left.segments) pairs.set(s.id, { id: s.id, label: s.label, left: s });
+  for (const s of right.segments) {
+    const existing = pairs.get(s.id);
+    pairs.set(s.id, existing ? { ...existing, right: s } : { id: s.id, label: s.label, right: s });
+  }
+  return [...pairs.values()];
+}
+
+/** The discovery a matched pair records, if any (both sides must exist). */
+export function matchDiscovery(pair: SegmentPair): string | undefined {
+  if (!pair.left || !pair.right) return undefined;
+  return pair.left.revealsOnMatch ?? pair.right.revealsOnMatch;
 }

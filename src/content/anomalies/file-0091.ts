@@ -1,5 +1,5 @@
 import { caseId } from '../../domain/case';
-import type { Anomaly } from '../../domain/anomaly';
+import { TONIGHT, type Anomaly } from '../../domain/anomaly';
 import { ARCHIVE_DESK } from '../archive';
 
 /**
@@ -53,6 +53,7 @@ export const FILE_0091: Anomaly = {
     ],
   },
   register: {
+    stamp: 'Asset register',
     heading: 'Asset register — Night Archive reading room',
     fields: [
       { label: 'Asset', value: `Workstation ${ARCHIVE_DESK.workstation}` },
@@ -63,7 +64,41 @@ export const FILE_0091: Anomaly = {
   note: 'No further records are associated with this file.',
 };
 
-export const ANOMALIES: readonly Anomaly[] = [FILE_0091];
+/**
+ * Final beat of Case 007 (approved option A): the cycle turns. A new file,
+ * a photograph of the same workstation dated tonight. Never explained.
+ */
+export const FILE_0093: Anomaly = {
+  id: 'file-0093',
+  title: 'File 0093',
+  appearsAfterClosing: caseId('case-007'),
+  fields: [
+    { label: 'Intake record', value: 'See ledger' },
+    { label: 'Filed by', value: 'M.' },
+    { label: 'Contents', value: '1 photograph' },
+  ],
+  photograph: {
+    artwork: 'workstation',
+    dateStamp: TONIGHT,
+    alt: `Photograph of a desk at night: a terminal with a label reading ${ARCHIVE_DESK.workstation}, a keyboard, a desk lamp, and stacked archive boxes. The date imprinted in the corner reads {date}.`,
+    caption: `Workstation ${ARCHIVE_DESK.workstation}, Night Archive reading room.`,
+    regions: FILE_0091.photograph.regions.map((r) =>
+      r.id === 'date-imprint' ? { ...r, note: 'The camera’s date imprint reads {date}.' } : r,
+    ),
+  },
+  register: {
+    stamp: 'Intake ledger',
+    heading: 'Intake ledger — tonight',
+    fields: [
+      { label: 'Number', value: '0093' },
+      { label: 'Issued', value: '03:40' },
+      { label: 'Filed by', value: 'M.' },
+    ],
+  },
+  note: 'No further records are associated with this file.',
+};
+
+export const ANOMALIES: readonly Anomaly[] = [FILE_0091, FILE_0093];
 
 export function findAnomaly(id: string): Anomaly | undefined {
   return ANOMALIES.find((a) => a.id === id);
