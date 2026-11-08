@@ -7,6 +7,7 @@ import { DeskPapers } from './DeskPapers';
 import { HandwritingSample } from './HandwritingSample';
 import { HAND_SAMPLES, type HandSampleKey } from '../../../../content/cases/case-009-hands';
 import { KitchenPhoto } from './KitchenPhoto';
+import { StoragePhoto } from './StoragePhoto';
 
 /**
  * Photograph artwork by content key. Evidence content names a key; the
@@ -30,6 +31,9 @@ export const PHOTO_ARTWORK: Readonly<Record<string, (props: { readonly alt: stri
       ({ alt }: { readonly alt: string }) => <HandwritingSample sample={HAND_SAMPLES[key]} alt={alt} />,
     ]),
   ),
+  // Case 011: Storage B at sealing (1981), and the File 0094 photograph.
+  'storage-b-1981': ({ alt }) => <StoragePhoto variant="sealing" alt={alt} />,
+  'storage-b-0094': ({ alt }) => <StoragePhoto variant="file-0094" alt={alt} />,
   // Case 008: camera 2 at 05:12, exported for comparison with File 0093.
   'camera-2-still-0512': ({ alt }) => (
     <CctvReadingRoom scene={{ door: 'shut', lamp: false, envelope: true }} time="05:12:00" alt={alt} />

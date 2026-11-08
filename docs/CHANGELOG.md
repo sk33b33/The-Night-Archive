@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.20.0 — Case 011: Storage B (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-011-bible.md`). Season 2.
+
+### Added
+- **Count findings.** A question type whose answer is a whole number, with
+  authored near misses.
+  - A near miss is unsupported, like any wrong answer, but its hint names
+    the record the count left out.
+  - The input brings up the numeric keyboard.
+  - Anything that is not a whole number is explained inline and blocks
+    submission.
+- Storage B photographs drawn from shared layout data, so regions line up
+  between the 1981 sealing photograph and the File 0094 photograph.
+- Case 011 content:
+  - P. Nash's 06:07 note
+  - the File 0094 photograph and the 1981 sealing photograph, with a
+    required location note (matched by the barred window)
+  - the sealing inventory (48 boxes), the 1997 clearance list (46
+    transferred, 2 not found) and the stack room accession (45 received)
+  - copies of the building history and tonight's intake ledger
+  - six board rules and five findings: two counts, a select-all question,
+    a choice, and "cannot be established"
+- End beat A: once Case 011 closes, the SB-07 line in the inventory reads
+  "Contents: east door key, Bellwether."
+
+### Changed
+- Reference codes such as "SB-07" and "NA-07" no longer break at the hyphen
+  in narrow document tables.
+
 ## 0.19.0 — Case 010: The Handover (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-010-bible.md`). Season 2.

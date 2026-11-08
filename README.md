@@ -12,7 +12,7 @@ you go. No accounts, timers, or purchases.
 
 ## Status
 
-All seven roadmap cases (Season 1) and the first three cases of Season 2 are
+All seven roadmap cases (Season 1) and the first four cases of Season 2 are
 playable, in order:
 
 | # | Case | Introduces |
@@ -27,6 +27,7 @@ playable, in order:
 | 008 | The Next Number *(Season 2)* | Seasons on the archive screen |
 | 009 | The Hand *(Season 2)* | Handwriting comparison (letterform regions) |
 | 010 | The Handover *(Season 2)* | Floor plan (who the records place where, by time) |
+| 011 | Storage B *(Season 2)* | Count findings (reconciling records) |
 
 Each case unlocks when the one before it is closed. Case canon (what is
 established, what is invented, and what must stay unknown) lives in

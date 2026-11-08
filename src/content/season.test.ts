@@ -5,6 +5,7 @@ import {
   encodeSelection,
   evaluateDeduction,
   isMulti,
+  isNumber,
   isOrdering,
   type DeductionSubmission,
 } from '../domain/deduction';
@@ -78,7 +79,9 @@ function supportedSubmission(caseFile: CaseDefinition): DeductionSubmission {
       ? encodeOrder(q.supportedOrder)
       : isMulti(q)
         ? encodeSelection(q.supportedOptionIds)
-        : q.supportedOptionId;
+        : isNumber(q)
+          ? String(q.supportedValue)
+          : q.supportedOptionId;
     citations[q.id] = [...q.requires.allOf, ...q.requires.anyOf.slice(0, 1)];
   }
   return { answers, citations };
@@ -111,6 +114,9 @@ describe('season integrity', () => {
       if (isOrdering(q)) {
         expect([...q.supportedOrder].sort()).toEqual(q.items.map((i) => i.id).sort());
         expect(q.items.map((i) => i.id)).not.toEqual(q.supportedOrder);
+      } else if (isNumber(q)) {
+        expect(Number.isInteger(q.supportedValue)).toBe(true);
+        for (const miss of q.nearMisses ?? []) expect(miss.value).not.toBe(q.supportedValue);
       } else if (isMulti(q)) {
         const ids = q.options.map((o) => o.id);
         expect(q.supportedOptionIds.every((id) => ids.includes(id))).toBe(true);

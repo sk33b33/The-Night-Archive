@@ -1,7 +1,7 @@
 # Season 2 arc
 
 Status: **approved** (2026-11-08): arc, reveal recommendation and finale
-choice. Seven cases, 008–014, matching Season 1. Cases 008–010 are built.
+choice. Seven cases, 008–014, matching Season 1. Cases 008–011 are built.
 Each later case gets its own bible for approval before it is built.
 
 ## Recommendation: the reveal
@@ -34,7 +34,7 @@ moving towards and past **06:00**, with threads back to 1981.
 | 008 | The Next Number ✓ | File 0093 shows 05:12 before it happens | Seasons |
 | 009 | The Hand ✓ | One hand from 1979 to tonight; a 1979 "M." | Handwriting comparison |
 | 010 | The Handover ✓ | 06:00: the day archivist's handover, and 0094 | **Floor plan**: who was where, room by room |
-| 011 | **Storage B** | What the reading room was in 1981, sealed, and what the 1981 night archivist kept there | **Numeric findings** (counts, reconciliation) |
+| 011 | Storage B ✓ | What the reading room was in 1981, sealed, and what the 1981 night archivist kept there | **Numeric findings** (counts, reconciliation) |
 | 012 | **The East Door** | Back to Bellwether, 1981: the door sealed in 1979, and the night it opened | **Multi-track timeline** across sources |
 | 013 | **Ward** | Who Elias Ward was. Not station staff. Then whose staff? | **Personnel cross-reference** |
 | 014 | **The Night Archivist** | The 03:40 call, assembled. The name. | **A final player choice**: file 0094, or don't |

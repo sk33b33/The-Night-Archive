@@ -1,8 +1,25 @@
-# Case bible — Case 011: Storage B (DRAFT for review)
+# Case bible — Case 011: Storage B
 
-Status: **proposal**. Season 2, case 4 of 7 (see
-`docs/seasons/season-2-arc.md`). Reveal level 1 holds. Nothing is built
-until approved.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-011*.ts`.
+Season 2, case 4 of 7 (see `docs/seasons/season-2-arc.md`). Reveal level 1
+holds. Everything approved; **end beat A** (the east door key).
+
+**Changes at implementation:**
+- **P. Nash's 06:07 note** is added as item 1 and serves as the briefing's
+  report, which must be a document. It records what was found and that
+  the room is not on the current plan.
+- **Near misses** count as unsupported answers, as any wrong answer does.
+  The case outcome is then *partial* when the other findings hold, and the
+  hint is the authored near-miss text.
+- **Layout data:** both Storage B photographs are drawn from the same data
+  (`case-011-storage.ts`): two bays of four shelves, six boxes to a shelf.
+  The 48 boxes fill them exactly.
+  - A content test reconciles the box ranges from the document tables
+    themselves.
+  - The inventory's shelf rows agree with the drawing.
+- **Engine:** reference codes such as "SB-07" no longer wrap at the hyphen
+  in narrow table columns. The display uses a non-breaking hyphen; search
+  is unchanged.
 
 ## Canon this case builds on
 
@@ -141,12 +158,3 @@ the window files the note.
 - Where SB-07, SB-31 and SB-40 are now. What SB-07 contains.
 - Who took the 0094 photograph and when. Who put it in the Unfiled tray.
 - Why Storage B was sealed two days after the Bellwether report.
-
-## Open questions for you
-
-1. Approve the premise: the 0094 photograph shows Storage B?
-2. Approve the numbers (48 / 46 + 2 / 45 / 3) and SB-07 as the 1981 night
-   archivist's deposit?
-3. Approve the numeric question type, with authored near-misses scored as
-   partial?
-4. End beat A (the east door key) or B ("3 boxes remain")?

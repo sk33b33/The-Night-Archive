@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import type { DocumentBlock, DocumentContent } from '../domain/evidence';
-import { splitMatches } from '../domain/textSearch';
+import { keepCodesTogether, splitMatches } from '../domain/textSearch';
 
 interface HighlightProps {
   readonly text: string;
@@ -8,16 +8,17 @@ interface HighlightProps {
 }
 
 /** Renders text with search matches wrapped in <mark>. */
-function SearchText({ text, query }: HighlightProps) {
+function SearchText({ text, query, codes = false }: HighlightProps & { readonly codes?: boolean }) {
+  const show = codes ? keepCodesTogether : (t: string) => t;
   const segments = splitMatches(text, query);
-  if (segments.length === 1 && !segments[0]?.match) return text;
+  if (segments.length === 1 && !segments[0]?.match) return show(text);
   return segments.map((segment, index) =>
     segment.match ? (
       <mark key={index} className="search-match">
-        {segment.text}
+        {show(segment.text)}
       </mark>
     ) : (
-      segment.text
+      show(segment.text)
     ),
   );
 }
@@ -154,7 +155,7 @@ function Block({
                     )}
                     {row.map((cell, cellIndex) => (
                       <td key={cellIndex}>
-                        <SearchText text={cell} query={query} />
+                        <SearchText text={cell} query={query} codes />
                       </td>
                     ))}
                   </tr>

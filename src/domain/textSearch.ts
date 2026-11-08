@@ -36,3 +36,12 @@ export function countMatches(texts: readonly string[], query: string): number {
     0,
   );
 }
+
+/**
+ * Keeps reference codes such as "SB-07" or "NA-07" on one line in narrow
+ * table columns: the hyphen after capitals and before a digit becomes a
+ * non-breaking hyphen. One character for one, so search offsets still hold.
+ */
+export function keepCodesTogether(text: string): string {
+  return text.replace(/(?<=\b[A-Z]{1,4})-(?=\d)/g, '\u2011');
+}

@@ -2224,3 +2224,51 @@ tr.is-marked td {
   padding: var(--space-1) var(--space-2);
   text-align: center;
 }
+
+/* ---------- Count answers (numeric findings) ---------- */
+
+.count-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.count-field__label {
+  font-weight: 600;
+}
+
+.count-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.count-field__input {
+  width: 7rem;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-deep);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+}
+
+.count-field__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.count-field__input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.count-field__unit {
+  color: var(--color-text-muted);
+}
+
+.count-field__error {
+  margin: 0;
+  color: var(--color-danger);
+}

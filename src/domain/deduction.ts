@@ -70,7 +70,31 @@ export interface MultiQuestion extends QuestionBase {
   readonly extraHint: string;
 }
 
-export type DeductionQuestion = ChoiceQuestion | OrderingQuestion | MultiQuestion;
+/** A count the player works out from the records, entered as a whole number. */
+export interface NumberQuestion extends QuestionBase {
+  readonly kind: 'number';
+  /** The only count the records support. */
+  readonly supportedValue: number;
+  /** What is being counted, shown beside the input (e.g. "boxes"). */
+  readonly unit: string;
+  /**
+   * Authored near misses: a count that leaves out one record. Still
+   * unsupported, but its hint points at what was missed.
+   */
+  readonly nearMisses?: readonly { readonly value: number; readonly hint: string }[];
+}
+
+export type DeductionQuestion = ChoiceQuestion | OrderingQuestion | MultiQuestion | NumberQuestion;
+
+export function isNumber(question: DeductionQuestion): question is NumberQuestion {
+  return question.kind === 'number';
+}
+
+/** A whole number from the player's input, or null if it is not one. */
+export function parseCount(answer: string | undefined): number | null {
+  const trimmed = (answer ?? '').trim();
+  return /^\d{1,6}$/.test(trimmed) ? Number(trimmed) : null;
+}
 
 export function isMulti(question: DeductionQuestion): question is MultiQuestion {
   return question.kind === 'multi';
@@ -137,6 +161,8 @@ export function evaluateFinding(
   let supported: boolean;
   if (isOrdering(question)) {
     supported = encodeOrder(orderOf(question, answer)) === encodeOrder(question.supportedOrder);
+  } else if (isNumber(question)) {
+    supported = parseCount(answer) === question.supportedValue;
   } else if (isMulti(question)) {
     supported = encodeSelection(selectionOf(question, answer)) === encodeSelection(question.supportedOptionIds);
   } else {
@@ -171,10 +197,14 @@ export function evaluateDeduction(
   return { outcome, results };
 }
 
-/** Every choice answered and every multi question has a selection. Ordering always has an order. */
+/**
+ * Every choice answered, every multi question has a selection, and every
+ * count is a whole number. Ordering always has an order.
+ */
 export function isComplete(questions: readonly DeductionQuestion[], submission: DeductionSubmission): boolean {
   return questions.every((q) => {
     if (isOrdering(q)) return true;
+    if (isNumber(q)) return parseCount(submission.answers[q.id]) !== null;
     if (isMulti(q)) return selectionOf(q, submission.answers[q.id]).length > 0;
     return q.options.some((o) => o.id === submission.answers[q.id]);
   });
@@ -203,6 +233,11 @@ export function hintFor(
     const chosen = selectionOf(question, latest.answers[question.id]);
     const extra = chosen.some((id) => !question.supportedOptionIds.includes(id));
     return extra ? question.extraHint : question.missingHint;
+  }
+  if (isNumber(question)) {
+    const value = parseCount(latest.answers[question.id]);
+    const near = question.nearMisses?.find((m) => m.value === value);
+    if (near) return near.hint;
   }
   const failed = attempts.filter((a) => a.outcome !== 'correct').length;
   return question.hints[Math.min(failed, question.hints.length) - 1] ?? null;

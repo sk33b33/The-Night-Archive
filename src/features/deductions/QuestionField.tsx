@@ -3,12 +3,15 @@ import {
   encodeOrder,
   encodeSelection,
   isMulti,
+  isNumber,
   isOrdering,
   orderOf,
+  parseCount,
   selectionOf,
   type ChoiceQuestion,
   type DeductionQuestion,
   type MultiQuestion,
+  type NumberQuestion,
   type OrderingQuestion,
 } from '../../domain/deduction';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
@@ -40,7 +43,8 @@ export function QuestionField({
       </h2>
       {isOrdering(question) && <OrderingField question={question} answer={answer} onAnswer={onAnswer} />}
       {isMulti(question) && <MultiField question={question} answer={answer} onAnswer={onAnswer} />}
-      {!isOrdering(question) && !isMulti(question) && (
+      {isNumber(question) && <NumberField name={name} question={question} answer={answer} onAnswer={onAnswer} />}
+      {!isOrdering(question) && !isMulti(question) && !isNumber(question) && (
         <ChoiceField name={name} question={question} answer={answer} onAnswer={onAnswer} />
       )}
       <Citations evidence={evidence} cited={cited} onCite={onCite} />
@@ -79,6 +83,51 @@ function ChoiceField({
         ))}
       </div>
     </fieldset>
+  );
+}
+
+/**
+ * A count: a plain text input with the numeric keyboard, so a half-typed
+ * value is never silently rewritten. Anything but a whole number is
+ * explained inline and keeps the findings from being submitted.
+ */
+function NumberField({
+  name,
+  question,
+  answer,
+  onAnswer,
+}: {
+  readonly name: string;
+  readonly question: NumberQuestion;
+  readonly answer: string;
+  readonly onAnswer: (answer: string) => void;
+}) {
+  const invalid = answer.trim() !== '' && parseCount(answer) === null;
+  return (
+    <div className="count-field">
+      <label className="count-field__label" htmlFor={`${name}-count`}>
+        Your count
+      </label>
+      <span className="count-field__row">
+        <input
+          id={`${name}-count`}
+          className="count-field__input"
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          value={answer}
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? `${name}-count-error` : undefined}
+          onChange={(event) => onAnswer(event.target.value)}
+        />
+        <span className="count-field__unit">{question.unit}</span>
+      </span>
+      {invalid && (
+        <p id={`${name}-count-error`} className="count-field__error">
+          Enter a whole number, using digits only.
+        </p>
+      )}
+    </div>
   );
 }
 
