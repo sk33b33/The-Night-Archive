@@ -16,13 +16,31 @@ export function createSave(now: Date): SaveGame {
     updatedAt: stamp,
     resume: { screen: 'archive' },
     cases: {},
+    choices: {},
   };
 }
 
-export function caseStatus(save: SaveGame | null, id: CaseId): CaseStatus {
+/**
+ * A case is closed once its findings hold, and, for a case with a closing
+ * choice, once that choice is made.
+ */
+export function caseStatus(save: SaveGame | null, id: CaseId, closingChoiceId?: string): CaseStatus {
   const progress = save?.cases[id];
   if (!progress) return 'new';
-  return isSolved(progress.attempts) ? 'closed' : 'opened';
+  if (!isSolved(progress.attempts)) return 'opened';
+  if (closingChoiceId !== undefined && save?.choices[closingChoiceId] === undefined) return 'opened';
+  return 'closed';
+}
+
+/** The value chosen for a closing choice, if made. */
+export function choiceOf(save: SaveGame | null, choiceId: string): string | undefined {
+  return save?.choices[choiceId];
+}
+
+/** Records a closing choice. Made once: a second call returns the save unchanged. */
+export function recordChoice(save: SaveGame, choiceId: string, value: string, now: Date): SaveGame {
+  if (save.choices[choiceId] !== undefined) return save;
+  return { ...save, updatedAt: now.toISOString(), choices: { ...save.choices, [choiceId]: value } };
 }
 
 export function caseProgress(save: SaveGame | null, id: CaseId): CaseProgress | undefined {

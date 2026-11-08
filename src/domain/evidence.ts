@@ -63,6 +63,8 @@ interface EvidenceBase {
 export type DocumentAmendment = {
   readonly id: string;
   readonly whenCaseClosed: CaseId;
+  /** Also requires this closing choice to have been made with this value. */
+  readonly whenChoice?: { readonly id: string; readonly value: string };
 } & (
   | { readonly block: DocumentBlock }
   /** Adds a row to an existing table block (by block index). */
@@ -409,11 +411,20 @@ export function passageKeys(doc: DocumentContent): string[] {
 }
 
 /** The document as it currently reads, including amendments now in effect. */
+/** Whether a closing choice was made with a given value. */
+export type ChoseFn = (choiceId: string, value: string) => boolean;
+const NO_CHOICES: ChoseFn = () => false;
+
+function documentAmendmentApplies(a: DocumentAmendment, isClosed: (caseId: CaseId) => boolean, chose: ChoseFn): boolean {
+  return isClosed(a.whenCaseClosed) && (!a.whenChoice || chose(a.whenChoice.id, a.whenChoice.value));
+}
+
 export function effectiveDocument(
   item: DocumentEvidence,
   isClosed: (caseId: CaseId) => boolean,
+  chose: ChoseFn = NO_CHOICES,
 ): DocumentContent {
-  const added = (item.amendments ?? []).filter((a) => isClosed(a.whenCaseClosed));
+  const added = (item.amendments ?? []).filter((a) => documentAmendmentApplies(a, isClosed, chose));
   if (added.length === 0) return item.document;
   const blocks = [...item.document.blocks];
   for (const amendment of added) {
@@ -449,9 +460,13 @@ export function effectiveProvenance(
 }
 
 /** Applies amendments to documents, objects, plans and timelines, leaving other kinds unchanged. */
-export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseId: CaseId) => boolean): T {
+export function withAmendments<T extends EvidenceItem>(
+  item: T,
+  isClosed: (caseId: CaseId) => boolean,
+  chose: ChoseFn = NO_CHOICES,
+): T {
   if (item.kind === 'document' && item.amendments?.length) {
-    const document = effectiveDocument(item, isClosed);
+    const document = effectiveDocument(item, isClosed, chose);
     return document === item.document ? item : { ...item, document };
   }
   if (item.kind === 'object' && item.amendments?.length) {
@@ -479,15 +494,21 @@ export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseI
  * Whether the record has changed since the case was first read: an
  * amendment is in effect, or it came on file when a case closed.
  */
-export function isAmended(item: EvidenceItem, isClosed: (caseId: CaseId) => boolean): boolean {
+export function isAmended(
+  item: EvidenceItem,
+  isClosed: (caseId: CaseId) => boolean,
+  chose: ChoseFn = NO_CHOICES,
+): boolean {
   if (item.unlock.type === 'caseClosed' && isClosed(item.unlock.caseId)) return true;
+  if (item.kind === 'document') return (item.amendments ?? []).some((a) => documentAmendmentApplies(a, isClosed, chose));
   return (
-    (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan' || item.kind === 'timeline') &&
+    (item.kind === 'object' || item.kind === 'plan' || item.kind === 'timeline') &&
     (item.amendments ?? []).some((a) => isClosed(a.whenCaseClosed))
   );
 }
 
 /** Every passage key the document can ever have, amendments included. */
 export function allPassageKeys(item: DocumentEvidence): string[] {
-  return passageKeys(effectiveDocument(item, () => true));
+  // Every branch of every choice, so a highlight on any version stays valid.
+  return passageKeys(effectiveDocument(item, () => true, () => true));
 }

@@ -16,8 +16,9 @@ import type { EvidenceId } from './evidence';
  *       resume point.
  * - v4: per-case deduction attempts; findings resume point.
  * - v5: per-case document highlights.
+ * - v6: closing choices (choice ID -> chosen value), made once per save.
  */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 /** Where Continue returns the player to. Only resumable screens appear here. */
 export type ResumePoint =
@@ -49,6 +50,8 @@ export interface SaveGame {
   readonly updatedAt: string;
   readonly resume: ResumePoint;
   readonly cases: Readonly<Record<string, CaseProgress>>;
+  /** Closing choices made, by choice ID. Permanent for this save. */
+  readonly choices: Readonly<Record<string, string>>;
 }
 
 /** Content lookups used to validate IDs found in stored data. */
@@ -57,6 +60,7 @@ export interface ContentIndex {
   readonly isKnownEvidence: (caseId: string, evidenceId: string) => boolean;
   readonly isKnownAnomaly: (anomalyId: string) => boolean;
   readonly isKnownPassage: (caseId: string, evidenceId: string, passageKey: string) => boolean;
+  readonly isKnownChoice: (choiceId: string, value: string) => boolean;
 }
 
 export type LoadProblem = 'corrupt' | 'newer-version';
@@ -113,6 +117,7 @@ const MIGRATIONS: Readonly<Record<number, (data: RawRecord) => RawRecord>> = {
     }
     return { ...data, version: 5, cases };
   },
+  5: (data) => ({ ...data, version: 6, choices: {} }),
 };
 
 function isIsoTimestamp(value: unknown): value is string {
@@ -246,6 +251,16 @@ function parseCases(value: unknown, content: ContentIndex): Record<string, CaseP
   return cases;
 }
 
+function parseChoices(value: unknown, content: ContentIndex): Record<string, string> {
+  const choices: Record<string, string> = {};
+  if (!isRecord(value)) return choices;
+  for (const [id, chosen] of Object.entries(value)) {
+    // A choice or value no longer in the content is dropped, never guessed at.
+    if (typeof chosen === 'string' && content.isKnownChoice(id, chosen)) choices[id] = chosen;
+  }
+  return choices;
+}
+
 /** Validates stored data, applying migrations if it is from an older version. */
 export function migrateSave(raw: unknown, content: ContentIndex): MigrationResult {
   if (!isRecord(raw) || typeof raw.version !== 'number' || !Number.isInteger(raw.version)) {
@@ -271,6 +286,7 @@ export function migrateSave(raw: unknown, content: ContentIndex): MigrationResul
       updatedAt: data.updatedAt,
       resume: parseResume(data.resume, content),
       cases: parseCases(data.cases, content),
+      choices: parseChoices(data.choices, content),
     },
   };
 }

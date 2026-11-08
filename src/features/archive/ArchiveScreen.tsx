@@ -15,6 +15,10 @@ interface ArchiveScreenProps {
   readonly onOpenAnomaly: (id: string) => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
+  /** The shift's closing line, once the finale's choice is made. */
+  readonly shiftLine?: string | undefined;
+  /** A season-complete note, once the finale closes. */
+  readonly seasonComplete?: string | undefined;
   /** Save-status notice, if any. */
   readonly notice?: ReactNode;
 }
@@ -28,6 +32,8 @@ export function ArchiveScreen({
   onOpenAnomaly,
   onBack,
   focusOnMount,
+  shiftLine,
+  seasonComplete,
   notice,
 }: ArchiveScreenProps) {
   // Group by season, in order. With one season, no season headings are shown.
@@ -56,7 +62,19 @@ export function ArchiveScreen({
           <dt>Assigned files</dt>
           <dd>{cases.length}</dd>
         </div>
+        {shiftLine && (
+          <div className="status-strip__item">
+            <dt>Shift</dt>
+            <dd>{shiftLine}</dd>
+          </div>
+        )}
       </dl>
+
+      {seasonComplete && (
+        <p className="notice notice--season" role="note">
+          {seasonComplete}
+        </p>
+      )}
 
       <section className="panel" aria-labelledby="case-files-heading">
         <h2 id="case-files-heading" className="panel__title">

@@ -1,7 +1,7 @@
 # Season 2 arc
 
 Status: **approved** (2026-11-08): arc, reveal recommendation and finale
-choice. Seven cases, 008–014, matching Season 1. Cases 008–013 are built.
+choice. Seven cases, 008–014, matching Season 1. All seven cases are built; Season 2 is complete.
 Each later case gets its own bible for approval before it is built.
 
 ## Recommendation: the reveal
@@ -37,7 +37,7 @@ moving towards and past **06:00**, with threads back to 1981.
 | 011 | Storage B ✓ | What the reading room was in 1981, sealed, and what the 1981 night archivist kept there | **Numeric findings** (counts, reconciliation) |
 | 012 | The East Door ✓ | Back to Bellwether, 1981: the door sealed in 1979, and the night it opened | **Multi-track timeline** across sources |
 | 013 | Ward ✓ | Who Elias Ward was. Not station staff. Then whose staff? | **Personnel cross-reference** |
-| 014 | **The Night Archivist** | The 03:40 call, assembled. The name. | **A final player choice**: file 0094, or don't |
+| 014 | The Night Archivist ✓ | The 03:40 call, assembled. The name. | **A final player choice**: file 0094, or don't |
 
 **The finale choice (proposal):** "Mara, don't file this." In Case 014 the
 player decides whether to file intake slip 0094. Findings stay deterministic

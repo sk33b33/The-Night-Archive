@@ -2488,3 +2488,24 @@ tr.is-marked td {
   flex: none;
   width: auto;
 }
+
+/* ---------- Closing choice ---------- */
+
+.closing-choice__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.closing-choice__made {
+  font-weight: 600;
+  color: var(--color-amber);
+}
+
+.notice--season {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-amber);
+  border-radius: var(--radius-sm);
+  background: var(--color-amber-soft);
+  color: var(--color-text);
+}

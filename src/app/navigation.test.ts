@@ -106,6 +106,7 @@ describe('screen parsing and history state', () => {
     isKnownEvidence: (c, e) => c === 'case-001' && e === 'c001-timetable',
     isKnownAnomaly: (id) => id === 'file-0091',
     isKnownPassage: () => true,
+    isKnownChoice: () => false,
   };
 
   it('parses evidence screens only for known evidence', () => {

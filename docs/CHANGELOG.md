@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.23.0 — Case 014: The Night Archivist (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-014-bible.md`). The
+Season 2 finale. Reveal level 2: a record names the night archivist at
+NA-07 "Mara —". Nothing explains how.
+
+### Added
+- **Closing choice.** A case can close on a one-time choice, offered once
+  its findings are accepted.
+  - Choosing asks for confirmation in plain words; nothing is saved until
+    it is confirmed. "Go back" returns focus to the options.
+  - The choice is permanent for the save; a new game resets it.
+  - No timer, and no option is marked as right.
+- **Save format v6.** Adds the closing choices made. v5 saves migrate with
+  no choice made. Unknown choices or values are dropped on load.
+- **Records that depend on the choice.** A document amendment can require
+  a choice value (`whenChoice`) as well as a closed case.
+- **Archive dashboard:** a "Shift" line and a season-complete note, once
+  the finale's choice is made.
+- Case 014 content:
+  - the 0094 slip and the intake procedure
+  - tonight's ledger, with a status per intake
+  - the full post record ("Mara —", surname withheld)
+  - copies of tonight's recording, the 1981 reel, the comparison note,
+    tonight's extension log, the 1981 exchange record and the 1981 night
+    desk log
+  - "Dates on file"
+  - six board rules and five findings, ending on "cannot be established"
+- **Two endings:**
+  - **Filed:** the slip is signed, the ledger reads "Filed", and the shift
+    line reads "Filed: 0091, 0093, 0094".
+  - **Unfiled:** the ledger reads "Not filed", the 1981 night desk log
+    gains "06:12 · Not filed.", and the shift line reads "Not filed:
+    0094".
+
 ## 0.22.0 — Case 013: Ward (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-013-bible.md`). Season 2.

@@ -12,7 +12,7 @@ you go. No accounts, timers, or purchases.
 
 ## Status
 
-All seven roadmap cases (Season 1) and the first six cases of Season 2 are
+All seven roadmap cases (Season 1) and all seven cases of Season 2 are
 playable, in order:
 
 | # | Case | Introduces |
@@ -30,6 +30,7 @@ playable, in order:
 | 011 | Storage B *(Season 2)* | Count findings (reconciling records) |
 | 012 | The East Door *(Season 2)* | Timeline (several records on one time axis) |
 | 013 | Ward *(Season 2)* | Staff register search (cross-reference) |
+| 014 | The Night Archivist *(Season 2 finale)* | A one-time closing choice, with two endings |
 
 Each case unlocks when the one before it is closed. Case canon (what is
 established, what is invented, and what must stay unknown) lives in
@@ -116,7 +117,7 @@ docs/             Changelog and per-case bibles
 - **Deterministic:** all deductions, unlocks, and board relationships are
   authored data evaluated by pure functions in `src/domain/`. There are no
   network or AI calls during play.
-- **Saves:** IndexedDB, versioned with migrations (currently v5).
+- **Saves:** IndexedDB, versioned with migrations (currently v6).
   Preferences use localStorage, and unsubmitted findings drafts use
   sessionStorage.
 - **Audio:** synthesised in code (seeded, so every render is identical),

@@ -7,6 +7,7 @@ import {
   clearHighlights,
   createSave,
   recordAttempt,
+  recordChoice,
   recordDiscovery,
   recordVisit,
   setHighlight,
@@ -46,6 +47,8 @@ export interface SaveController {
   readonly highlight: (caseId: CaseId, evidenceId: EvidenceId, passageKey: string, on: boolean) => void;
   /** Removes all highlights from one document. */
   readonly clearHighlights: (caseId: CaseId, evidenceId: EvidenceId) => void;
+  /** Records a closing choice, once. Later calls for the same choice are ignored. */
+  readonly choose: (choiceId: string, value: string) => void;
   readonly erase: () => Promise<boolean>;
 }
 
@@ -169,6 +172,17 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     [commit],
   );
 
+  const choose = useCallback(
+    (choiceId: string, value: string) => {
+      if (!loadedRef.current) return;
+      const now = new Date();
+      const current = saveRef.current ?? createSave(now);
+      const next = recordChoice(current, choiceId, value, now);
+      if (next !== current) commit(next);
+    },
+    [commit],
+  );
+
   const erase = useCallback(async () => {
     if (!repository || blockedRef.current) return false;
     const cleared = writeQueue.current.then(() => repository.clear());
@@ -191,6 +205,7 @@ export function useSaveGame(repository: SaveRepository | null): SaveController {
     submitAttempt,
     highlight,
     clearHighlights: clear,
+    choose,
     erase,
   };
 }

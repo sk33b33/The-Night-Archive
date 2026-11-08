@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react';
 import { ANOMALIES } from '../content/anomalies/file-0091';
-import { CASES, findCase } from '../content/cases';
+import { FINALE } from '../content/archive';
+import { CASES, closingChoiceOf, findCase } from '../content/cases';
 import { visibleAnomalies } from '../domain/anomaly';
 import { AnomalyScreen } from '../features/anomaly/AnomalyScreen';
 import { EMPTY_BOARD } from '../domain/board';
 import {
   briefingReport,
+  caseId,
   isCaseAvailable,
   type CaseDefinition,
   type CaseId,
@@ -14,10 +16,11 @@ import {
   availableEvidence,
   evidenceUnlockedBy,
   isAmended,
+  type ChoseFn,
   withAmendments,
   type DocumentEvidence,
 } from '../domain/evidence';
-import { caseProgress, caseStatus } from '../domain/progress';
+import { caseProgress, caseStatus, choiceOf } from '../domain/progress';
 import { ArchiveScreen } from '../features/archive/ArchiveScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
@@ -56,15 +59,18 @@ function Unavailable({ title, body, onBack }: { title: string; body: string; onB
 }
 
 /** How many of a case's records currently carry an amendment. */
-function amendedRecords(caseFile: CaseDefinition, isClosed: (id: CaseId) => boolean): number {
-  return caseFile.evidence.filter((e) => isAmended(e, isClosed)).length;
+function amendedRecords(caseFile: CaseDefinition, isClosed: (id: CaseId) => boolean, chose: ChoseFn): number {
+  return caseFile.evidence.filter((e) => isAmended(e, isClosed, chose)).length;
 }
 
 /** Maps the current screen to its feature component. No navigation state here. */
 export function ScreenRouter(props: ScreenRouterProps) {
   const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
   const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
-  const isClosed = (id: CaseId) => caseStatus(save, id) === 'closed';
+  const statusOf = (id: CaseId) => caseStatus(save, id, closingChoiceOf(id));
+  const isClosed = (id: CaseId) => statusOf(id) === 'closed';
+  const chose: ChoseFn = (choiceId, value) => choiceOf(save, choiceId) === value;
+  const finaleChoice = choiceOf(save, FINALE.choiceId);
   const cases = CASES.filter((c) => isCaseAvailable(c, isClosed));
   // An anomaly taken over by an available case leaves the Unfiled section.
   const replaced = new Set(cases.flatMap((c) => (c.replacesAnomaly ? [c.replacesAnomaly] : [])));
@@ -98,14 +104,16 @@ export function ScreenRouter(props: ScreenRouterProps) {
       return (
         <ArchiveScreen
           cases={cases}
-          statusOf={(id) => caseStatus(save, id)}
+          statusOf={statusOf}
           amendedCount={(id) => {
             const c = findCase(id);
-            return c ? amendedRecords(c, isClosed) : 0;
+            return c ? amendedRecords(c, isClosed, chose) : 0;
           }}
           onOpenCase={(caseId) => navigate({ id: 'briefing', caseId })}
           anomalies={anomalies}
           onOpenAnomaly={(anomalyId) => navigate({ id: 'anomaly', anomalyId })}
+          shiftLine={finaleChoice && FINALE.shiftLine[finaleChoice]}
+          seasonComplete={finaleChoice && isClosed(caseId(FINALE.caseId)) ? FINALE.ending[finaleChoice] : undefined}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}
@@ -132,7 +140,7 @@ export function ScreenRouter(props: ScreenRouterProps) {
   const progress = caseProgress(save, caseFile.id);
   // Records read as they currently stand, including any amendments in effect.
   const evidence = availableEvidence(caseFile.evidence, progress?.discoveries ?? [], isClosed).map((e) =>
-    withAmendments(e, isClosed),
+    withAmendments(e, isClosed, chose),
   );
 
   switch (screen.id) {
@@ -140,7 +148,7 @@ export function ScreenRouter(props: ScreenRouterProps) {
       return (
         <BriefingScreen
           caseFile={caseFile}
-          report={withAmendments(briefingReport(caseFile), isClosed).document}
+          report={withAmendments(briefingReport(caseFile), isClosed, chose).document}
           onBeginInvestigation={() => navigate({ id: 'investigation', caseId: caseFile.id })}
           focusOnMount={focusOnMount}
           onBack={back}
@@ -184,6 +192,10 @@ export function ScreenRouter(props: ScreenRouterProps) {
           attempts={progress?.attempts ?? []}
           onSubmit={(attempt) => saveGame.submitAttempt(caseFile.id, attempt)}
           onReturnToArchive={() => navigate({ id: 'archive' })}
+          chosen={caseFile.closingChoice ? choiceOf(save, caseFile.closingChoice.id) : undefined}
+          onChoose={(value) => {
+            if (caseFile.closingChoice) saveGame.choose(caseFile.closingChoice.id, value);
+          }}
           focusOnMount={focusOnMount}
           onBack={back}
           notice={notice}

@@ -15,9 +15,10 @@ import { CASE_010 } from './case-010';
 import { CASE_011 } from './case-011';
 import { CASE_012 } from './case-012';
 import { CASE_013 } from './case-013';
+import { CASE_014 } from './case-014';
 
 /** All cases available in this build, in archive order. */
-export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002, CASE_003, CASE_004, CASE_005, CASE_006, CASE_007, CASE_008, CASE_009, CASE_010, CASE_011, CASE_012, CASE_013];
+export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002, CASE_003, CASE_004, CASE_005, CASE_006, CASE_007, CASE_008, CASE_009, CASE_010, CASE_011, CASE_012, CASE_013, CASE_014];
 
 export function findCase(id: string): CaseDefinition | undefined {
   return CASES.find((c) => c.id === id);
@@ -42,4 +43,11 @@ export const CONTENT_INDEX: ContentIndex = {
     const item = caseFile && findEvidence(caseFile, evidenceIdValue);
     return item?.kind === 'document' && allPassageKeys(item).includes(key);
   },
+  isKnownChoice: (choiceId, value) =>
+    CASES.some((c) => c.closingChoice?.id === choiceId && c.closingChoice.options.some((o) => o.value === value)),
 };
+
+/** The closing choice ID a case waits on, if any (see caseStatus). */
+export function closingChoiceOf(id: string): string | undefined {
+  return findCase(id)?.closingChoice?.id;
+}

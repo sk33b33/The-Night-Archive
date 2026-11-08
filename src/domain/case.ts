@@ -32,6 +32,27 @@ export interface CaseBriefing {
   readonly reportId: EvidenceId;
 }
 
+/** One answer to a closing choice. Neither answer is "correct". */
+export interface ChoiceOption {
+  readonly value: string;
+  /** The action, e.g. "Sign and file 0094". */
+  readonly label: string;
+  /** What choosing it does, in plain words, shown before confirming. */
+  readonly consequence: string;
+}
+
+/**
+ * A one-time choice offered once a case's findings are accepted. The case
+ * closes only when it is made. Saved once per save; never re-asked.
+ */
+export interface ClosingChoice {
+  readonly id: string;
+  readonly heading: string;
+  /** Context shown above the options. */
+  readonly body: readonly string[];
+  readonly options: readonly ChoiceOption[];
+}
+
 export interface CaseDefinition {
   readonly id: CaseId;
   /** Display number, e.g. "001". */
@@ -52,6 +73,8 @@ export interface CaseDefinition {
   readonly boardRules: readonly BoardRule[];
   /** Findings the player must establish to close the case. */
   readonly questions: readonly DeductionQuestion[];
+  /** If set, the case closes only once this choice is made (after the findings hold). */
+  readonly closingChoice?: ClosingChoice;
 }
 
 export function findEvidence(caseFile: CaseDefinition, id: string): EvidenceItem | undefined {

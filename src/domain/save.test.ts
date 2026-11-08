@@ -3,9 +3,11 @@ import { caseId } from './case';
 import { evidenceId } from './evidence';
 import {
   caseStatus,
+  choiceOf,
   createSave,
   isExamined,
   recordAttempt,
+  recordChoice,
   recordDiscovery,
   recordVisit,
   clearHighlights,
@@ -20,6 +22,7 @@ const content: ContentIndex = {
   isKnownEvidence: (c, e) => c === 'case-001' && ['ev-a', 'ev-b'].includes(e),
   isKnownAnomaly: () => false,
   isKnownPassage: (_c, e, k) => e === 'ev-a' && ['b0', 'b1.2'].includes(k),
+  isKnownChoice: (id, v) => id === 'file-0094' && ['filed', 'unfiled'].includes(v),
 };
 const T0 = new Date('2026-01-01T22:00:00.000Z');
 const T1 = new Date('2026-01-01T22:05:00.000Z');
@@ -63,8 +66,21 @@ describe('migrateSave', () => {
             highlights: {},
           },
         },
+        choices: {},
       },
     });
+  });
+
+  it('upgrades a v5 save with no choices made, and keeps only known choices on a v6 save', () => {
+    const v5 = { ...createSave(T0), version: 5 } as Record<string, unknown>;
+    delete v5.choices;
+    const upgraded = migrateSave(v5, content);
+    expect(upgraded.ok && upgraded.save.choices).toEqual({});
+    const v6 = { ...createSave(T0), choices: { 'file-0094': 'unfiled', 'file-0094-old': 'filed', other: 3 } };
+    const kept = migrateSave(v6, content);
+    expect(kept.ok && kept.save.choices).toEqual({ 'file-0094': 'unfiled' });
+    const bad = migrateSave({ ...createSave(T0), choices: { 'file-0094': 'shredded' } }, content);
+    expect(bad.ok && bad.save.choices).toEqual({});
   });
 
   it('upgrades a v2 save, keeping examined evidence and discoveries', () => {
@@ -281,6 +297,26 @@ describe('migrateSave', () => {
 });
 
 describe('progress', () => {
+  it('a case with a closing choice closes only once its findings hold and the choice is made', () => {
+    const id = caseId('case-001');
+    const solved = recordAttempt(createSave(T0), id, {
+      submittedAt: T1.toISOString(),
+      outcome: 'correct',
+      answers: {},
+      citations: {},
+    });
+    expect(caseStatus(solved, id)).toBe('closed');
+    expect(caseStatus(solved, id, 'file-0094')).toBe('opened');
+    const chosen = recordChoice(solved, 'file-0094', 'unfiled', T2);
+    expect(caseStatus(chosen, id, 'file-0094')).toBe('closed');
+    expect(choiceOf(chosen, 'file-0094')).toBe('unfiled');
+    // Made once: it is never changed afterwards.
+    expect(recordChoice(chosen, 'file-0094', 'filed', T2)).toBe(chosen);
+    // A choice without accepted findings does not close the case.
+    const early = recordChoice(createSave(T0), 'file-0094', 'filed', T2);
+    expect(caseStatus(recordVisit(early, { screen: 'briefing', caseId: id }, T2), id, 'file-0094')).toBe('opened');
+  });
+
   it('a new save resumes at the archive with no cases opened', () => {
     const save = createSave(T0);
     expect(save.resume).toEqual({ screen: 'archive' });

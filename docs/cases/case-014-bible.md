@@ -1,8 +1,32 @@
-# Case bible — Case 014: The Night Archivist (DRAFT for review)
+# Case bible — Case 014: The Night Archivist
 
-Status: **proposal**. Season 2 finale, case 7 of 7 (see
-`docs/seasons/season-2-arc.md`). **Reveal level 2**, as approved for this
-case only. Nothing is built until approved.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-014*.ts`.
+Season 2 finale, case 7 of 7. **Reveal level 2**, for this case only.
+Everything approved: the full post record, the intake procedure, the two
+closing states with neither marked as right, and a choice that is
+permanent for the save.
+
+**Changes at implementation:**
+- **The 0094 slip is a document transcription** (item 1, also the
+  briefing's report), not the handwriting photo.
+  - The photo cannot change, and the filed ending signs the slip.
+  - A transcription that changes is consistent; a photo that stays blank
+    beside a signed ledger would not be.
+- **"Dates on file" is added (item 11).** It gathers the five dates the
+  ordering finding needs, each with its source record, so the finding is
+  answerable inside the case.
+- **The intake ledger has a Status column.**
+  - 0093 reads "Filed"; 0094 reads "Provisional".
+  - The choice sets 0094 to "Filed" or "Not filed".
+  - The procedure adds: "An intake not signed by close of shift is
+    recorded as not filed."
+- **The dashboard's shift line** is a status-strip item, "Shift", reading
+  "Closed 06:12 · Filed: 0091, 0093, 0094" or "Closed 06:12 · Not filed:
+  0094".
+  - A season-complete note states which ending this save reached.
+- **While the choice is pending,** "Return to the archive" is a secondary
+  button. Leaving is always allowed, and the case stays open until the
+  choice is made.
 
 ## Canon this case builds on
 
@@ -163,12 +187,3 @@ open: how.
 - Whether the 1979 "M." and Mara are the same person; Mara's surname.
 - Who sat at position 7 at 06:00; where SB-07 is; what the 0094 photograph
   is for.
-
-## Open questions for you
-
-1. Approve the full post record as the record that names "Mara —"?
-2. Approve the intake procedure (filed only when signed), which turns
-   "file 0094" into a concrete act?
-3. Approve the two closing states, and that neither is marked as right?
-4. Approve that the choice is permanent for the save (a new game resets
-   it)?

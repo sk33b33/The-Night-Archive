@@ -14,6 +14,7 @@ import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
 import { loadDraft, saveDraft, sessionStore } from '../../services/persistence/findingsDraft';
 import { OUTCOME_TEXT } from './outcomeText';
 import { QuestionField } from './QuestionField';
+import { ClosingChoicePanel } from './ClosingChoicePanel';
 
 interface FindingsScreenProps {
   readonly caseFile: CaseDefinition;
@@ -21,6 +22,9 @@ interface FindingsScreenProps {
   readonly attempts: readonly DeductionAttempt[];
   readonly onSubmit: (attempt: DeductionAttempt) => void;
   readonly onReturnToArchive: () => void;
+  /** For a case with a closing choice: the value chosen in this save, if any. */
+  readonly chosen?: string | undefined;
+  readonly onChoose?: (value: string) => void;
   readonly onBack: () => void;
   readonly focusOnMount: boolean;
   readonly notice?: ReactNode;
@@ -34,6 +38,8 @@ export function FindingsScreen({
   attempts,
   onSubmit,
   onReturnToArchive,
+  chosen,
+  onChoose,
   onBack,
   focusOnMount,
   notice,
@@ -136,11 +142,17 @@ export function FindingsScreen({
               <li key={q.id}>{q.finding}</li>
             ))}
           </ol>
-          <p className="prose">This file is closed.</p>
-          <Button variant="primary" onClick={onReturnToArchive}>
-            Return to the archive
-          </Button>
+          {(!caseFile.closingChoice || chosen !== undefined) && <p className="prose">This file is closed.</p>}
         </section>
+      ) : null}
+      {solved && caseFile.closingChoice && (
+        <ClosingChoicePanel choice={caseFile.closingChoice} chosen={chosen} onChoose={(v) => onChoose?.(v)} />
+      )}
+      {solved ? (
+        // While a closing choice is pending, leaving is allowed but not the main action.
+        <Button variant={caseFile.closingChoice && chosen === undefined ? 'secondary' : 'primary'} onClick={onReturnToArchive}>
+          Return to the archive
+        </Button>
       ) : (
         <>
           <p className="prose">
