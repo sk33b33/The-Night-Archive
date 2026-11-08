@@ -3,7 +3,8 @@
 Automated checks cover rules, saves, layout at 360 px and desktop, keyboard
 use, and axe accessibility (see `docs/CHANGELOG.md`). This list covers what
 only a real device can confirm: touch, install, the system back gesture,
-offline use, and **listening**. One pass plays the whole season.
+offline use, and **listening**. One pass plays both seasons. Season 2
+(sections 10–17) can be played on its own from a save with Season 1 closed.
 
 **Device:** an Android phone with Chrome (primary). Repeat the
 **Install** and **Audio** sections on iOS Safari if available.
@@ -96,7 +97,68 @@ Mark each line ✅, ❌ (note what happened), or n/a.
 - [ ] After closing, **File 0093** appears. Its photo imprint shows **today's
       date** on this device.
 
-## 10. Updates
+## 10. Case 008 — The Next Number
+
+- [ ] The archive groups the cases under **Season 1** and **Season 2**.
+- [ ] File 0093 photograph vs camera 2 at 05:12: **Wall clock** files the
+      timing note. On camera 2 the wall clock follows each frame's time.
+- [ ] After closing, the intake ledger's 0094 time reads 06:00.
+
+## 11. Case 009 — The Hand
+
+- [ ] The 0094 slip vs the 1979 specimen: **Crossed "M"** files the
+      specimen note. Pinching one sample zooms both, each to its own letter.
+- [ ] Ordering question: the four records reorder smoothly with a thumb.
+
+## 12. Case 010 — The Handover
+
+- [ ] Floor plan: the time buttons fit without sideways scrolling; tapping
+      a room in the drawing or in the list shows its records.
+- [ ] **Source** links open the named record, and Back returns to the plan.
+- [ ] After closing, the **06:00 · Storage B** step shows a dashed room with no record.
+
+## 13. Case 011 — Storage B
+
+- [ ] Count questions open the **number keyboard**. Typing a letter shows
+      "Enter a whole number" and keeps **Submit findings** unavailable.
+- [ ] Answering 2 for the unaccounted boxes gives a hint naming the missing
+      comparison.
+- [ ] Box labels (SB-07, SB-31, SB-40) are readable when zoomed in.
+
+## 14. Case 012 — The East Door
+
+- [ ] Timeline: unticking a source hides its row and its list entries;
+      tapping a dot in the chart highlights its entry.
+- [ ] After closing, the timeline gains "Records facility, night desk,
+      1981" with "Source: no record on file."
+
+## 15. Case 013 — Ward
+
+- [ ] Register search: **Search** on the keyboard submits. "Warden" finds
+      E. Warden only; "Ward" finds E. Ward only and files the note.
+- [ ] After closing, **Night desk log, 13–14 October 1981** appears in the
+      case files.
+
+## 16. Case 014 — The Night Archivist (finale)
+
+- [ ] The post record (full) reads **Mara —**.
+- [ ] After the findings are accepted, the case is **not** closed until a
+      choice is made. Leaving and returning keeps the choice on offer.
+- [ ] Choosing shows a plain confirmation. **Go back** returns to the two
+      options with nothing saved.
+- [ ] After confirming, the dashboard shows the **Shift** line and the
+      Season 2 complete note for that ending.
+- [ ] Play the finale twice on two installs (or erase progress between
+      runs) to see both endings:
+  - [ ] **Filed:** the slip reads "Received by: night archivist, NA-07. 06:12."
+  - [ ] **Unfiled:** the 1981 night desk log gains "06:12 · Not filed."
+
+## 17. Upgrading an older save
+
+- [ ] On a device with a save from before this update (save v5), install the
+      update: **Continue** works, and no case or progress is lost.
+
+## 18. Updates
 
 - [ ] Deploy a new build. Within a minute of reopening the app, "A new
       version of the archive is available" appears.

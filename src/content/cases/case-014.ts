@@ -185,9 +185,15 @@ export const CASE_014: CaseDefinition = {
       description: 'A copy of the Case 007 comparison note.',
       unlock: { type: 'initial' },
       document: {
-        stamp: 'Examiner',
+        stamp: 'Audio comparison',
         heading: 'Comparison note — NA-07 recording (tonight) and audio reel (1981)',
-        blocks: [{ type: 'paragraph', text: 'The two recordings match segment for segment. Tonight’s is clearer.' }],
+        blocks: [
+          {
+            type: 'paragraph',
+            text: 'The two recordings match segment for segment: the announcement, the clock chime, and both voices.',
+          },
+          { type: 'paragraph', text: 'Tonight’s recording is clearer.' },
+        ],
       },
     },
     {
