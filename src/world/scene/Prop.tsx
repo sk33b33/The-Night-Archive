@@ -22,8 +22,6 @@ export type KitModel =
   | 'pottedPlant'
   | 'radio'
   | 'televisionVintage'
-  | 'rugRectangle'
-  | 'sideTableDrawers'
   | 'table';
 
 const url = (model: KitModel) => `/models/${model}.glb`;
@@ -104,8 +102,6 @@ export const KIT_MODELS: readonly KitModel[] = [
   'pottedPlant',
   'radio',
   'televisionVintage',
-  'rugRectangle',
-  'sideTableDrawers',
   'table',
 ];
 

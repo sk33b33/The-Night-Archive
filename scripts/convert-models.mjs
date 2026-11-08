@@ -11,7 +11,7 @@ export const MODELS = [
   'desk', 'chairDesk', 'computerScreen', 'computerKeyboard', 'computerMouse',
   'lampSquareTable', 'lampSquareCeiling', 'bookcaseClosedWide', 'bookcaseOpen', 'books',
   'cardboardBoxClosed', 'cardboardBoxOpen', 'trashcan', 'coatRackStanding', 'pottedPlant',
-  'radio', 'televisionVintage', 'rugRectangle', 'sideTableDrawers', 'table',
+  'radio', 'televisionVintage', 'table',
 ];
 
 const source = process.argv[2];
