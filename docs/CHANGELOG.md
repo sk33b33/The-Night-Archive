@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.23.1 — Season 2 hardening (2026-11-08)
+
+### Added
+- **Cross-case canon test** (`src/content/canon.test.ts`). Records filed as
+  copies in later cases must agree with their originals, as amended by
+  then. This covers the incident report, roster, intake ledger, SB-07 line,
+  exchange record, night desk log, building history, comparison note,
+  recordings and post record. No document before the finale may name
+  "Mara".
+- The on-device checklist covers Season 2, both endings, and upgrading a
+  v5 save.
+
+### Fixed
+- Case 014's copy of the audio comparison note had drifted from Case 007's
+  wording. It now matches.
+- At 360 px, Case 014's evidence board scrolled sideways: the connection
+  form's selects grew to the longest record title. Selects in form fields
+  now fit their column.
+
+### Checked
+- An automated sweep of every screen in all 14 cases found no axe
+  violations, no horizontal overflow (after the fix above) and no console
+  errors. It covered 165 screens at 360 px and 165 at 1280 px: archive,
+  briefing, case files, every evidence item, board and findings.
+- Bundle: 144 KB of JavaScript gzipped, all precached for offline play.
+
 ## 0.23.0 — Case 014: The Night Archivist (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-014-bible.md`). The
