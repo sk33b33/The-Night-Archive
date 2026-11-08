@@ -29,6 +29,7 @@ export interface HandSample {
 }
 
 export const SPECIMEN_DISCOVERY = 'c009-specimen-match';
+export const HANDOVER_DISCOVERY = 'c010-handover-match';
 export const SAMPLES_DISCOVERY = 'c009-samples-match';
 
 const LABEL: Record<GlyphRegionId, string> = {
@@ -145,6 +146,26 @@ export const HAND_SAMPLES = {
         region: { id: 'crossed-m', note: M_NOTE, revealsOnMatch: SPECIMEN_DISCOVERY },
       },
       { kind: 'text', x: 200, y: 196, size: 60, text: '. —' },
+    ],
+  },
+  // Case 010: the night archivist's "M." in the day archivist's handover log.
+  handover: {
+    paper: 'report',
+    printed: [
+      { x: 26, y: 40, size: 12, text: 'Handover log — 06:00' },
+      { x: 26, y: 120, size: 12, text: 'Day archivist: P. Nash' },
+      { x: 26, y: 200, size: 12, text: 'Night archivist:' },
+    ],
+    hand: [
+      {
+        kind: 'glyph',
+        glyph: 'M',
+        x: 170,
+        y: 214,
+        size: 56,
+        region: { id: 'crossed-m', note: M_NOTE, revealsOnMatch: HANDOVER_DISCOVERY },
+      },
+      { kind: 'text', x: 226, y: 214, size: 44, text: '.' },
     ],
   },
 } as const satisfies Record<string, HandSample>;

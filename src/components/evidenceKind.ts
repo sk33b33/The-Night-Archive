@@ -7,4 +7,5 @@ export const KIND_LABEL: Record<EvidenceKind, string> = {
   photo: 'Photograph',
   object: 'Object',
   cctv: 'CCTV',
+  plan: 'Floor plan',
 };

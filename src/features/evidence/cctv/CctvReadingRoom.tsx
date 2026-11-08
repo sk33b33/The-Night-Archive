@@ -14,6 +14,10 @@ export interface ReadingRoomScene {
   readonly envelope?: boolean;
   /** The night porter, standing at the left of the desk, back to camera. */
   readonly porter?: boolean;
+  /** Someone seated at position 7, back to camera: not identified. */
+  readonly seatedFigure?: boolean;
+  /** The day archivist, standing at the left of the desk. */
+  readonly dayArchivist?: boolean;
 }
 
 interface CctvReadingRoomProps {
@@ -88,6 +92,19 @@ export function CctvReadingRoom({ scene, time, alt }: CctvReadingRoomProps) {
             <ellipse cx="86" cy="118" rx="16" ry="20" />
             <path d="M56 300 L62 156 Q86 136 110 156 L116 300 Z" />
             <path d="M104 170 L96 204 L102 206 L112 172 Z" />
+          </g>
+        )}
+        {scene.dayArchivist && (
+          <g fill="#8a8274">
+            <ellipse cx="86" cy="116" rx="16" ry="20" />
+            <path d="M56 300 L62 154 Q86 134 110 154 L116 300 Z" />
+          </g>
+        )}
+        {scene.seatedFigure && (
+          // Seated at position 7, back to camera; darker than the archivist.
+          <g fill="#1d1b18">
+            <ellipse cx="196" cy="182" rx="22" ry="26" />
+            <path d="M152 300 L162 222 Q196 196 230 222 L240 300 Z" />
           </g>
         )}
         {scene.archivist && (

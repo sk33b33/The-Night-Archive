@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.19.0 — Case 010: The Handover (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-010-bible.md`). Season 2.
+
+### Added
+- **Floor plan evidence type.** Authored rooms on a 400×300 plan and time
+  steps, each with per-room entries naming their source record. The viewer
+  has a time selector, a room list (the accessible alternative and the
+  actual control), and per-room entries with links to their sources. The
+  plan only ever shows what a record says: an unlit room means no record,
+  not nobody.
+- Plan amendments: a time step appended when a case closes.
+- Case 010 content:
+  - the first-floor plan (05:50–06:05)
+  - the door and badge log, your shift log (end), and P. Nash's handover log
+  - camera 2, 05:55–06:06, with a seated figure and the day archivist at
+    06:00:10
+  - tonight's intake ledger (0093, 0094)
+  - the handover "M." and a copy of the 0094 slip, with a required
+    comparison note (crossed M, "consistent with")
+  - six board rules and five findings, including a select-all question and
+    "cannot be established"
+- End beat A: once Case 010 closes, the plan gains a step "06:00 · Storage B"
+  showing a sealed room that is not on the plan, with no record.
+
 ## 0.18.0 — Case 009: The Hand (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-009-bible.md`). Season 2.

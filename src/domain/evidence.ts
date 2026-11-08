@@ -149,7 +149,59 @@ export interface CctvEvidence extends EvidenceBase {
   readonly catalogue: readonly RecordField[];
 }
 
-export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence | ObjectEvidence | CctvEvidence;
+/** A room on a floor plan, as an SVG polygon on a 400×300 plan. */
+export interface PlanRoom {
+  readonly id: string;
+  readonly label: string;
+  /** SVG polygon points, e.g. "20,20 220,20 220,170 20,170". */
+  readonly points: string;
+  /** Where the label sits, if not the polygon's centre (e.g. to clear a room drawn over it). */
+  readonly labelAt?: { readonly x: number; readonly y: number };
+  /** Drawn dashed: a room that is not part of the current building. */
+  readonly sealed?: boolean;
+}
+
+/** What one named record says about one room at one time step. */
+export interface PlanEntry {
+  readonly room: string;
+  readonly text: string;
+  readonly source: EvidenceId;
+}
+
+/**
+ * A moment on the plan. The plan is a view of the records, never an
+ * inference: a room shows a person only if an entry's source record puts
+ * them there. An empty room means "no record", not "nobody".
+ */
+export interface PlanStep {
+  readonly time: string;
+  readonly label?: string;
+  readonly entries: readonly PlanEntry[];
+  /** Rooms drawn only at this step. */
+  readonly extraRooms?: readonly PlanRoom[];
+}
+
+export interface PlanAmendment {
+  readonly id: string;
+  readonly whenCaseClosed: CaseId;
+  readonly appendStep: PlanStep;
+}
+
+export interface PlanEvidence extends EvidenceBase {
+  readonly kind: 'plan';
+  readonly rooms: readonly PlanRoom[];
+  readonly steps: readonly PlanStep[];
+  readonly catalogue: readonly RecordField[];
+  readonly amendments?: readonly PlanAmendment[];
+}
+
+export type EvidenceItem =
+  | DocumentEvidence
+  | AudioEvidence
+  | PhotoEvidence
+  | ObjectEvidence
+  | CctvEvidence
+  | PlanEvidence;
 export type EvidenceKind = EvidenceItem['kind'];
 
 export function isUnlocked(item: EvidenceItem, discoveries: ReadonlySet<string>): boolean {
@@ -277,13 +329,17 @@ export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseI
     const provenance = effectiveProvenance(item, isClosed);
     return provenance === item.provenance ? item : { ...item, provenance };
   }
+  if (item.kind === 'plan' && item.amendments?.length) {
+    const added = item.amendments.filter((a) => isClosed(a.whenCaseClosed));
+    return added.length === 0 ? item : { ...item, steps: [...item.steps, ...added.map((a) => a.appendStep)] };
+  }
   return item;
 }
 
 /** Whether any amendment on this item is in effect. */
 export function isAmended(item: EvidenceItem, isClosed: (caseId: CaseId) => boolean): boolean {
   return (
-    (item.kind === 'document' || item.kind === 'object') &&
+    (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan') &&
     (item.amendments ?? []).some((a) => isClosed(a.whenCaseClosed))
   );
 }

@@ -16,6 +16,8 @@ function readingRoomScene(scene: Readonly<Record<string, string | boolean>>): Re
     figure: scene.figure === true,
     envelope: scene.envelope === true,
     porter: scene.porter === true,
+    seatedFigure: scene.seatedFigure === true,
+    dayArchivist: scene.dayArchivist === true,
   };
 }
 

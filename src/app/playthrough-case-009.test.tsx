@@ -18,7 +18,7 @@ describe('Case 009 playthrough', () => {
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
-    click(/The Hand/);
+    click(/Case 009/);
     click('Open case files');
 
     // The slip against the 1979 specimen: the crossed M.
@@ -62,7 +62,7 @@ describe('Case 009 playthrough', () => {
     expect(screen.getByRole('heading', { name: 'Findings accepted' })).toBeTruthy();
 
     click('Return to the archive');
-    click(/The Hand/);
+    click(/Case 009/);
     expect(screen.getByText('1983 — tonight')).toBeTruthy();
 
     await waitFor(() => {

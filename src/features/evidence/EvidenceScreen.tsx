@@ -11,6 +11,7 @@ import type { RecordField } from '../../domain/case';
 import { AudioCompare } from './audio/AudioCompare';
 import { AudioPlayer } from './audio/AudioPlayer';
 import { CctvViewer } from './cctv/CctvViewer';
+import { PlanViewer } from './plan/PlanViewer';
 import { ObjectEvidenceView } from './object/ObjectEvidenceView';
 import { PhotoEvidenceView } from './photo/PhotoEvidenceView';
 import type { EngineFactory } from './audio/useReelPlayer';
@@ -57,7 +58,9 @@ export function EvidenceScreen({
   const comparable = item.kind === 'photo' ? otherPhotos : item.kind === 'audio' ? otherAudio : others;
   // Comparing needs the full width; a single record keeps the reading column.
   const [compareId, setCompareId] = useState(() => loadCompare(item.id, comparable));
-  const comparing = item.kind !== 'object' && item.kind !== 'cctv' && comparable.some((o) => o.id === compareId);
+  const comparing =
+    (item.kind === 'document' || item.kind === 'photo' || item.kind === 'audio') &&
+    comparable.some((o) => o.id === compareId);
   const comparedAudio = otherAudio.find((o) => o.id === compareId);
   const changeCompare = (next: EvidenceId | '') => {
     setCompareId(next);
@@ -104,10 +107,11 @@ export function EvidenceScreen({
         />
       )}
       {item.kind === 'cctv' && <CctvViewer item={item} />}
+      {item.kind === 'plan' && <PlanViewer item={item} available={available} onOpenEvidence={onOpenEvidence} />}
       {item.kind === 'object' && (
         <ObjectEvidenceView item={item} available={available} onOpenEvidence={onOpenEvidence} />
       )}
-      {(item.kind === 'audio' || item.kind === 'photo' || item.kind === 'cctv') && (
+      {(item.kind === 'audio' || item.kind === 'photo' || item.kind === 'cctv' || item.kind === 'plan') && (
         <Catalogue fields={item.catalogue} />
       )}
       {notice}

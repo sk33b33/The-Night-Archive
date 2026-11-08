@@ -12,7 +12,7 @@ you go. No accounts, timers, or purchases.
 
 ## Status
 
-All seven roadmap cases (Season 1) and the first two cases of Season 2 are
+All seven roadmap cases (Season 1) and the first three cases of Season 2 are
 playable, in order:
 
 | # | Case | Introduces |
@@ -26,6 +26,7 @@ playable, in order:
 | 007 | The Impossible Call | Side-by-side audio comparison |
 | 008 | The Next Number *(Season 2)* | Seasons on the archive screen |
 | 009 | The Hand *(Season 2)* | Handwriting comparison (letterform regions) |
+| 010 | The Handover *(Season 2)* | Floor plan (who the records place where, by time) |
 
 Each case unlocks when the one before it is closed. Case canon (what is
 established, what is invented, and what must stay unknown) lives in
@@ -99,7 +100,7 @@ src/
   content/        Case data, anomalies, the player's desk. No UI code.
   domain/         Pure rules: evidence, deductions, board, saves, playback
   features/       Screens: archive, briefing, investigation, evidence
-                  viewers (document, audio, photo, CCTV, object), board,
+                  viewers (document, audio, photo, CCTV, object, plan), board,
                   findings, anomaly, settings
   services/       Persistence (IndexedDB saves), audio synthesis and playback,
                   preferences

@@ -1,8 +1,18 @@
-# Case bible — Case 010: The Handover (DRAFT for review)
+# Case bible — Case 010: The Handover
 
-Status: **proposal**. Season 2, case 3 of 7 (see
-`docs/seasons/season-2-arc.md`). Reveal level 1 holds. Nothing is built
-until approved.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-010*.ts`.
+Season 2, case 3 of 7 (see `docs/seasons/season-2-arc.md`). Reveal level 1
+holds. Premise, the floor-plan rule and "P. Nash" approved. **End beat A**
+chosen (Storage B appears on the plan): it opens Case 011 directly, and B
+("— not yet") would have given the hand a voice that reads as intent.
+
+**Changes at implementation:**
+- The plan has a sixth regular step, **06:05** (your shift log's handover
+  entry and camera 2's arrival), so the Storage B step is the seventh.
+- The handover "M." and the slip copy are generated from the same
+  handwriting layout data as Case 009 (`case-009-hands.ts`).
+- Room labels can be placed explicitly (`labelAt`): the reading room's label
+  sits clear of Storage B when that step is shown.
 
 ## Premise
 
@@ -105,10 +115,3 @@ them there at that step. An empty room means "no record", not "nobody".
 - Who "M." is; the 0094 photograph's subject. *Proposal:* the ledger says
   "Photograph", but no photograph is filed yet. It is Case 011's opening
   item.
-
-## Open questions for you
-
-1. Approve the premise and the floor-plan rule ("a view of the records,
-   never an inference")?
-2. Name for the day archivist: "P. Nash" OK?
-3. End beat A (Storage B appears on the plan) or B ("— not yet")?
