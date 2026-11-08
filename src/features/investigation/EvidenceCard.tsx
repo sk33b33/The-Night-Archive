@@ -6,6 +6,7 @@ export const KIND_LABEL: Record<EvidenceKind, string> = {
   audio: 'Audio',
   photo: 'Photograph',
   object: 'Object',
+  cctv: 'CCTV',
 };
 
 interface EvidenceCardProps {

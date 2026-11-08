@@ -3,6 +3,7 @@ import { ScreenLayout } from '../../components/ScreenLayout';
 import type { DocumentEvidence, EvidenceId, EvidenceItem, PhotoEvidence } from '../../domain/evidence';
 import type { RecordField } from '../../domain/case';
 import { AudioPlayer } from './audio/AudioPlayer';
+import { CctvViewer } from './cctv/CctvViewer';
 import { ObjectEvidenceView } from './object/ObjectEvidenceView';
 import { PhotoEvidenceView } from './photo/PhotoEvidenceView';
 import type { EngineFactory } from './audio/useReelPlayer';
@@ -84,10 +85,13 @@ export function EvidenceScreen({
           onDiscover={onDiscover}
         />
       )}
+      {item.kind === 'cctv' && <CctvViewer item={item} />}
       {item.kind === 'object' && (
         <ObjectEvidenceView item={item} available={available} onOpenEvidence={onOpenEvidence} />
       )}
-      {(item.kind === 'audio' || item.kind === 'photo') && <Catalogue fields={item.catalogue} />}
+      {(item.kind === 'audio' || item.kind === 'photo' || item.kind === 'cctv') && (
+        <Catalogue fields={item.catalogue} />
+      )}
       {notice}
     </ScreenLayout>
   );

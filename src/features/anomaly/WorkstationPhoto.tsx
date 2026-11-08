@@ -63,6 +63,11 @@ export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: Workstat
         ))}
         <rect x="24" y="20" width="114" height="100" fill="none" stroke="#4d4339" strokeWidth="3" />
 
+        {/* Night-entrance door on the far wall (shut) */}
+        <rect x="252" y="58" width="36" height="110" fill="#3b332b" />
+        <rect x="252" y="58" width="36" height="110" fill="none" stroke="#4d4339" strokeWidth="2" />
+        <circle cx="281" cy="116" r="1.6" fill="#6b604f" />
+
         {/* Archive boxes on a shelf */}
         <rect x="292" y="40" width="96" height="6" fill="#4b4036" />
         <rect x="296" y="12" width="40" height="28" fill="#8d7756" />

@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.15.0 — Case 006: Someone Is Watching (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-006-bible.md`). The
+story reaches the player's current shift.
+
+### Added
+- Engine: **CCTV evidence** (frames with timestamps, scene state, regions,
+  and descriptions) and a CCTV viewer: previous/next frame, frame slider
+  with spoken position, a frame list, play/pause, and frame inspection with
+  zoom, pan, and regions; zoom is kept while stepping. Under reduced motion
+  there is no playback, with an explanation.
+- `prefersReducedMotion()` helper honouring the player's setting, then the
+  device.
+- Artwork: camera 2's monochrome reading-room view (door, lamp, archivist,
+  figure states, scanlines, timestamp) on the File 0091 layout; an exported
+  03:40 still; the night-entrance door added to the File 0091 artwork.
+- Case 006 content: camera 2 footage (12 frames), the 03:40 still, viewpoint
+  note (required, unlocked by matching the window against the File 0091
+  photograph), File 0091 photograph copy, access log, the player's shift log,
+  camera installation record, call 6 extract; six board rules; five findings.
+- End beat A: once Case 006 closes, Case 001's incident report carries
+  "Report time 03:40: received at extension NA-07." Unexplained.
+
+### Verified
+- Chromium at 360px and 1280px, Cases 001–006 in one save through the UI;
+  axe: no violations; no overflow; no console errors; playback advances and
+  stops on the last frame when motion is allowed.
+
 ## 0.14.0 — Case 005: The Wrong Date (2026-11-07)
 
 Built from the approved case bible (`docs/cases/case-005-bible.md`). Proves

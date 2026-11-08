@@ -77,6 +77,12 @@ export const CASE_001: CaseDefinition = {
           whenCaseClosed: caseId('case-002'),
           block: { type: 'annotation', text: 'Filed. — M.' },
         },
+        // Approved Case 006 end beat A (sets up Case 007). Never explained.
+        {
+          id: 'received-na07',
+          whenCaseClosed: caseId('case-006'),
+          block: { type: 'annotation', text: 'Report time 03:40: received at extension NA-07.' },
+        },
       ],
     },
     {

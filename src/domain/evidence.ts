@@ -130,7 +130,26 @@ export interface ObjectAmendment {
   readonly prependProvenance: ProvenanceEntry;
 }
 
-export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence | ObjectEvidence;
+/** One frame of CCTV footage. */
+export interface CctvFrame {
+  /** Timestamp as recorded by the camera, e.g. "23:10:04". */
+  readonly time: string;
+  /** What the artwork should draw for this frame (artwork-specific keys). */
+  readonly scene: Readonly<Record<string, string | boolean>>;
+  /** Full description for assistive technology. */
+  readonly description: string;
+  readonly regions: readonly PhotoRegion[];
+}
+
+export interface CctvEvidence extends EvidenceBase {
+  readonly kind: 'cctv';
+  /** Key of the presentation component that draws each frame. */
+  readonly artwork: string;
+  readonly frames: readonly CctvFrame[];
+  readonly catalogue: readonly RecordField[];
+}
+
+export type EvidenceItem = DocumentEvidence | AudioEvidence | PhotoEvidence | ObjectEvidence | CctvEvidence;
 export type EvidenceKind = EvidenceItem['kind'];
 
 export function isUnlocked(item: EvidenceItem, discoveries: ReadonlySet<string>): boolean {

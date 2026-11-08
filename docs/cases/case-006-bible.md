@@ -1,8 +1,22 @@
-# Case bible — Case 006: Someone Is Watching (DRAFT for review)
+# Case bible — Case 006: Someone Is Watching
 
-Status: **proposal**. CLAUDE.md gives the title only. Everything below is
-**[Proposed]** unless marked **[Canon]** or **[Rule]**. Nothing is built until
-approved.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-006*.ts`.
+All proposals approved; **end beat A** chosen, the 1981 call "received at
+extension NA-07". The figure stays faceless and unattributed.
+
+**Changes at implementation:**
+- The end-beat note is appended at the end of Case 001's report ("Report
+  time 03:40: received at extension NA-07."), not placed under the field, so
+  existing passage keys and highlights stay valid.
+- So camera 2's viewpoint can genuinely match the File 0091 photograph, the
+  CCTV frames share that photograph's layout, and the **night-entrance door**
+  (shut) has been added to the far wall of the File 0091 artwork.
+- The shift log adds "23:05–23:15 Retrieval, stack room", so position 7 is
+  empty when the door opens at 23:10.
+
+**Details chosen at implementation [Added]:** twelve frames, 22:00:00 to
+04:10:00; the figure appears only at 03:40:02; the door stands open only at
+23:10:04.
 
 ## Scope guard
 
