@@ -9,7 +9,7 @@ import {
   isOrdering,
   type DeductionSubmission,
 } from '../domain/deduction';
-import { isUnlocked, type EvidenceItem } from '../domain/evidence';
+import { isUnlocked, nameTokens, type EvidenceItem } from '../domain/evidence';
 import { ANOMALIES } from './anomalies/file-0091';
 import { CASES } from './cases';
 
@@ -33,6 +33,12 @@ function discoveriesFrom(items: readonly EvidenceItem[]): Set<string> {
           if (partner) found.add(region.revealsOnMatch);
         }
       }
+    }
+    if (item.kind === 'registry' && item.revealsOnSearch) {
+      // Searching the term finds something if any register has that whole word in a name.
+      const term = item.revealsOnSearch.term.toLowerCase();
+      const hit = item.registers.some((r) => r.entries.some((e) => nameTokens(e.name).includes(term)));
+      if (hit) found.add(item.revealsOnSearch.discovery);
     }
     if (item.kind === 'cctv') {
       for (const frame of item.frames) for (const r of frame.regions) if (r.revealsDiscovery) found.add(r.revealsDiscovery);
@@ -105,7 +111,14 @@ describe('season integrity', () => {
 
   it.each(CASES.map((c) => [c.id, c] as const))('%s: every discovery-gated item can be unlocked', (_, caseFile) => {
     const reachable = new Set<string>(reachableEvidence(caseFile).map((e) => e.id));
-    for (const item of caseFile.evidence) expect(reachable.has(item.id), `${caseFile.id}: ${item.id}`).toBe(true);
+    for (const item of caseFile.evidence) {
+      // End-beat records arrive only after the case closes, so they can never be needed to close it.
+      if (item.unlock.type === 'caseClosed') {
+        expect(item.unlock.caseId).toBe(caseFile.id);
+        continue;
+      }
+      expect(reachable.has(item.id), `${caseFile.id}: ${item.id}`).toBe(true);
+    }
   });
 
   it.each(CASES.map((c) => [c.id, c] as const))('%s: questions are well formed', (_, caseFile) => {

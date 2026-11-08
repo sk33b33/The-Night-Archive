@@ -1,8 +1,22 @@
-# Case bible — Case 013: Ward (DRAFT for review)
+# Case bible — Case 013: Ward
 
-Status: **proposal**. Season 2, case 6 of 7 (see
-`docs/seasons/season-2-arc.md`). Reveal level 1 holds. Nothing is built
-until approved.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-013*.ts`.
+Season 2, case 6 of 7 (see `docs/seasons/season-2-arc.md`). Reveal level 1
+holds. Everything approved; **end beat A** (the night desk log comes on
+file).
+
+**Changes at implementation:**
+- **Ordering evidence:** a copy of the SB-07 inventory line is added (item
+  9). Without it, the ordering question's "SB-07 deposited" item had no
+  date in the case.
+- **Registers authored once** (`case-013-registers.ts`). The four register
+  documents and the search are built from the same rows.
+- **Near matches:** "PC H. Edwards" in the police roll is a second near
+  match. Searching "Edwards" or "Warden" finds those names, never Ward.
+- **The courier log** includes S. Lyle's entries either side of Ward's, so
+  "no return recorded" is read against a log where returns are recorded.
+- **The "case closed" unlock rule** brings the night desk log on file. A
+  record that arrives this way counts as changed on the archive card.
 
 ## Canon this case builds on
 
@@ -138,12 +152,3 @@ what findings cite, as with the comparison notes in Cases 009–011.
 - Who E. Ward was, beyond a post and two dates. Whether E. Ward is Elias Ward.
 - What Ward collected at Bellwether; whether Ward returned.
 - Who made the 03:40 call. Who received it at the night desk.
-
-## Open questions for you
-
-1. Approve the premise: E. Ward was records facility staff, a courier
-   who signed out to Bellwether on the night?
-2. Approve the near-match "E. Warden" as the select-all distractor?
-3. Approve register search, with the discovery filed by searching "Ward"?
-4. End beat A (the night-desk record comes on file) or B (M. authorised
-   the sign-out)?

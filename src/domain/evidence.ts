@@ -41,7 +41,9 @@ export interface DocumentContent {
  */
 export type UnlockRule =
   | { readonly type: 'initial' }
-  | { readonly type: 'discovery'; readonly discoveryId: string };
+  | { readonly type: 'discovery'; readonly discoveryId: string }
+  /** A record that comes on file once a case is closed (an end beat). */
+  | { readonly type: 'caseClosed'; readonly caseId: CaseId };
 
 interface EvidenceBase {
   readonly id: EvidenceId;
@@ -246,7 +248,75 @@ export function eventsInOrder(item: TimelineEvidence): TimelineEvent[] {
   );
 }
 
+/** One person's line in a staff register. */
+export interface RegisterEntry {
+  readonly name: string;
+  readonly post: string;
+  readonly from: string;
+  readonly to: string;
+}
+
+/** A staff register searched by the cross-reference. Its source is the register as a document. */
+export interface StaffRegister {
+  readonly id: string;
+  readonly label: string;
+  readonly source: EvidenceId;
+  readonly entries: readonly RegisterEntry[];
+}
+
+/**
+ * Several staff registers searched at once by surname or initial. A view of
+ * the registers, which stay readable on their own.
+ */
+export interface RegistryEvidence extends EvidenceBase {
+  readonly kind: 'registry';
+  readonly registers: readonly StaffRegister[];
+  /** Searching this whole word, with at least one entry found, records the discovery. */
+  readonly revealsOnSearch?: { readonly term: string; readonly discovery: string };
+  readonly catalogue: readonly RecordField[];
+}
+
+/** Lower-case whole words of a name or query; punctuation is ignored. */
+export function nameTokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean);
+}
+
+export interface RegisterResult {
+  readonly register: StaffRegister;
+  readonly matches: readonly RegisterEntry[];
+}
+
+/**
+ * Whole-word search: every word of the query must be a whole word of the
+ * name, so "Ward" finds "E. Ward" but not "E. Warden" or "H. Edwards".
+ * Returns one result per register, in authored order, matches or not.
+ */
+export function searchRegisters(item: RegistryEvidence, query: string): RegisterResult[] {
+  const words = nameTokens(query);
+  return item.registers.map((register) => ({
+    register,
+    matches:
+      words.length === 0
+        ? []
+        : register.entries.filter((entry) => {
+            const name = nameTokens(entry.name);
+            return words.every((w) => name.includes(w));
+          }),
+  }));
+}
+
+/** The discovery a search records, if any. */
+export function searchDiscovery(item: RegistryEvidence, query: string): string | undefined {
+  const reveal = item.revealsOnSearch;
+  if (!reveal || !nameTokens(query).includes(reveal.term.toLowerCase())) return undefined;
+  return searchRegisters(item, query).some((r) => r.matches.length > 0) ? reveal.discovery : undefined;
+}
+
 export type EvidenceItem =
+  | RegistryEvidence
   | TimelineEvidence
   | DocumentEvidence
   | AudioEvidence
@@ -256,12 +326,18 @@ export type EvidenceItem =
   | PlanEvidence;
 export type EvidenceKind = EvidenceItem['kind'];
 
-export function isUnlocked(item: EvidenceItem, discoveries: ReadonlySet<string>): boolean {
+export function isUnlocked(
+  item: EvidenceItem,
+  discoveries: ReadonlySet<string>,
+  isClosed: (caseId: CaseId) => boolean = () => false,
+): boolean {
   switch (item.unlock.type) {
     case 'initial':
       return true;
     case 'discovery':
       return discoveries.has(item.unlock.discoveryId);
+    case 'caseClosed':
+      return isClosed(item.unlock.caseId);
   }
 }
 
@@ -269,9 +345,10 @@ export function isUnlocked(item: EvidenceItem, discoveries: ReadonlySet<string>)
 export function availableEvidence(
   items: readonly EvidenceItem[],
   discoveries: Iterable<string>,
+  isClosed: (caseId: CaseId) => boolean = () => false,
 ): EvidenceItem[] {
   const found = new Set(discoveries);
-  return items.filter((item) => isUnlocked(item, found));
+  return items.filter((item) => isUnlocked(item, found, isClosed));
 }
 
 /** Items a discovery unlocks, in authored order. */
@@ -398,8 +475,12 @@ export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseI
   return item;
 }
 
-/** Whether any amendment on this item is in effect. */
+/**
+ * Whether the record has changed since the case was first read: an
+ * amendment is in effect, or it came on file when a case closed.
+ */
 export function isAmended(item: EvidenceItem, isClosed: (caseId: CaseId) => boolean): boolean {
+  if (item.unlock.type === 'caseClosed' && isClosed(item.unlock.caseId)) return true;
   return (
     (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan' || item.kind === 'timeline') &&
     (item.amendments ?? []).some((a) => isClosed(a.whenCaseClosed))

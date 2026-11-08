@@ -12,7 +12,7 @@ you go. No accounts, timers, or purchases.
 
 ## Status
 
-All seven roadmap cases (Season 1) and the first five cases of Season 2 are
+All seven roadmap cases (Season 1) and the first six cases of Season 2 are
 playable, in order:
 
 | # | Case | Introduces |
@@ -29,6 +29,7 @@ playable, in order:
 | 010 | The Handover *(Season 2)* | Floor plan (who the records place where, by time) |
 | 011 | Storage B *(Season 2)* | Count findings (reconciling records) |
 | 012 | The East Door *(Season 2)* | Timeline (several records on one time axis) |
+| 013 | Ward *(Season 2)* | Staff register search (cross-reference) |
 
 Each case unlocks when the one before it is closed. Case canon (what is
 established, what is invented, and what must stay unknown) lives in
@@ -103,7 +104,7 @@ src/
   domain/         Pure rules: evidence, deductions, board, saves, playback
   features/       Screens: archive, briefing, investigation, evidence
                   viewers (document, audio, photo, CCTV, object, plan,
-                  timeline), board,
+                  timeline, registers), board,
                   findings, anomaly, settings
   services/       Persistence (IndexedDB saves), audio synthesis and playback,
                   preferences

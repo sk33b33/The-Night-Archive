@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.22.0 — Case 013: Ward (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-013-bible.md`). Season 2.
+
+### Added
+- **Register search evidence.** Searches several staff registers at once by
+  surname or initial.
+  - Whole words only, so a near match is never shown as a match.
+  - Every register answers, with "No entry" where it has none, and links
+    to the full register.
+  - The result count is announced.
+  - A search can file a discovery.
+- **"Case closed" unlock rule.** A record that comes on file when a case
+  closes. It counts as a changed record on the archive card.
+- Case 013 content:
+  - the 1981 report copy
+  - the cross-reference and four registers (railway district, records
+    facility, telephone exchange, police division), with near matches
+    E. Warden and H. Edwards
+  - the facility courier log
+  - copies of the roster and the SB-07 line
+  - the cross-reference note, filed by searching "Ward"
+  - six board rules and five findings, ending on whether the report's
+    "Elias Ward" is the facility's E. Ward: cannot be established
+- End beat A: once Case 013 closes, the records facility night desk log
+  for 13–14 October 1981 comes on file. Its one line: "03:40 · Call
+  received from E. Ward. Not filed." No signature.
+
 ## 0.21.0 — Case 012: The East Door (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-012-bible.md`). Season 2.

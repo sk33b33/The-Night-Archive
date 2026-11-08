@@ -2410,3 +2410,81 @@ tr.is-marked td {
   padding: 0;
   text-align: left;
 }
+
+/* ---------- Staff register search ---------- */
+
+.registry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.registry__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.registry__label {
+  font-weight: 600;
+}
+
+.registry__row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.registry__hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.registry__results,
+.registry__entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.registry__register {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.registry__register-title {
+  font-size: var(--text-md);
+}
+
+.registry__entries li {
+  display: flex;
+  flex-direction: column;
+}
+
+.registry__name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-accent-strong);
+}
+
+.registry__none {
+  color: var(--color-text-muted);
+}
+
+.registry__register .link-button {
+  padding: 0;
+  text-align: left;
+}
+
+.registry__row .btn {
+  flex: none;
+  width: auto;
+}

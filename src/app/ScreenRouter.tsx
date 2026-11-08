@@ -131,7 +131,7 @@ export function ScreenRouter(props: ScreenRouterProps) {
   }
   const progress = caseProgress(save, caseFile.id);
   // Records read as they currently stand, including any amendments in effect.
-  const evidence = availableEvidence(caseFile.evidence, progress?.discoveries ?? []).map((e) =>
+  const evidence = availableEvidence(caseFile.evidence, progress?.discoveries ?? [], isClosed).map((e) =>
     withAmendments(e, isClosed),
   );
 
