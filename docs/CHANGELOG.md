@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.16.1 — Season integrity and README (2026-11-08)
+
+### Added
+- `src/content/season.test.ts`: for every case, computes the evidence the
+  player can reach (initial items plus everything unlocked by discoveries the
+  case can produce: photo regions, filtered audio lines, CCTV regions, and
+  photo/audio matches), then checks the authored supported answers close the
+  case using only reachable evidence. Also checks the unlock chain,
+  well-formed questions, amendment and anomaly references, and unique IDs.
+  Verified to fail when a required discovery is removed.
+
+### Changed
+- `README.md` rewritten for the game: what it is, case list, running and
+  checking it, installing on a phone, and project structure. Replaces the
+  starter-kit instructions.
+
 ## 0.16.0 — Case 007: The Impossible Call (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-007-bible.md`): reveal
