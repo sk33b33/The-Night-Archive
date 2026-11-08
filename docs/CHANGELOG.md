@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.21.0 — Case 012: The East Door (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-012-bible.md`). Season 2.
+
+### Added
+- **Timeline evidence type.** Several records on one time axis.
+  - **Chart:** one row per source, drawn as a picture. Clicking an event
+    highlights its entry in the list.
+  - **List:** every event in time order, tagged with its source and linked
+    to it. The list is the control and the accessible view.
+  - **Source filters** show or hide each record. An empty state explains
+    when every source is hidden.
+  - **Amendments:** a track can be appended when a case closes.
+- Case 012 content:
+  - the 1979 works order (hasp, padlock, key to the district engineer)
+  - the night of 13–14 October 1981 from five records: signal box, porter,
+    supervisor, exchange route BW-4, and the incident report
+  - copies of the duty roster and the SB-07 inventory line
+  - seven board rules and five findings: ordering, select-all, a count (15
+    minutes), "the records disagree", and "cannot be established"
+- End beat A: once Case 012 closes, the timeline gains a track, "Records
+  facility, night desk, 1981". Its one entry: "03:40 · Call received from
+  E. Ward. Not filed." No record of it is on file.
+
 ## 0.20.0 — Case 011: Storage B (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-011-bible.md`). Season 2.

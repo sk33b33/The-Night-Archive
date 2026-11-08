@@ -13,9 +13,10 @@ import { CASE_008 } from './case-008';
 import { CASE_009 } from './case-009';
 import { CASE_010 } from './case-010';
 import { CASE_011 } from './case-011';
+import { CASE_012 } from './case-012';
 
 /** All cases available in this build, in archive order. */
-export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002, CASE_003, CASE_004, CASE_005, CASE_006, CASE_007, CASE_008, CASE_009, CASE_010, CASE_011];
+export const CASES: readonly CaseDefinition[] = [CASE_001, CASE_002, CASE_003, CASE_004, CASE_005, CASE_006, CASE_007, CASE_008, CASE_009, CASE_010, CASE_011, CASE_012];
 
 export function findCase(id: string): CaseDefinition | undefined {
   return CASES.find((c) => c.id === id);

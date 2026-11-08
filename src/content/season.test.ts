@@ -130,7 +130,7 @@ describe('season integrity', () => {
   it('every amendment and anomaly refers to a real case', () => {
     const ids = new Set<string>(CASES.map((c) => c.id));
     for (const item of CASES.flatMap((c) => c.evidence)) {
-      if (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan') {
+      if (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan' || item.kind === 'timeline') {
         for (const a of item.amendments ?? []) expect(ids.has(a.whenCaseClosed)).toBe(true);
       }
     }

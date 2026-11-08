@@ -12,6 +12,7 @@ import { AudioCompare } from './audio/AudioCompare';
 import { AudioPlayer } from './audio/AudioPlayer';
 import { CctvViewer } from './cctv/CctvViewer';
 import { PlanViewer } from './plan/PlanViewer';
+import { TimelineViewer } from './timeline/TimelineViewer';
 import { ObjectEvidenceView } from './object/ObjectEvidenceView';
 import { PhotoEvidenceView } from './photo/PhotoEvidenceView';
 import type { EngineFactory } from './audio/useReelPlayer';
@@ -108,10 +109,17 @@ export function EvidenceScreen({
       )}
       {item.kind === 'cctv' && <CctvViewer item={item} />}
       {item.kind === 'plan' && <PlanViewer item={item} available={available} onOpenEvidence={onOpenEvidence} />}
+      {item.kind === 'timeline' && (
+        <TimelineViewer item={item} available={available} onOpenEvidence={onOpenEvidence} />
+      )}
       {item.kind === 'object' && (
         <ObjectEvidenceView item={item} available={available} onOpenEvidence={onOpenEvidence} />
       )}
-      {(item.kind === 'audio' || item.kind === 'photo' || item.kind === 'cctv' || item.kind === 'plan') && (
+      {(item.kind === 'audio' ||
+        item.kind === 'photo' ||
+        item.kind === 'cctv' ||
+        item.kind === 'plan' ||
+        item.kind === 'timeline') && (
         <Catalogue fields={item.catalogue} />
       )}
       {notice}

@@ -195,7 +195,59 @@ export interface PlanEvidence extends EvidenceBase {
   readonly amendments?: readonly PlanAmendment[];
 }
 
+/** One source on a timeline: a record, drawn as a row. */
+export interface TimelineTrack {
+  readonly id: string;
+  readonly label: string;
+  /** The record this track is read from. Absent: no such record is on file. */
+  readonly source?: EvidenceId;
+}
+
+/** What one record says at one time. Times are "HH:MM" on the timeline's night. */
+export interface TimelineEvent {
+  readonly track: string;
+  readonly time: string;
+  readonly text: string;
+}
+
+export interface TimelineAmendment {
+  readonly id: string;
+  readonly whenCaseClosed: CaseId;
+  readonly appendTrack: TimelineTrack;
+  readonly events: readonly TimelineEvent[];
+}
+
+/**
+ * Several records on one time axis. Like the floor plan, it is a view of
+ * the records: every event belongs to a track, and every track names its
+ * source.
+ */
+export interface TimelineEvidence extends EvidenceBase {
+  readonly kind: 'timeline';
+  /** Axis start and end, "HH:MM", within one calendar day. */
+  readonly range: { readonly from: string; readonly to: string };
+  readonly tracks: readonly TimelineTrack[];
+  readonly events: readonly TimelineEvent[];
+  readonly catalogue: readonly RecordField[];
+  readonly amendments?: readonly TimelineAmendment[];
+}
+
+/** Minutes since midnight for "HH:MM". */
+export function minutesOf(time: string): number {
+  const [h = 0, m = 0] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+/** Timeline events in time order, then track order. Pure. */
+export function eventsInOrder(item: TimelineEvidence): TimelineEvent[] {
+  const rank = new Map(item.tracks.map((t, i) => [t.id, i]));
+  return [...item.events].sort(
+    (a, b) => minutesOf(a.time) - minutesOf(b.time) || (rank.get(a.track) ?? 0) - (rank.get(b.track) ?? 0),
+  );
+}
+
 export type EvidenceItem =
+  | TimelineEvidence
   | DocumentEvidence
   | AudioEvidence
   | PhotoEvidence
@@ -319,7 +371,7 @@ export function effectiveProvenance(
   return [...added.map((a) => a.prependProvenance), ...item.provenance];
 }
 
-/** Applies amendments to documents and objects, leaving other kinds unchanged. */
+/** Applies amendments to documents, objects, plans and timelines, leaving other kinds unchanged. */
 export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseId: CaseId) => boolean): T {
   if (item.kind === 'document' && item.amendments?.length) {
     const document = effectiveDocument(item, isClosed);
@@ -333,13 +385,23 @@ export function withAmendments<T extends EvidenceItem>(item: T, isClosed: (caseI
     const added = item.amendments.filter((a) => isClosed(a.whenCaseClosed));
     return added.length === 0 ? item : { ...item, steps: [...item.steps, ...added.map((a) => a.appendStep)] };
   }
+  if (item.kind === 'timeline' && item.amendments?.length) {
+    const added = item.amendments.filter((a) => isClosed(a.whenCaseClosed));
+    return added.length === 0
+      ? item
+      : {
+          ...item,
+          tracks: [...item.tracks, ...added.map((a) => a.appendTrack)],
+          events: [...item.events, ...added.flatMap((a) => a.events)],
+        };
+  }
   return item;
 }
 
 /** Whether any amendment on this item is in effect. */
 export function isAmended(item: EvidenceItem, isClosed: (caseId: CaseId) => boolean): boolean {
   return (
-    (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan') &&
+    (item.kind === 'document' || item.kind === 'object' || item.kind === 'plan' || item.kind === 'timeline') &&
     (item.amendments ?? []).some((a) => isClosed(a.whenCaseClosed))
   );
 }

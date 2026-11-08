@@ -1,8 +1,23 @@
-# Case bible — Case 012: The East Door (DRAFT for review)
+# Case bible — Case 012: The East Door
 
-Status: **proposal**. Season 2, case 5 of 7 (see
-`docs/seasons/season-2-arc.md`). Reveal level 1 holds. Nothing is built
-until approved.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-012*.ts`.
+Season 2, case 5 of 7 (see `docs/seasons/season-2-arc.md`). Reveal level 1
+holds. Everything approved, including the padlock and key and no required
+discovery. **End beat A** (the records facility night-desk track).
+
+**Changes at implementation:**
+- **The 1979 works order is item 1** and the briefing's report, which must
+  be a document.
+- **A copy of the duty roster is added (item 8).** Finding 5 needs it: the
+  report names Elias Ward as station staff, and only the roster shows he
+  was not rostered.
+- **A seventh board rule:** the timeline is *derived from* the porter's
+  log. The roster *contradicts* the report, as in Case 001.
+- **The night is authored once** (`NIGHT` in `case-012.ts`). The timeline
+  and each source's document table are both built from it, so they cannot
+  disagree.
+- **A timeline track's source is optional.** The end-beat track has none,
+  and the viewer shows "Source: no record on file."
 
 ## Canon this case builds on
 
@@ -155,11 +170,3 @@ a match. Here the question is order.
 - Whether the door opened; who stacked the boards, or restored them.
 - What the 03:18 lights were. Who used the kiosk; where the call went.
 - Why the key is claimed to be in SB-07; who deposited it and why.
-
-## Open questions for you
-
-1. Approve the premise and the five-source night (times and names)?
-2. Approve the 1979 works order's padlock and key, which reconciles a
-   welded door with a key?
-3. Approve no required discovery for this case?
-4. End beat A (the records facility track, "E. Ward. Not filed.") or B?

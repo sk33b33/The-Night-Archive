@@ -2272,3 +2272,141 @@ tr.is-marked td {
   margin: 0;
   color: var(--color-danger);
 }
+
+/* ---------- Timeline (several records on one axis) ---------- */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.timeline__filters {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.timeline__chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.timeline__axis {
+  position: relative;
+  height: 1.25rem;
+  margin: 0 0.75rem;
+}
+
+.timeline__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-text-subtle);
+}
+
+.timeline__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.timeline__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.timeline__bar {
+  position: relative;
+  height: 1.5rem;
+  margin: 0 0.75rem;
+  border-radius: 999px;
+  background: #1b232c;
+}
+
+.timeline__gridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #2a3547;
+}
+
+.timeline__marker {
+  position: absolute;
+  top: 50%;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid var(--color-bg-deep);
+  border-radius: 50%;
+  background: var(--color-accent);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.timeline__marker.is-selected {
+  background: var(--color-focus);
+  box-shadow: 0 0 0 3px rgb(242 198 109 / 0.35);
+}
+
+.timeline__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline__event {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.timeline__event.is-selected {
+  border-color: var(--color-focus);
+}
+
+.timeline__event:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.timeline__time {
+  flex: none;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-accent-strong);
+}
+
+.timeline__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.timeline__track {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.timeline__nosource {
+  font-size: var(--text-sm);
+  color: var(--color-amber);
+}
+
+.timeline__body .link-button {
+  padding: 0;
+  text-align: left;
+}
