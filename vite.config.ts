@@ -40,6 +40,17 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // React and other dependencies change far less often than the game.
+        // A separate chunk means an update only re-downloads the game's code.
+        manualChunks(id: string) {
+          return id.includes('node_modules') ? 'vendor' : undefined;
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],

@@ -1,38 +1,21 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { caseId } from '../domain/case';
-import { createSave, recordAttempt } from '../domain/progress';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
+import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
 
 /** Case 007 end to end, from a save with Cases 001–006 closed. */
 const noSound = () => null;
-const CASE_FILES = [{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-007' }];
+const CASE_FILES = caseFiles('case-007');
 
-beforeEach(() => {
-  window.localStorage.clear();
-  window.sessionStorage.clear();
-  window.history.replaceState(null, '');
-});
+beforeEach(resetBrowserState);
 afterEach(cleanup);
 
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
-function back(stack: readonly object[]) {
-  window.history.replaceState({ nightArchiveStack: stack }, '');
-  fireEvent(window, new PopStateEvent('popstate', { state: window.history.state }));
-}
-function closed(...ids: string[]): SaveGame {
-  let save = createSave(new Date('2026-01-01T00:00:00Z'));
-  for (const id of ids) {
-    save = recordAttempt(save, caseId(id), { submittedAt: '2026-01-01T01:00:00.000Z', outcome: 'correct', answers: {}, citations: {} });
-  }
-  return save;
-}
 
 describe('Case 007 playthrough', () => {
   it('compares the recordings, closes the season’s last case, and File 0093 appears', async () => {
-    const repo = createMemoryRepository(closed('case-001', 'case-002', 'case-003', 'case-004', 'case-005', 'case-006'));
+    const repo = createMemoryRepository(closedSave('case-001', 'case-002', 'case-003', 'case-004', 'case-005', 'case-006'));
     render(<App repository={repo} createEngine={noSound} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
@@ -47,16 +30,11 @@ describe('Case 007 playthrough', () => {
     back(CASE_FILES);
 
     click('Case findings');
-    const q = (prompt: RegExp) => {
-      const section = screen.getByRole('heading', { name: prompt }).closest('section');
-      if (!section) throw new Error('missing question');
-      return within(section);
-    };
-    const what = q(/What reached extension/);
-    const impossible = q(/should not have been possible/);
-    const order = q(/^\d+\. Put these in order/);
-    const addressed = q(/second voice speaking to/);
-    const placed = q(/Who placed the call/);
+    const what = question(/What reached extension/);
+    const impossible = question(/should not have been possible/);
+    const order = question(/^\d+\. Put these in order/);
+    const addressed = question(/second voice speaking to/);
+    const placed = question(/Who placed the call/);
     fireEvent.click(what.getByRole('radio', { name: /matches the 1981 reel/ }));
     fireEvent.click(what.getByRole('checkbox', { name: 'Extension log' }));
     fireEvent.click(what.getByRole('checkbox', { name: 'Audio comparison note' }));

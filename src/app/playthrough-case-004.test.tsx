@@ -1,43 +1,21 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { caseId } from '../domain/case';
-import { createSave, recordAttempt } from '../domain/progress';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
+import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
 
 /** Case 004 end to end, from a save with Cases 001–003 closed. */
-const CASE_FILES = [{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-004' }];
+const CASE_FILES = caseFiles('case-004');
 
-beforeEach(() => {
-  window.localStorage.clear();
-  window.sessionStorage.clear();
-  window.history.replaceState(null, '');
-});
+beforeEach(resetBrowserState);
 afterEach(cleanup);
 
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
-function back(stack: readonly object[]) {
-  window.history.replaceState({ nightArchiveStack: stack }, '');
-  fireEvent(window, new PopStateEvent('popstate', { state: window.history.state }));
-}
 
-function closed(...ids: string[]): SaveGame {
-  let save = createSave(new Date('2026-01-01T00:00:00Z'));
-  for (const id of ids) {
-    save = recordAttempt(save, caseId(id), {
-      submittedAt: '2026-01-01T01:00:00.000Z',
-      outcome: 'correct',
-      answers: {},
-      citations: {},
-    });
-  }
-  return save;
-}
 
 describe('Case 004 playthrough', () => {
   it('shows File 0091 as Unfiled until Case 004 takes it over', async () => {
-    render(<App repository={createMemoryRepository(closed('case-001', 'case-002'))} />);
+    render(<App repository={createMemoryRepository(closedSave('case-001', 'case-002'))} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
     expect(screen.getByRole('heading', { name: 'Unfiled' })).toBeTruthy();
@@ -45,7 +23,7 @@ describe('Case 004 playthrough', () => {
   });
 
   it('can be completed, and the voided ledger line gains a date', async () => {
-    const repo = createMemoryRepository(closed('case-001', 'case-002', 'case-003'));
+    const repo = createMemoryRepository(closedSave('case-001', 'case-002', 'case-003'));
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
@@ -68,11 +46,6 @@ describe('Case 004 playthrough', () => {
     back(CASE_FILES);
 
     click('Case findings');
-    const question = (prompt: RegExp) => {
-      const section = screen.getByRole('heading', { name: prompt }).closest('section');
-      if (!section) throw new Error('missing question');
-      return within(section);
-    };
     const intake = question(/through intake/);
     const papers = question(/papers on the desk/);
     const print = question(/order 4471/);

@@ -1,7 +1,8 @@
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { DocumentView, type PassageMarking } from '../../components/DocumentView';
 import { documentText, type DocumentEvidence, type EvidenceId } from '../../domain/evidence';
 import { countMatches } from '../../domain/textSearch';
+import { CompareSelect } from './CompareSelect';
 import { DocumentSearch } from './DocumentSearch';
 
 interface DocumentWorkspaceProps {
@@ -16,27 +17,6 @@ interface DocumentWorkspaceProps {
   readonly onCompareChange: (id: EvidenceId | '') => void;
 }
 
-const compareKey = (id: string) => `night-archive:compare:${id}`;
-
-/** Remembers the comparison choice for this tab, so a refresh keeps it. */
-export function loadCompare(id: string, others: readonly { readonly id: EvidenceId }[]): EvidenceId | '' {
-  try {
-    const stored = window.sessionStorage.getItem(compareKey(id));
-    return others.find((o) => o.id === stored)?.id ?? '';
-  } catch {
-    return '';
-  }
-}
-
-export function storeCompare(id: string, value: string): void {
-  try {
-    if (value) window.sessionStorage.setItem(compareKey(id), value);
-    else window.sessionStorage.removeItem(compareKey(id));
-  } catch {
-    // Not kept: comparison simply resets on refresh.
-  }
-}
-
 export function DocumentWorkspace({
   item,
   others,
@@ -46,7 +26,6 @@ export function DocumentWorkspace({
   compareId,
   onCompareChange,
 }: DocumentWorkspaceProps) {
-  const id = useId();
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState(false);
   const compared = others.find((o) => o.id === compareId);
@@ -105,23 +84,7 @@ export function DocumentWorkspace({
           )}
         </div>
         {others.length > 0 && (
-          <div className="field">
-            <label htmlFor={`${id}-compare`}>Compare with</label>
-            <select
-              id={`${id}-compare`}
-              value={compareId}
-              onChange={(event) => {
-                onCompareChange(event.target.value as EvidenceId | '');
-              }}
-            >
-              <option value="">No comparison</option>
-              {others.map((other) => (
-                <option key={other.id} value={other.id}>
-                  {other.title}
-                </option>
-              ))}
-            </select>
-          </div>
+          <CompareSelect options={others} value={compareId} onChange={onCompareChange} />
         )}
       </div>
 

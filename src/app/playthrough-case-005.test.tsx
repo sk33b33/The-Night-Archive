@@ -1,37 +1,20 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { caseId } from '../domain/case';
-import { createSave, recordAttempt } from '../domain/progress';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
+import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
 
 /** Case 005 end to end, from a save with Cases 001–004 closed. */
-const CASE_FILES = [{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-005' }];
+const CASE_FILES = caseFiles('case-005');
 
-beforeEach(() => {
-  window.localStorage.clear();
-  window.sessionStorage.clear();
-  window.history.replaceState(null, '');
-});
+beforeEach(resetBrowserState);
 afterEach(cleanup);
 
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
-function back(stack: readonly object[]) {
-  window.history.replaceState({ nightArchiveStack: stack }, '');
-  fireEvent(window, new PopStateEvent('popstate', { state: window.history.state }));
-}
-function closed(...ids: string[]): SaveGame {
-  let save = createSave(new Date('2026-01-01T00:00:00Z'));
-  for (const id of ids) {
-    save = recordAttempt(save, caseId(id), { submittedAt: '2026-01-01T01:00:00.000Z', outcome: 'correct', answers: {}, citations: {} });
-  }
-  return save;
-}
 
 describe('Case 005 playthrough', () => {
   it('compares the photographs, closes the case, and the print gains an earlier entry', async () => {
-    const repo = createMemoryRepository(closed('case-001', 'case-002', 'case-003', 'case-004'));
+    const repo = createMemoryRepository(closedSave('case-001', 'case-002', 'case-003', 'case-004'));
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
@@ -46,16 +29,11 @@ describe('Case 005 playthrough', () => {
     back(CASE_FILES);
 
     click('Case findings');
-    const q = (prompt: RegExp) => {
-      const section = screen.getByRole('heading', { name: prompt }).closest('section');
-      if (!section) throw new Error('missing question');
-      return within(section);
-    };
-    const imprint = q(/date imprint establish/);
-    const terminal = q(/terminal in the photograph/);
-    const print = q(/date the print/);
-    const dates = q(/these dates in order/);
-    const how = q(/How was a print/);
+    const imprint = question(/date imprint establish/);
+    const terminal = question(/terminal in the photograph/);
+    const print = question(/date the print/);
+    const dates = question(/these dates in order/);
+    const how = question(/How was a print/);
     fireEvent.click(imprint.getByRole('radio', { name: /set by hand/ }));
     fireEvent.click(imprint.getByRole('checkbox', { name: 'Camera manual extract' }));
     fireEvent.click(terminal.getByRole('radio', { name: /before 1996/ }));

@@ -1,8 +1,9 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
+import { back, caseFiles, click, question, resetBrowserState } from '../test/playthrough';
 
 /**
  * Full Case 001 playthrough, as a regression test for the complete loop:
@@ -11,23 +12,12 @@ import { App } from './App';
  */
 const noSound = () => null;
 
-beforeEach(() => {
-  window.localStorage.clear();
-  window.sessionStorage.clear();
-  window.history.replaceState(null, '');
-});
+beforeEach(resetBrowserState);
 afterEach(cleanup);
 
 const heading = (name: string | RegExp) => screen.getByRole('heading', { level: 1, name });
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
 
-/** Delivers the popstate a real Back would fire (jsdom's back() is async). */
-function back(stack: readonly object[]) {
-  window.history.replaceState({ nightArchiveStack: stack }, '');
-  fireEvent(window, new PopStateEvent('popstate', { state: window.history.state }));
-}
-
-const CASE_FILES = [{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-001' }];
+const CASE_FILES = caseFiles('case-001');
 
 describe('Case 001 full playthrough', () => {
   it('can be completed from a fresh start, surviving a refresh, to the end anomaly', async () => {
@@ -82,11 +72,6 @@ describe('Case 001 full playthrough', () => {
 
     // Findings: a wrong theory first, then the supported findings.
     click('Case findings');
-    const question = (prompt: RegExp) => {
-      const section = screen.getByRole('heading', { name: prompt }).closest('section');
-      if (!section) throw new Error('missing question');
-      return within(section);
-    };
     const reliability = question(/relied on/);
     const recording = question(/recording show/);
     const caller = question(/Who made the call/);

@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.16.2 — Polish and hardening (2026-11-08)
+
+### Changed
+- **Vendor chunk:** dependencies (React and Workbox's window helper) are
+  built into their own chunk. Game code is ~50 KB gzipped and vendor ~70 KB.
+  An update now re-downloads only the game chunk. No lazy loading: the
+  service worker downloads everything for offline play anyway, and our own
+  code is small.
+- **Shared code instead of copies:**
+  - Evidence-kind labels → `src/components/evidenceKind.ts`.
+  - "Remember comparison" helpers → `src/features/evidence/compareChoice.ts`.
+  - The "Compare with" picker → `CompareSelect`, used by the document, photo,
+    and audio viewers (previously three copies).
+- Removed `EvidenceCard`'s unused `disabledReason` prop (dead since audio
+  playback was enabled).
+- Playthrough tests share helpers in `src/test/playthrough.ts` (click, back,
+  case-file stack, closed-case saves, question queries) instead of seven
+  copies.
+
+### Dependencies (reviewed, accepted)
+- `npm audit` reports 15 advisories (13 moderate, 2 low), **all in
+  development/build tooling**: ESLint, typescript-eslint, and Workbox's build
+  step, via `minimatch`, `glob`, and `deepmerge`. The shipped app's runtime
+  dependencies are only `react` and `react-dom`, which are unaffected.
+- `npm audit fix` changes nothing. `--force` would *downgrade* ESLint to 9
+  and vite-plugin-pwa to 1.1. Pinning patched versions needs major jumps
+  (minimatch 11, glob 14), and deepmerge has no patched release. Not done:
+  the risk of silently breaking linting or service-worker generation
+  outweighs build-time-only advisories. Re-check when ESLint or Workbox
+  release updates.
+
+### Verified
+- typecheck, lint, 309 tests, build; offline reload and Continue; the full
+  seven-case browser pass at 360px and 1280px with axe (no violations).
+
 ## 0.16.1 — Season integrity and README (2026-11-08)
 
 ### Added

@@ -1,37 +1,19 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { caseId } from '../domain/case';
-import { createSave, recordAttempt } from '../domain/progress';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
+import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
 
 /** Case 002 end to end, starting from a save where Case 001 is closed. */
 const noSound = () => null;
-const CASE_FILES = [{ id: 'menu' }, { id: 'archive' }, { id: 'investigation', caseId: 'case-002' }];
+const CASE_FILES = caseFiles('case-002');
 
-beforeEach(() => {
-  window.localStorage.clear();
-  window.sessionStorage.clear();
-  window.history.replaceState(null, '');
-});
+beforeEach(resetBrowserState);
 afterEach(cleanup);
 
 const heading = (name: string | RegExp) => screen.getByRole('heading', { level: 1, name });
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
-function back(stack: readonly object[]) {
-  window.history.replaceState({ nightArchiveStack: stack }, '');
-  fireEvent(window, new PopStateEvent('popstate', { state: window.history.state }));
-}
 
-function case001Closed(): SaveGame {
-  return recordAttempt(createSave(new Date('2026-01-01T00:00:00Z')), caseId('case-001'), {
-    submittedAt: '2026-01-01T01:00:00.000Z',
-    outcome: 'correct',
-    answers: {},
-    citations: {},
-  });
-}
 
 describe('Case 002 playthrough', () => {
   it('is hidden until Case 001 closes', async () => {
@@ -43,7 +25,7 @@ describe('Case 002 playthrough', () => {
   });
 
   it('can be completed, and closing it changes the Case 001 report', async () => {
-    const repo = createMemoryRepository(case001Closed());
+    const repo = createMemoryRepository(closedSave('case-001'));
     render(<App repository={repo} createEngine={noSound} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
@@ -76,11 +58,6 @@ describe('Case 002 playthrough', () => {
 
     // Findings.
     click('Case findings');
-    const question = (prompt: RegExp) => {
-      const section = screen.getByRole('heading', { name: prompt }).closest('section');
-      if (!section) throw new Error('missing question');
-      return within(section);
-    };
     const vacant = question(/vacant on 2 March/);
     const expected = question(/know the inspection/);
     const occupant = question(/Who was living/);

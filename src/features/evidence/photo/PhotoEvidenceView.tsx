@@ -1,5 +1,6 @@
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import type { EvidenceId, PhotoEvidence } from '../../../domain/evidence';
+import { CompareSelect } from '../CompareSelect';
 import { PHOTO_ARTWORK } from './artwork';
 import { PhotoCompare } from './PhotoCompare';
 import { PhotoViewer } from './PhotoViewer';
@@ -15,7 +16,6 @@ interface PhotoEvidenceViewProps {
 }
 
 export function PhotoEvidenceView({ item, others, compareId, onCompareChange, onDiscover }: PhotoEvidenceViewProps) {
-  const id = useId();
   const [filed, setFiled] = useState<readonly string[]>([]);
   const compared = others.find((o) => o.id === compareId);
   const Artwork = PHOTO_ARTWORK[item.artwork];
@@ -28,20 +28,8 @@ export function PhotoEvidenceView({ item, others, compareId, onCompareChange, on
   return (
     <>
       {others.length > 0 && (
-        <div className="field doc-tools">
-          <label htmlFor={`${id}-compare`}>Compare with</label>
-          <select
-            id={`${id}-compare`}
-            value={compareId}
-            onChange={(event) => onCompareChange(event.target.value as EvidenceId | '')}
-          >
-            <option value="">No comparison</option>
-            {others.map((other) => (
-              <option key={other.id} value={other.id}>
-                {other.title}
-              </option>
-            ))}
-          </select>
+        <div className="doc-tools">
+          <CompareSelect options={others} value={compareId} onChange={onCompareChange} />
         </div>
       )}
 

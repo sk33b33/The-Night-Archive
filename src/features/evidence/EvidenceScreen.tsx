@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ScreenLayout } from '../../components/ScreenLayout';
 import type {
   AudioEvidence,
@@ -14,7 +14,9 @@ import { CctvViewer } from './cctv/CctvViewer';
 import { ObjectEvidenceView } from './object/ObjectEvidenceView';
 import { PhotoEvidenceView } from './photo/PhotoEvidenceView';
 import type { EngineFactory } from './audio/useReelPlayer';
-import { DocumentWorkspace, loadCompare, storeCompare } from './DocumentWorkspace';
+import { CompareSelect } from './CompareSelect';
+import { loadCompare, storeCompare } from './compareChoice';
+import { DocumentWorkspace } from './DocumentWorkspace';
 
 interface EvidenceScreenProps {
   readonly item: EvidenceItem;
@@ -82,11 +84,9 @@ export function EvidenceScreen({
         />
       )}
       {item.kind === 'audio' && otherAudio.length > 0 && (
-        <CompareSelect
-          options={otherAudio}
-          value={compareId}
-          onChange={changeCompare}
-        />
+        <div className="doc-tools">
+          <CompareSelect options={otherAudio} value={compareId} onChange={changeCompare} />
+        </div>
       )}
       {item.kind === 'audio' &&
         (comparedAudio ? (
@@ -130,30 +130,5 @@ function Catalogue({ fields }: { readonly fields: readonly RecordField[] }) {
         ))}
       </dl>
     </section>
-  );
-}
-
-function CompareSelect({
-  options,
-  value,
-  onChange,
-}: {
-  readonly options: readonly { readonly id: EvidenceId; readonly title: string }[];
-  readonly value: EvidenceId | '';
-  readonly onChange: (id: EvidenceId | '') => void;
-}) {
-  const id = useId();
-  return (
-    <div className="field doc-tools">
-      <label htmlFor={id}>Compare with</label>
-      <select id={id} value={value} onChange={(event) => onChange(event.target.value as EvidenceId | '')}>
-        <option value="">No comparison</option>
-        {options.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.title}
-          </option>
-        ))}
-      </select>
-    </div>
   );
 }

@@ -11,7 +11,7 @@ import {
   type LinkEvaluation,
 } from '../../domain/board';
 import type { EvidenceId, EvidenceItem } from '../../domain/evidence';
-import { KIND_LABEL } from '../investigation/EvidenceCard';
+import { KIND_LABEL } from '../../components/evidenceKind';
 
 interface BoardCanvasProps {
   readonly evidence: readonly EvidenceItem[];
