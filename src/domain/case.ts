@@ -43,6 +43,8 @@ export interface CaseDefinition {
   readonly availableAfter?: CaseId;
   /** An Unfiled anomaly this case takes over once it is available. */
   readonly replacesAnomaly?: string;
+  /** Season the case belongs to; absent means season 1. */
+  readonly season?: number;
   readonly briefing: CaseBriefing;
   /** All evidence for the case, in inventory order, including locked items. */
   readonly evidence: readonly EvidenceItem[];
@@ -66,4 +68,8 @@ export function briefingReport(caseFile: CaseDefinition): DocumentEvidence {
 
 export function isCaseAvailable(caseFile: CaseDefinition, isClosed: (id: CaseId) => boolean): boolean {
   return caseFile.availableAfter === undefined || isClosed(caseFile.availableAfter);
+}
+
+export function seasonOf(caseFile: CaseDefinition): number {
+  return caseFile.season ?? 1;
 }

@@ -39,6 +39,7 @@ export function AnomalyScreen({ anomaly, onBack, focusOnMount }: AnomalyScreenPr
           regions={photograph.regions.map((r) => ({ ...r, note: withDate(r.note, photograph.dateStamp, now) }))}
         >
           <WorkstationPhoto
+            variant={photograph.variant ?? 'night'}
             dateStamp={resolveDateStamp(photograph.dateStamp, now)}
             alt={withDate(photograph.alt, photograph.dateStamp, now)}
           />

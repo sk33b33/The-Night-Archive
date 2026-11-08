@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { ScreenLayout } from '../../components/ScreenLayout';
-import type { CaseDefinition, CaseId } from '../../domain/case';
+import { seasonOf, type CaseDefinition, type CaseId } from '../../domain/case';
 import { ARCHIVE_DESK } from '../../content/archive';
 import type { Anomaly } from '../../domain/anomaly';
 import type { CaseStatus } from '../../domain/progress';
@@ -30,6 +30,11 @@ export function ArchiveScreen({
   focusOnMount,
   notice,
 }: ArchiveScreenProps) {
+  // Group by season, in order. With one season, no season headings are shown.
+  const seasons = [...new Set(cases.map(seasonOf))]
+    .sort((a, b) => a - b)
+    .map((season) => [season, cases.filter((c) => seasonOf(c) === season)] as const);
+
   return (
     <ScreenLayout
       title="Archive dashboard"
@@ -63,17 +68,22 @@ export function ArchiveScreen({
             <p className="empty-state__body">No files have been assigned to this shift.</p>
           </div>
         ) : (
-          <ul className="case-list">
-            {cases.map((caseFile) => (
-              <CaseCard
-                key={caseFile.id}
-                caseFile={caseFile}
-                status={statusOf(caseFile.id)}
-                amended={amendedCount(caseFile.id)}
-                onOpen={() => onOpenCase(caseFile.id)}
-              />
-            ))}
-          </ul>
+          seasons.map(([season, inSeason]) => (
+            <div key={season} className="season">
+              {seasons.length > 1 && <h3 className="season__title">Season {season}</h3>}
+              <ul className="case-list">
+                {inSeason.map((caseFile) => (
+                  <CaseCard
+                    key={caseFile.id}
+                    caseFile={caseFile}
+                    status={statusOf(caseFile.id)}
+                    amended={amendedCount(caseFile.id)}
+                    onOpen={() => onOpenCase(caseFile.id)}
+                  />
+                ))}
+              </ul>
+            </div>
+          ))
         )}
       </section>
 

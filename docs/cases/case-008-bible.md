@@ -1,8 +1,33 @@
-# Case bible — Case 008 (DRAFT for review)
+# Case bible — Case 008: The Next Number
 
-Status: **proposal**. Case 008 is beyond CLAUDE.md's roadmap (which ends at
-Case 007). Nothing here is canon until approved, and nothing is built
-before then.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-008*.ts`.
+Beyond CLAUDE.md's roadmap. The approval did not pick between options;
+these were chosen to fit together (each can be switched):
+- **Framing A, Season 2 opener.** The archive groups cases by season.
+- **Title: "The Next Number".**
+- **File 0093's photograph** changed to the pre-dawn view (approved).
+- **Envelope A, stays sealed.** Its contents are Case 009's question.
+- **End beat A.** 0094's time fills in as 06:00.
+
+**Changes at implementation:**
+- **Case 008 does not take over File 0093's Unfiled card.** It becomes
+  available the moment Case 007 closes, so taking over the card would hide
+  Case 007's final beat entirely. The Unfiled card stays, and this case
+  investigates it.
+- **The wall clock is in every view of position 7.** It reads 03:40 in the
+  File 0091 photograph (Case 001's report time), 11:05 in the 1998
+  installation photograph, and 05:12 in File 0093. On camera 2 it follows
+  each frame's timestamp. A clock appearing only in File 0093 would have been
+  an unintended contradiction with the earlier views of the same wall.
+- The unfiled-tray region was dropped. Its position conflicted between the
+  photograph and CCTV layouts, and the clock, envelope and lamp carry the
+  match.
+- Your shift log adds "05:00–05:14 Retrieval, stack room", so position 7 is
+  empty at 05:12. The lamp going off at 05:08 with no one at the desk is
+  left unexplained.
+
+**Details chosen at implementation [Added]:** porter initials "J.T."; lamp
+circuit back on at 05:19; ten frames 04:10:00–05:20:00.
 
 ## Framing — choose one
 

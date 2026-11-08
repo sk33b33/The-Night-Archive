@@ -8,6 +8,8 @@ import type { PhotoRegion } from './photoView';
 export interface AnomalyPhotograph {
   /** Key of the presentation component that draws the photograph. */
   readonly artwork: 'workstation';
+  /** Which view of the workstation: the 1981 night view, or the pre-dawn view. */
+  readonly variant?: 'night' | 'predawn';
   /**
    * The date imprinted on the photograph itself, or TONIGHT for the date
    * of the player's own session (read from the device clock when shown).

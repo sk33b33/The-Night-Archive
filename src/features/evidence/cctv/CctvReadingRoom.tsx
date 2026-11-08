@@ -1,4 +1,6 @@
 import { useId } from 'react';
+import { Envelope } from '../photo/artwork/Envelope';
+import { READING_ROOM_CLOCK, WallClock } from '../photo/artwork/WallClock';
 
 export interface ReadingRoomScene {
   /** Night-entrance door on the far wall. */
@@ -8,6 +10,10 @@ export interface ReadingRoomScene {
   readonly archivist?: boolean;
   /** A standing figure at position 7's Unfiled tray, back to camera. */
   readonly figure?: boolean;
+  /** A sealed envelope on the desk where the papers usually lie. */
+  readonly envelope?: boolean;
+  /** The night porter, standing at the left of the desk, back to camera. */
+  readonly porter?: boolean;
 }
 
 interface CctvReadingRoomProps {
@@ -62,6 +68,8 @@ export function CctvReadingRoom({ scene, time, alt }: CctvReadingRoomProps) {
         )}
         <rect x="252" y="58" width="36" height="110" fill="none" stroke="#4d4339" strokeWidth="2" />
         {scene.lamp && <rect width="400" height="300" fill="#f3d79a" opacity="0.08" />}
+        {/* Wall clock: its hands follow the frame's timestamp. */}
+        <WallClock {...READING_ROOM_CLOCK} time={time} />
         {/* Desk, terminal, keyboard */}
         <rect y="168" width="400" height="132" fill="#4a3a2b" />
         <rect x="128" y="66" width="128" height="104" rx="8" fill="#b9ad94" />
@@ -73,6 +81,15 @@ export function CctvReadingRoom({ scene, time, alt }: CctvReadingRoomProps) {
         {/* Desk lamp */}
         <rect x="300" y="186" width="34" height="5" rx="2" fill="#262420" />
         <path d="M316 188 L308 138 L330 116" stroke="#262420" strokeWidth="4" fill="none" />
+        {scene.envelope && <Envelope />}
+        {scene.porter && (
+          // Lighter figure at the left of the desk, leaning to the envelope.
+          <g fill="#5d564c">
+            <ellipse cx="86" cy="118" rx="16" ry="20" />
+            <path d="M56 300 L62 156 Q86 136 110 156 L116 300 Z" />
+            <path d="M104 170 L96 204 L102 206 L112 172 Z" />
+          </g>
+        )}
         {scene.archivist && (
           // Seated, back to camera.
           <g fill="#7d7466">

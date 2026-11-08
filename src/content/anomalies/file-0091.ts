@@ -1,5 +1,6 @@
 import { caseId } from '../../domain/case';
 import { TONIGHT, type Anomaly } from '../../domain/anomaly';
+import type { PhotoRegion } from '../../domain/photoView';
 import { ARCHIVE_DESK } from '../archive';
 
 /**
@@ -64,6 +65,46 @@ export const FILE_0091: Anomaly = {
   note: 'No further records are associated with this file.',
 };
 
+/** Regions of the File 0093 photograph, shared with Case 008's copy. */
+export const FILE_0093_REGIONS: readonly PhotoRegion[] = [
+  {
+    id: 'wall-clock',
+    label: 'Wall clock',
+    note: 'The wall clock above position 7 reads 05:12.',
+    x: 0.44,
+    y: 0.055,
+    width: 0.1,
+    height: 0.14,
+  },
+  {
+    id: 'envelope',
+    label: 'Envelope',
+    note: 'A sealed internal-mail envelope on the desk, addressed “Night archivist, NA-07”.',
+    x: 0.09,
+    y: 0.635,
+    width: 0.2,
+    height: 0.18,
+  },
+  {
+    id: 'lamp',
+    label: 'Desk lamp',
+    note: 'The desk lamp is switched off.',
+    x: 0.74,
+    y: 0.33,
+    width: 0.16,
+    height: 0.36,
+  },
+  {
+    id: 'date-imprint',
+    label: 'Date imprint',
+    note: 'The camera’s date imprint reads {date}.',
+    x: 0.69,
+    y: 0.9,
+    width: 0.28,
+    height: 0.08,
+  },
+];
+
 /**
  * Final beat of Case 007 (approved option A): the cycle turns. A new file,
  * a photograph of the same workstation dated tonight. Never explained.
@@ -79,12 +120,12 @@ export const FILE_0093: Anomaly = {
   ],
   photograph: {
     artwork: 'workstation',
+    // Approved in the Case 008 bible: File 0093 shows the pre-dawn view.
+    variant: 'predawn',
     dateStamp: TONIGHT,
-    alt: `Photograph of a desk at night: a terminal with a label reading ${ARCHIVE_DESK.workstation}, a keyboard, a desk lamp, and stacked archive boxes. The date imprinted in the corner reads {date}.`,
+    alt: `Photograph of a desk before dawn: a terminal with a label reading ${ARCHIVE_DESK.workstation}, the desk lamp switched off, a sealed internal-mail envelope on the desk, and a wall clock reading 05:12. The date imprinted in the corner reads {date}.`,
     caption: `Workstation ${ARCHIVE_DESK.workstation}, Night Archive reading room.`,
-    regions: FILE_0091.photograph.regions.map((r) =>
-      r.id === 'date-imprint' ? { ...r, note: 'The camera’s date imprint reads {date}.' } : r,
-    ),
+    regions: FILE_0093_REGIONS,
   },
   register: {
     stamp: 'Intake ledger',

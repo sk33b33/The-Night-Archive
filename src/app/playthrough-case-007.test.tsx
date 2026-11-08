@@ -19,7 +19,7 @@ describe('Case 007 playthrough', () => {
     render(<App repository={repo} createEngine={noSound} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
-    expect(screen.queryByRole('button', { name: /File 0093/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /^No intake record.*File 0093/ })).toBeNull();
     click(/The Impossible Call/);
     click('Open case files');
 
@@ -59,7 +59,8 @@ describe('Case 007 playthrough', () => {
 
     click('Return to the archive');
     expect(screen.getByRole('heading', { name: 'Unfiled' })).toBeTruthy();
-    click(/File 0093/);
+    // The Unfiled card (Case 008's card mentions File 0093 too).
+    click(/^No intake record.*File 0093/);
     expect(screen.getByRole('heading', { level: 1, name: 'File 0093' })).toBeTruthy();
     expect(screen.getByRole('img', { name: /The date imprinted in the corner reads \d{2} [A-Z]{3} \d{4}\./ })).toBeTruthy();
     expect(screen.getByText('0093')).toBeTruthy();

@@ -2120,3 +2120,18 @@ tr.is-marked td {
   font-size: var(--text-sm);
   color: var(--color-amber);
 }
+
+/* ---------- Seasons ---------- */
+
+.season + .season {
+  margin-top: var(--space-5);
+}
+
+.season__title {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-amber);
+}

@@ -22,7 +22,7 @@ describe('Case 002 availability', () => {
     expect(isCaseAvailable(CASE_002, () => false)).toBe(false);
     expect(isCaseAvailable(CASE_002, (id) => id === C1)).toBe(true);
     expect(isCaseAvailable(CASE_001, () => false)).toBe(true);
-    expect(CASES.map((c) => c.id)).toEqual(['case-001', 'case-002', 'case-003', 'case-004', 'case-005', 'case-006', 'case-007']);
+    expect(CASES.map((c) => c.id)).toEqual(['case-001', 'case-002', 'case-003', 'case-004', 'case-005', 'case-006', 'case-007', 'case-008']);
   });
 });
 

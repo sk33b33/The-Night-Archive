@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.17.0 — Case 008: The Next Number (Season 2 opener) (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-008-bible.md`). Beyond
+CLAUDE.md's roadmap.
+
+### Added
+- Engine: **seasons**. Cases carry a season, and the archive groups them
+  under "Season 1" / "Season 2" headings when more than one exists.
+- Artwork:
+  - a **pre-dawn** workstation view (lamp off, sealed envelope, clock 05:12),
+    now used by File 0093
+  - a shared **wall clock** above position 7 in every view: 03:40 in File
+    0091, 11:05 in the 1998 photograph, following the timestamp on camera 2
+  - envelope and night-porter scene states in the CCTV artwork
+- Case 008 content: File 0093 photograph and the camera 2 still at 05:12
+  (matching the wall clock files the required timing note); camera 2
+  footage 04:10–05:20; tonight's intake ledger (0093 at 03:40, 0094
+  reserved); internal post log; lamp circuit log; the sealed envelope (object);
+  your shift log continued; six board rules; five findings.
+- End beat A: once Case 008 closes, ledger 0094's time reads 06:00.
+
+### Changed
+- File 0093's photograph is the pre-dawn view (approved canon change).
+- Case 008 does not take over File 0093's Unfiled card, so Case 007's final
+  beat stays visible.
+
+### Verified
+- typecheck, lint, 329 tests (including season integrity across eight
+  cases), build; Chromium at 360px and 1280px from a Season 1-complete save;
+  axe: no violations; no overflow; no console errors.
+
 ## 0.16.2 — Polish and hardening (2026-11-08)
 
 ### Changed

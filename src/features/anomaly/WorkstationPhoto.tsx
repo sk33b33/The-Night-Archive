@@ -1,15 +1,19 @@
 import { useId } from 'react';
+import { Envelope } from '../evidence/photo/artwork/Envelope';
+import { READING_ROOM_CLOCK, WallClock } from '../evidence/photo/artwork/WallClock';
 import { ARCHIVE_DESK } from '../../content/archive';
 
 interface WorkstationPhotoProps {
   /** Camera date imprint; omit for a print without one. */
   readonly dateStamp?: string;
   /**
-   * night: the File 0091 photograph (lamp lit, papers, dark window).
+   * night: the File 0091 photograph (lamp lit, papers, dark window; clock 03:40).
    * installation: the Estates photograph of 2 Feb 1998 (daylight, no lamp,
-   * no papers, position tag on the desk edge).
+   * no papers, position tag on the desk edge; clock 11:05).
+   * predawn: the File 0093 photograph (lamp off, a sealed envelope where the
+   * papers were, dark window; clock 05:12).
    */
-  readonly variant?: 'night' | 'installation';
+  readonly variant?: 'night' | 'installation' | 'predawn';
   readonly alt: string;
 }
 
@@ -17,8 +21,12 @@ interface WorkstationPhotoProps {
  * A faded night photograph of the player's workstation, drawn as SVG.
  * Static: no animation, so nothing to reduce for reduced-motion users.
  */
+const CLOCK_TIME = { night: '03:40', installation: '11:05', predawn: '05:12' } as const;
+
 export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: WorkstationPhotoProps) {
+  // "night" here means the lamp is lit; the window is dark in night and predawn.
   const night = variant === 'night';
+  const dark = variant !== 'installation';
   const id = useId().replace(/:/g, '');
   return (
     <svg
@@ -57,7 +65,7 @@ export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: Workstat
         <rect width="400" height="300" fill="#2a241e" />
         <rect y="0" width="400" height="168" fill="#332c25" />
         {/* Window blinds: dark outside at night, daylight at installation */}
-        <rect x="26" y="22" width="110" height="96" fill={night ? '#14161a' : '#b9bdb8'} />
+        <rect x="26" y="22" width="110" height="96" fill={dark ? '#14161a' : '#b9bdb8'} />
         {Array.from({ length: 9 }, (_, i) => (
           <rect key={i} x="26" y={24 + i * 10.5} width="110" height="4" fill="#4a4238" opacity="0.8" />
         ))}
@@ -77,7 +85,8 @@ export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: Workstat
 
         {/* Lamp glow (night only) */}
         {night && <rect width="400" height="300" fill={`url(#${id}-lamp)`} />}
-        {!night && <rect width="400" height="300" fill="#d8dcd6" opacity="0.12" />}
+        {!dark && <rect width="400" height="300" fill="#d8dcd6" opacity="0.12" />}
+        <WallClock {...READING_ROOM_CLOCK} time={CLOCK_TIME[variant]} />
 
         {/* Desk */}
         <rect x="0" y="168" width="400" height="132" fill="#4a3a2b" />
@@ -115,18 +124,24 @@ export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: Workstat
           />
         ))}
 
-        {night ? (
+        {dark ? (
           <>
             {/* Desk lamp */}
             <rect x="300" y="196" width="40" height="6" rx="2" fill="#262420" />
             <path d="M318 198 L308 140 L334 114" stroke="#262420" strokeWidth="4" fill="none" />
             <path d="M322 104 L356 118 L344 134 Z" fill="#2f3a36" />
 
-            {/* Papers */}
-            <path d="M40 200 L104 194 L110 236 L44 242 Z" fill="#d9d1bd" />
-            <path d="M52 206 L96 202" stroke="#8c8370" strokeWidth="1.5" />
-            <path d="M54 214 L98 210" stroke="#8c8370" strokeWidth="1.5" />
-            <path d="M55 222 L86 219" stroke="#8c8370" strokeWidth="1.5" />
+            {night ? (
+              <>
+                {/* Papers */}
+                <path d="M40 200 L104 194 L110 236 L44 242 Z" fill="#d9d1bd" />
+                <path d="M52 206 L96 202" stroke="#8c8370" strokeWidth="1.5" />
+                <path d="M54 214 L98 210" stroke="#8c8370" strokeWidth="1.5" />
+                <path d="M55 222 L86 219" stroke="#8c8370" strokeWidth="1.5" />
+              </>
+            ) : (
+              <Envelope />
+            )}
           </>
         ) : (
           <>
@@ -139,8 +154,8 @@ export function WorkstationPhoto({ dateStamp, alt, variant = 'night' }: Workstat
         )}
 
         <rect width="400" height="300" fill={`url(#${id}-vignette)`} />
-        {/* Faded print (the File 0091 photograph only) */}
-        {night && <rect width="400" height="300" fill="#c49a5c" opacity="0.08" />}
+        {/* Faded print (File 0091 and File 0093 photographs) */}
+        {dark && <rect width="400" height="300" fill="#c49a5c" opacity="0.08" />}
       </g>
 
       {/* Camera date imprint */}

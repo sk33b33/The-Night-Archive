@@ -61,6 +61,9 @@ remain hypotheses. **[Rule]** Reasons state what the records show, never why.
 | "Previous asset at this position: None recorded" | [Added] |
 | No intake record; filed by "Not recorded" | [Added] |
 | Photo regions: asset label, terminal screen (on; text unreadable), date imprint | [Added] |
+| Wall clock above position 7 reads 03:40 (Case 001's report time); not a marked region | [Added in Case 008] |
+| Night-entrance door, shut, on the far wall | [Added in Case 006] |
+| HALDEN 486 maker's badge on the terminal | [Added in Case 005] |
 
 **[Rule]** Leave it unexplained. Tests reject explanatory wording in its content.
 Case 004 is titled "File 0091": nothing here may pre-empt it.
