@@ -1,7 +1,21 @@
-# Case bible — Case 009: The Hand (DRAFT for review)
+# Case bible — Case 009: The Hand
 
-Status: **proposal**. Season 2, beyond CLAUDE.md's roadmap. Nothing here is
-canon until approved, and nothing is built before then.
+Status: **approved** (2026-11-08), implemented in `src/content/cases/case-009*.ts`.
+Season 2. All proposals approved, including the envelope's contents.
+**End beat A** chosen ("— tonight" in the staff register): B would have
+shown the player's own initial on the dashboard, the identity link that
+reveal level 1 holds back.
+
+**Changes at implementation:**
+- Board rules: the proposed "method note contradicts post record" rule was
+  dropped as semantically odd. Two plain *derived-from* rules (each
+  comparison note from its samples) replace it.
+- The ordering question orders the **records** the samples appear in
+  (specimen card 1979, intake ledger 1981, calendar 1984, slip tonight), as
+  the bible proposed.
+- Handwriting samples are generated from layout data
+  (`case-009-hands.ts`). The three compared letterforms are drawn as
+  glyphs, and their regions are computed from the same coordinates.
 
 ## The envelope (Claude's proposal, as asked)
 

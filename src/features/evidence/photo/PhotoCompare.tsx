@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 import type { PhotoEvidence } from '../../../domain/evidence';
-import { FULL_VIEW, fitRegion, type PhotoRegion, type PhotoView } from '../../../domain/photoView';
+import { FULL_VIEW, clampView, fitRegion, type PhotoRegion, type PhotoView } from '../../../domain/photoView';
 import { PHOTO_ARTWORK } from './artwork';
 import { PhotoViewer } from './PhotoViewer';
 
@@ -31,23 +31,35 @@ function pairRegions(left: PhotoEvidence, right: PhotoEvidence): RegionPair[] {
 
 /**
  * Two photographs side by side (stacked on narrow screens). With "Keep
- * views in step" on, zooming or panning either moves both. Choosing a
- * region found in both photographs zooms each to it: a match.
+ * views in step" on, zooming or panning either moves both by the same
+ * amount. Choosing a region found in both photographs zooms each to its
+ * own copy of that region: a match.
  */
 export function PhotoCompare({ left, right, onMatch }: PhotoCompareProps) {
   const id = useId();
   const [synced, setSynced] = useState(true);
-  const [shared, setShared] = useState<PhotoView>(FULL_VIEW);
   const [leftView, setLeftView] = useState<PhotoView>(FULL_VIEW);
   const [rightView, setRightView] = useState<PhotoView>(FULL_VIEW);
   const [active, setActive] = useState<RegionPair | null>(null);
   const pairs = pairRegions(left, right);
 
+  /**
+   * In step: apply the same change (zoom ratio and pan) to both photographs,
+   * so each keeps its own framing. This matters when a matched region sits
+   * in a different place in each photograph.
+   */
+  const moveBoth = (from: PhotoView, to: PhotoView) => {
+    const ratio = to.scale / from.scale;
+    const apply = (v: PhotoView) =>
+      clampView({ scale: v.scale * ratio, x: v.x + (to.x - from.x), y: v.y + (to.y - from.y) });
+    setLeftView(apply);
+    setRightView(apply);
+  };
+
   const examine = (pair: RegionPair) => {
     setActive(pair);
     const leftFit = pair.left ? fitRegion(pair.left) : FULL_VIEW;
     const rightFit = pair.right ? fitRegion(pair.right) : FULL_VIEW;
-    setShared(pair.left ? leftFit : rightFit);
     setLeftView(leftFit);
     setRightView(rightFit);
     const discovery = pair.left && pair.right ? (pair.left.revealsOnMatch ?? pair.right.revealsOnMatch) : undefined;
@@ -63,8 +75,8 @@ export function PhotoCompare({ left, right, onMatch }: PhotoCompareProps) {
           {Artwork ? (
             <PhotoViewer
               regions={item.regions}
-              view={synced ? shared : view}
-              onViewChange={synced ? setShared : setView}
+              view={view}
+              onViewChange={(next) => (synced ? moveBoth(view, next) : setView(next))}
               activeRegionId={region?.id ?? null}
               hideRegionList
               label={`Photograph: ${item.title}`}

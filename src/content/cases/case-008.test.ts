@@ -34,7 +34,7 @@ describe('Case 008', () => {
     expect(isCaseAvailable(CASE_008, () => false)).toBe(false);
     expect(isCaseAvailable(CASE_008, (id) => id === C7)).toBe(true);
     expect(seasonOf(CASE_008)).toBe(2);
-    expect(CASES.filter((c) => c.id !== C8).every((c) => seasonOf(c) === 1)).toBe(true);
+    expect(CASES.filter((c) => c.id < C8).every((c) => seasonOf(c) === 1)).toBe(true);
   });
 
   it('does not take over File 0093, so Case 007’s final beat stays visible', () => {

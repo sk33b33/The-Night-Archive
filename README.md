@@ -12,8 +12,8 @@ you go. No accounts, timers, or purchases.
 
 ## Status
 
-All seven roadmap cases (Season 1) and the Season 2 opener are playable, in
-order:
+All seven roadmap cases (Season 1) and the first two cases of Season 2 are
+playable, in order:
 
 | # | Case | Introduces |
 |---|---|---|
@@ -25,6 +25,7 @@ order:
 | 006 | Someone Is Watching | CCTV footage |
 | 007 | The Impossible Call | Side-by-side audio comparison |
 | 008 | The Next Number *(Season 2)* | Seasons on the archive screen |
+| 009 | The Hand *(Season 2)* | Handwriting comparison (letterform regions) |
 
 Each case unlocks when the one before it is closed. Case canon (what is
 established, what is invented, and what must stay unknown) lives in

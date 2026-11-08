@@ -56,4 +56,26 @@ describe('PhotoCompare', () => {
     fireEvent.keyDown(a, { key: '+' });
     expect(layer(b)).not.toBe(layer(a));
   });
+
+  it('zooms each photograph to its own copy of a region, even when they sit in different places', () => {
+    const moved: PhotoEvidence = {
+      ...right,
+      regions: [{ id: 'shared', label: 'Shared thing', note: 'Right note.', x: 0.1, y: 0.7, width: 0.1, height: 0.1 }],
+    };
+    render(<PhotoCompare left={left} right={moved} onMatch={() => {}} />);
+    const [a, b] = screen.getAllByRole('group').filter((g) => g.getAttribute('aria-roledescription'));
+    if (!a || !b) throw new Error('viewers missing');
+    const layer = (g: HTMLElement) => (g.firstElementChild as HTMLElement).style.transform;
+    fireEvent.click(screen.getByRole('button', { name: /Shared thing/ }));
+    // Different regions → different framing, both at the same zoom.
+    expect(layer(a)).not.toBe(layer(b));
+    expect(layer(a)).toContain('scale(4)');
+    expect(layer(b)).toContain('scale(4)');
+    // Moving in step keeps each photograph's own framing (same pan applied to both).
+    const before = [layer(a), layer(b)];
+    fireEvent.keyDown(a, { key: 'ArrowLeft' });
+    expect(layer(a)).not.toBe(before[0]);
+    expect(layer(b)).not.toBe(before[1]);
+    expect(layer(a)).not.toBe(layer(b));
+  });
 });

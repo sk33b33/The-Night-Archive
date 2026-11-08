@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.18.0 — Case 009: The Hand (2026-11-08)
+
+Built from the approved case bible (`docs/cases/case-009-bible.md`). Season 2.
+
+### Added
+- Handwriting samples rendered from layout data: a crossed "M", an open "0",
+  and a slanted "1" drawn identically in every sample, with marked regions
+  computed from the same coordinates.
+- Case 009 content:
+  - the 0094 intake slip from Case 008's envelope
+  - four Season 1 handwriting samples and the 1979 specimen signature card
+  - the staff register (night archivist "M. —", 1979–1983) and the
+    examiner's method note ("consistent with" is the limit)
+  - two comparison notes (required, filed by matching letterforms)
+  - the opened envelope and the current post record
+  - six board rules and five findings
+- End beat A: once Case 009 closes, the register's 1979–1983 line reads
+  "1983 — tonight".
+
+### Fixed
+- **Photo comparison with "Keep views in step":** choosing a region zoomed
+  both photographs to the *left* photograph's region coordinates, so the
+  right one showed the wrong area whenever the region sat elsewhere. Each
+  photograph now zooms to its own copy of the region, and in-step zoom/pan
+  applies the same change to both rather than copying one view onto the
+  other. A regression test covers it. (Cases 005, 006, and 008 were
+  unaffected: their regions sit at identical positions.)
+
+### Verified
+- typecheck, lint, 346 tests (season integrity across nine cases), build;
+  Chromium at 360px and 1280px for Cases 008 and 009; axe: no violations;
+  no overflow; no console errors.
+
 ## 0.17.0 — Case 008: The Next Number (Season 2 opener) (2026-11-08)
 
 Built from the approved case bible (`docs/cases/case-008-bible.md`). Beyond
