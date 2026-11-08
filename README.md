@@ -2,7 +2,7 @@
 
 *Every file has a story. Some stories refuse to stay buried.*
 
-An interface-driven investigation game. You are the night archivist in a
+A first-person investigation game. You are the night archivist in a
 government records facility, reopening unresolved incidents through
 documents, photographs, audio, CCTV, and object records. As the cases go on,
 the files begin to change.
@@ -95,22 +95,28 @@ subpath, set Vite's `base` and the manifest's `start_url` and `scope` in
 ## How it is built
 
 React, TypeScript (strict), and Vite. No UI framework; styles are plain CSS
-with design tokens.
+with design tokens. The reading room is 3D: three.js through React Three
+Fiber and drei, loaded lazily so the title screen appears first.
 
 ```text
 src/
   app/            Navigation, history sync, screen router, update prompt
+  world/          The 3D reading room: layout, walking rules, player
+                  controls, scene (Kenney CC0 models and code-built props)
   components/     Shared UI (buttons, layout, document view, controls)
   content/        Case data, anomalies, the player's desk. No UI code.
   domain/         Pure rules: evidence, deductions, board, saves, playback
-  features/       Screens: archive, briefing, investigation, evidence
+  features/       Screens: the room's on-screen layer, archive terminal,
+                  briefing, investigation, evidence
                   viewers (document, audio, photo, CCTV, object, plan,
                   timeline, registers), board,
                   findings, anomaly, settings
   services/       Persistence (IndexedDB saves), audio synthesis and playback,
                   preferences
   styles/         Tokens and global styles
-docs/             Changelog and per-case bibles
+public/models/   Furniture models (Kenney Furniture Kit, CC0; see CREDITS.md)
+scripts/          Model conversion (OBJ to glTF)
+docs/             Changelog, per-case bibles, 3D engine plan
 .claude/          Agent definitions, skills, and settings for Claude Code
 ```
 
@@ -123,10 +129,16 @@ docs/             Changelog and per-case bibles
 - **Audio:** synthesised in code (seeded, so every render is identical),
   played through the Web Audio API. Words are carried by captions. Real
   recordings can replace the synthesis behind the same timeline model.
+- **The reading room:** walk with W A S D or the arrows, look with R and F
+  or the mouse (click the room), and use what is in front of you with E. On a
+  phone, drag the left half to walk and the right half to look, then tap an
+  object. See `docs/3D-engine-plan.md`.
 - **Accessibility:** keyboard and touch throughout, visible focus, reduced
-  motion respected (CCTV never autoplays under it), a list alternative to the
-  evidence board, and no hover-only controls. Screens are audited with axe at
-  360 px and desktop widths.
+  motion respected (CCTV never autoplays under it; drawers snap instead of
+  sliding), a list alternative to the evidence board, and no hover-only
+  controls. The room's **Places** list reaches every object without walking,
+  and is always open on devices that cannot draw 3D. Screens are audited with
+  axe at 360 px and desktop widths.
 
 ## Working on it with Claude Code
 

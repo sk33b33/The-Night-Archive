@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
-import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
+import { back, caseFiles, click, closedSave, question, resetBrowserState, openTerminal } from '../test/playthrough';
 
 /** Case 012 end to end, from a save with Cases 001–011 closed. */
 const CASE_FILES = caseFiles('case-012');
@@ -17,6 +17,7 @@ describe('Case 012 playthrough', () => {
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
+    openTerminal();
     click(/Case 012/);
     click('Open case files');
 

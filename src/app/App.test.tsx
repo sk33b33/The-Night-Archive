@@ -7,10 +7,13 @@ import { SAVE_VERSION, type SaveGame } from '../domain/save';
 import { createMemoryRepository, type SaveRepository } from '../services/persistence/saveRepository';
 import { PREFERENCES_STORAGE_KEY } from '../services/preferences/preferences';
 import { App } from './App';
+import { roomStore } from '../world/roomStore';
+import { openTerminal } from '../test/playthrough';
 
 const CASE_001 = caseId('case-001');
 
 beforeEach(() => {
+  roomStore.reset();
   window.localStorage.clear();
   window.history.replaceState(null, '');
 });
@@ -99,7 +102,8 @@ describe('shift flow', () => {
     await renderReady(repo);
 
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
-    expect(document.activeElement).toBe(heading('Archive dashboard'));
+    expect(document.activeElement).toBe(heading('Reading room'));
+    openTerminal();
     expect(screen.getByText('New')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
@@ -121,6 +125,7 @@ describe('shift flow', () => {
     const repo = createMemoryRepository();
     await renderReady(repo);
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
 
@@ -161,6 +166,7 @@ describe('shift flow', () => {
     render(<App repository={repo} createEngine={() => engine} />);
     await waitFor(() => expect(screen.getByRole('navigation').getAttribute('aria-busy')).toBe('false'));
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
     fireEvent.click(screen.getByRole('button', { name: /Audio reel/ }));
@@ -208,6 +214,7 @@ describe('shift flow', () => {
     render(<App repository={createMemoryRepository()} createEngine={() => null} />);
     await waitFor(() => expect(screen.getByRole('navigation').getAttribute('aria-busy')).toBe('false'));
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
     fireEvent.click(screen.getByRole('button', { name: /Audio reel/ }));
@@ -221,6 +228,7 @@ describe('shift flow', () => {
     const repo = createMemoryRepository();
     await renderReady(repo);
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
     fireEvent.click(screen.getByRole('button', { name: 'Open evidence board' }));
@@ -272,6 +280,7 @@ describe('shift flow', () => {
     const repo = createMemoryRepository();
     await renderReady(repo);
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
     fireEvent.click(screen.getByRole('button', { name: 'Case findings' }));
@@ -320,7 +329,7 @@ describe('shift flow', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'Return to the archive' }));
-    expect(heading('Archive dashboard')).toBeTruthy();
+    expect(heading('Reading room')).toBeTruthy();
     expect(screen.getByText('Closed')).toBeTruthy();
 
     // The end anomaly appears, unexplained.
@@ -338,6 +347,7 @@ describe('shift flow', () => {
     const repo = createMemoryRepository();
     await renderReady(repo);
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
     fireEvent.click(screen.getByRole('button', { name: 'Case findings' }));
@@ -358,6 +368,7 @@ describe('shift flow', () => {
   it('shows the workstation on the dashboard and no anomaly before the case closes', async () => {
     await renderReady();
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     expect(screen.getByText('NA-07')).toBeTruthy();
     expect(screen.queryByText('File 0091')).toBeNull();
   });
@@ -378,6 +389,7 @@ describe('shift flow', () => {
     const repo = createMemoryRepository();
     await renderReady(repo);
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     fireEvent.click(screen.getByRole('button', { name: /The Missing Recording/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Open case files' }));
     fireEvent.click(screen.getByRole('button', { name: /Incident report/ }));
@@ -484,6 +496,7 @@ describe('shift flow', () => {
     };
     await renderReady(failing);
     fireEvent.click(screen.getByRole('button', { name: 'Begin shift' }));
+    openTerminal();
     expect(await screen.findByText(/latest progress could not be saved/)).toBeTruthy();
   });
 });

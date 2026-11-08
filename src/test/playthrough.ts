@@ -2,6 +2,7 @@ import { fireEvent, queries, screen, within, type BoundFunctions } from '@testin
 import { caseId } from '../domain/case';
 import { createSave, recordAttempt } from '../domain/progress';
 import type { SaveGame } from '../domain/save';
+import { roomStore } from '../world/roomStore';
 
 /** Shared helpers for the App-level playthrough tests. */
 
@@ -41,8 +42,14 @@ export function question(prompt: RegExp): BoundFunctions<typeof queries> {
   return within(section);
 }
 
+/** In the reading room, uses the NA-07 computer to open the archive terminal (via Places). */
+export function openTerminal(): void {
+  fireEvent.click(screen.getByRole('button', { name: /^Desk computer, NA-07/ }));
+}
+
 /** Resets browser state between playthrough tests. */
 export function resetBrowserState(): void {
+  roomStore.reset();
   window.localStorage.clear();
   window.sessionStorage.clear();
   window.history.replaceState(null, '');

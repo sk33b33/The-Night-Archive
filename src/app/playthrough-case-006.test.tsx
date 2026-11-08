@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
-import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
+import { back, caseFiles, click, closedSave, question, resetBrowserState, openTerminal } from '../test/playthrough';
 
 /** Case 006 end to end, from a save with Cases 001–005 closed. */
 const CASE_FILES = caseFiles('case-006');
@@ -18,6 +18,7 @@ describe('Case 006 playthrough', () => {
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
+    openTerminal();
     click(/Someone Is Watching/);
     click('Open case files');
 

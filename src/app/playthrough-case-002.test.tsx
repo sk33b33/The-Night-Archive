@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
-import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
+import { back, caseFiles, click, closedSave, question, resetBrowserState, openTerminal } from '../test/playthrough';
 
 /** Case 002 end to end, starting from a save where Case 001 is closed. */
 const noSound = () => null;
@@ -20,6 +20,7 @@ describe('Case 002 playthrough', () => {
     render(<App repository={createMemoryRepository()} createEngine={noSound} />);
     await waitFor(() => expect(screen.getByRole('navigation').getAttribute('aria-busy')).toBe('false'));
     click('Begin shift');
+    openTerminal();
     expect(screen.queryByText('The Empty House')).toBeNull();
     expect(screen.getByText('1', { selector: 'dd' })).toBeTruthy();
   });
@@ -29,7 +30,9 @@ describe('Case 002 playthrough', () => {
     render(<App repository={repo} createEngine={noSound} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
-    expect(heading('Archive dashboard')).toBeTruthy();
+    openTerminal();
+    expect(heading('Reading room')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Archive terminal · NA-07' })).toBeTruthy();
     expect(screen.queryByText(/amended since filing/)).toBeNull();
 
     click(/The Empty House/);

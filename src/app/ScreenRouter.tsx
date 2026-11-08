@@ -21,7 +21,7 @@ import {
   type DocumentEvidence,
 } from '../domain/evidence';
 import { caseProgress, caseStatus, choiceOf } from '../domain/progress';
-import { ArchiveScreen } from '../features/archive/ArchiveScreen';
+import { RoomScreen } from '../features/room/RoomScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { EvidenceScreen } from '../features/evidence/EvidenceScreen';
@@ -31,6 +31,7 @@ import { InvestigationScreen } from '../features/investigation/InvestigationScre
 import { MainMenu } from '../features/menu/MainMenu';
 import { SettingsScreen } from '../features/settings/SettingsScreen';
 import type { SaveController } from '../services/persistence/useSaveGame';
+import type { SaveGame } from '../domain/save';
 import type { PreferencesController } from '../services/preferences/usePreferences';
 import type { Screen } from './navigation';
 
@@ -63,18 +64,24 @@ function amendedRecords(caseFile: CaseDefinition, isClosed: (id: CaseId) => bool
   return caseFile.evidence.filter((e) => isAmended(e, isClosed, chose)).length;
 }
 
-/** Maps the current screen to its feature component. No navigation state here. */
-export function ScreenRouter(props: ScreenRouterProps) {
-  const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
-  const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
+/** What is on file for this save: the cases assigned and anything unfiled. */
+export function shiftContents(save: SaveGame | null) {
   const statusOf = (id: CaseId) => caseStatus(save, id, closingChoiceOf(id));
   const isClosed = (id: CaseId) => statusOf(id) === 'closed';
-  const chose: ChoseFn = (choiceId, value) => choiceOf(save, choiceId) === value;
-  const finaleChoice = choiceOf(save, FINALE.choiceId);
   const cases = CASES.filter((c) => isCaseAvailable(c, isClosed));
   // An anomaly taken over by an available case leaves the Unfiled section.
   const replaced = new Set(cases.flatMap((c) => (c.replacesAnomaly ? [c.replacesAnomaly] : [])));
   const anomalies = visibleAnomalies(ANOMALIES, isClosed).filter((a) => !replaced.has(a.id));
+  return { statusOf, isClosed, cases, anomalies };
+}
+
+/** Maps the current screen to its feature component. No navigation state here. */
+export function ScreenRouter(props: ScreenRouterProps) {
+  const { screen, focusOnMount, saveGame, notice, navigate, back } = props;
+  const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
+  const { statusOf, isClosed, cases, anomalies } = shiftContents(save);
+  const chose: ChoseFn = (choiceId, value) => choiceOf(save, choiceId) === value;
+  const finaleChoice = choiceOf(save, FINALE.choiceId);
   const anomalyRoute = visibleAnomalies(ANOMALIES, isClosed);
 
   switch (screen.id) {
@@ -102,22 +109,28 @@ export function ScreenRouter(props: ScreenRouterProps) {
       );
     case 'archive':
       return (
-        <ArchiveScreen
-          cases={cases}
-          statusOf={statusOf}
-          amendedCount={(id) => {
-            const c = findCase(id);
-            return c ? amendedRecords(c, isClosed, chose) : 0;
-          }}
-          onOpenCase={(caseId) => navigate({ id: 'briefing', caseId })}
-          anomalies={anomalies}
-          onOpenAnomaly={(anomalyId) => navigate({ id: 'anomaly', anomalyId })}
-          shiftLine={finaleChoice && FINALE.shiftLine[finaleChoice]}
-          seasonComplete={finaleChoice && isClosed(caseId(FINALE.caseId)) ? FINALE.ending[finaleChoice] : undefined}
-          focusOnMount={focusOnMount}
-          onBack={back}
-          notice={notice}
-        />
+        <>
+          <RoomScreen
+            view={{
+              cases,
+              statusOf,
+              amendedCount: (id) => {
+                const c = findCase(id);
+                return c ? amendedRecords(c, isClosed, chose) : 0;
+              },
+              onOpenCase: (id) => navigate({ id: 'briefing', caseId: id }),
+              anomalies,
+              onOpenAnomaly: (anomalyId) => navigate({ id: 'anomaly', anomalyId }),
+              shiftLine: finaleChoice && FINALE.shiftLine[finaleChoice],
+              seasonComplete:
+                finaleChoice && isClosed(caseId(FINALE.caseId)) ? FINALE.ending[finaleChoice] : undefined,
+            }}
+            onLeave={() => navigate({ id: 'menu' })}
+            onOpenSettings={() => navigate({ id: 'settings' })}
+            focusOnMount={focusOnMount}
+          />
+          {notice}
+        </>
       );
     case 'anomaly': {
       // Still reachable after a case takes it over (e.g. from history).

@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.24.0 — The 3D reading room (2026-11-08)
+
+The archive becomes a place. Plan and decisions: `docs/3D-engine-plan.md`.
+
+### Added
+- **A first-person 3D reading room** (three.js via React Three Fiber, drei).
+  - The archive dashboard is now the room itself: three desks with NA-07
+    in the middle, a filing cabinet, bookcases, the camera 2 monitor, the
+    door, the clock at 03:40, and a warm desk lamp in the dark.
+  - Free roam: W A S D or the arrows to walk, R and F to look up and down,
+    mouse-look on click, and touch sticks (drag the left half to walk, the
+    right half to look). Walls and furniture block you, and you slide
+    along them.
+  - **Use what is in front of you** with E, a click or a tap:
+    - the NA-07 computer opens the archive terminal
+    - the cabinet's Season 1 and Season 2 drawers slide out with a folder
+      per case
+    - the Unfiled tray lists unregistered files
+    - the door leaves to the title screen
+- **Places**, a list in the room's bar that reaches every object without
+  walking: for keyboard and screen-reader users, and always open on devices
+  that cannot draw 3D.
+- Every other screen (briefing, evidence, board, findings, settings,
+  anomalies) opens over the dimmed room. The title screen shows the room
+  behind it. Coming back from a case reopens the station you left.
+- Furniture models from Kenney's Furniture Kit (CC0), converted to glTF by
+  `scripts/convert-models.mjs` (see `public/models/CREDITS.md`).
+  Interactive pieces are built in code.
+
+### Changed
+- **The engine loads lazily** with the reading room (about 270 KB
+  gzipped), so the title screen does not wait for it. Models are cached
+  for offline play.
+- The main menu's "Archive dashboard" button is now "Reading room".
+
+### Checked
+- Typecheck, lint and 473 tests pass, including pure tests for walking
+  and collision, and tests for the room's on-screen layer.
+- In a browser at 360 px and 1280 px: the PC, cabinet drawer and door each
+  focus and open the right panel. axe found no violations on the title,
+  room, Places, terminal or briefing screens, with no horizontal overflow
+  and no console errors.
+
 ## 0.23.1 — Season 2 hardening (2026-11-08)
 
 ### Added

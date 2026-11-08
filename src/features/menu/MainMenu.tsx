@@ -46,7 +46,7 @@ export function MainMenu({
             <Button variant="primary" onClick={onContinue}>
               Continue
             </Button>
-            <Button onClick={onOpenArchive}>Archive dashboard</Button>
+            <Button onClick={onOpenArchive}>Reading room</Button>
           </>
         ) : (
           <>

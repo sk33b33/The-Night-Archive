@@ -22,6 +22,19 @@ Mark each line ✅, ❌ (note what happened), or n/a.
 - [ ] The home-screen icon is the archive box, not cropped (maskable icon).
 - [ ] On a fresh install, **Continue** is unavailable and says why. **Begin shift** and **Settings** work.
 
+## 1a. The 3D reading room
+
+- [ ] **Continue** or **Begin shift** shows the room within a few seconds; the
+      title screen appears first, without waiting for it.
+- [ ] Phone: dragging the left half walks and the right half looks; walking
+      stays smooth (no stutter) for a minute of moving around.
+- [ ] Tapping the computer, a cabinet drawer, the Unfiled tray and the door
+      uses each one. The drawer slides out with folders inside.
+- [ ] Desktop: clicking the room captures the mouse for looking; **Esc** gives it back.
+- [ ] **Places** reaches every object without walking.
+- [ ] The phone does not get hot or drain quickly in five minutes in the room.
+      Note the model and Android version.
+
 ## 2. Navigation and saving
 
 - [ ] The Android **back gesture** moves back one screen every time and never

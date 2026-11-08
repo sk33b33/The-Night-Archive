@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
-import { back, caseFiles, click, question, resetBrowserState } from '../test/playthrough';
+import { back, caseFiles, click, openTerminal, question, resetBrowserState } from '../test/playthrough';
 
 /**
  * Full Case 001 playthrough, as a regression test for the complete loop:
@@ -27,6 +27,7 @@ describe('Case 001 full playthrough', () => {
 
     // Shift starts; briefing; case files.
     click('Begin shift');
+    openTerminal();
     click(/The Missing Recording/);
     expect(screen.getByText('Elias Ward (station staff)')).toBeTruthy();
     click('Open case files');
@@ -108,11 +109,12 @@ describe('Case 001 full playthrough', () => {
 
     // A later session still sees the closed case and the unfiled file.
     cleanup();
-    window.history.replaceState(null, '');
+    resetBrowserState();
     await act(async () => {
       render(<App repository={repo} createEngine={noSound} />);
     });
-    click('Archive dashboard');
+    click('Reading room');
+    openTerminal();
     expect(screen.getByText('Closed')).toBeTruthy();
     expect(screen.getByRole('button', { name: /File 0091/ })).toBeTruthy();
   });

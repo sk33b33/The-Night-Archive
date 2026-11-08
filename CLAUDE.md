@@ -8,7 +8,7 @@ Build **The Night Archive**, a polished, mysterious, interface-driven investigat
 ## Product constraints
 - Browser-first, installable PWA; Android-friendly from the first release.
 - Solo-developer scope. Finish and polish the first case before adding chapters.
-- Modern premium dark interface; no 3D game requirement.
+- Modern premium dark interface. Since 2026-11-08 the archive is a first-person 3D reading room (free roam; see `docs/3D-engine-plan.md`); evidence, board and findings stay 2D overlays. Every object in the room must also be reachable from the Places list.
 - Sessions target 10–20 minutes; save and resume at any point.
 - No energy systems, wait timers, or pay-to-progress mechanics.
 - Deductions are authored and deterministic. No LLM/API calls during gameplay.
@@ -23,7 +23,7 @@ Build **The Night Archive**, a polished, mysterious, interface-driven investigat
 - Web Audio API for playback and basic audio interaction.
 - SVG for evidence-board connections.
 - Add a maintained Vite PWA plugin when the app shell is stable.
-- Capacitor is a later packaging step. Phaser is unnecessary unless a future feature demands it.
+- Capacitor is a later packaging step. The 3D room uses three.js via React Three Fiber and drei (lazily loaded); Phaser is unnecessary.
 - Inspect the repo before changing it; preserve existing work. Explain dependencies before adding them.
 
 ## Visual direction

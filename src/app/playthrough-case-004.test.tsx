@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
-import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
+import { back, caseFiles, click, closedSave, question, resetBrowserState, openTerminal } from '../test/playthrough';
 
 /** Case 004 end to end, from a save with Cases 001–003 closed. */
 const CASE_FILES = caseFiles('case-004');
@@ -18,6 +18,7 @@ describe('Case 004 playthrough', () => {
     render(<App repository={createMemoryRepository(closedSave('case-001', 'case-002'))} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
+    openTerminal();
     expect(screen.getByRole('heading', { name: 'Unfiled' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Case 004/ })).toBeNull();
   });
@@ -27,6 +28,7 @@ describe('Case 004 playthrough', () => {
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
+    openTerminal();
     expect(screen.queryByRole('heading', { name: 'Unfiled' })).toBeNull();
     click(/Case 004/);
     expect(screen.getByText('[Line ruled through]')).toBeTruthy();

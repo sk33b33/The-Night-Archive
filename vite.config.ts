@@ -34,19 +34,25 @@ export default defineConfig({
       },
       workbox: {
         // Everything the game needs is in the build; cache it all for offline play.
-        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,glb}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
       },
     }),
   ],
   build: {
+    // The 3D engine (three.js) is one lazily loaded chunk of about 1 MB (270 KB gzipped).
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
         // React and other dependencies change far less often than the game.
         // A separate chunk means an update only re-downloads the game's code.
         manualChunks(id: string) {
-          return id.includes('node_modules') ? 'vendor' : undefined;
+          if (!id.includes('node_modules')) return undefined;
+          // React and the small libraries the first screen needs. The 3D engine
+          // is left out on purpose: it is split off with the lazily loaded
+          // reading room, so the title screen never waits for it.
+          return /node_modules\/(react|react-dom|scheduler|workbox-window)\//.test(id) ? 'vendor' : undefined;
         },
       },
     },

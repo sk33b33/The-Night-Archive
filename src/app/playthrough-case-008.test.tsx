@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { SaveGame } from '../domain/save';
 import { createMemoryRepository } from '../services/persistence/saveRepository';
 import { App } from './App';
-import { back, caseFiles, click, closedSave, question, resetBrowserState } from '../test/playthrough';
+import { back, caseFiles, click, closedSave, question, resetBrowserState, openTerminal } from '../test/playthrough';
 
 /** Case 008 end to end, from a save with Season 1 (Cases 001–007) closed. */
 const CASE_FILES = caseFiles('case-008');
@@ -17,6 +17,7 @@ describe('Case 008 playthrough', () => {
     render(<App repository={createMemoryRepository(closedSave(...SEASON_1))} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
+    openTerminal();
     expect(screen.getByRole('heading', { name: 'Season 1' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Season 2' })).toBeTruthy();
     expect(screen.getByRole('button', { name: /^No intake record.*File 0093/ })).toBeTruthy();
@@ -27,6 +28,7 @@ describe('Case 008 playthrough', () => {
     render(<App repository={repo} />);
     await waitFor(() => expect(screen.getByRole('button', { name: 'Continue' })).toBeTruthy());
     click('Continue');
+    openTerminal();
     click(/The Next Number/);
     expect(screen.getByText('Reserved')).toBeTruthy();
     click('Open case files');

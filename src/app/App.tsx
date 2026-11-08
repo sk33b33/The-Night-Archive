@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { saveWarning } from '../services/persistence/saveMessages';
 import { browserRepository, type SaveRepository } from '../services/persistence/saveRepository';
 import { useSaveGame } from '../services/persistence/useSaveGame';
@@ -16,7 +16,15 @@ import {
   type Screen,
 } from './navigation';
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
-import { ScreenRouter } from './ScreenRouter';
+import { ScreenRouter, shiftContents } from './ScreenRouter';
+import { seasonOf } from '../domain/case';
+import { operate } from '../features/room/RoomScreen';
+import { prefersReducedMotion } from '../services/preferences/motion';
+import { roomStore, useRoom } from '../world/roomStore';
+import { canDrawWorld } from '../world/webgl';
+
+/** The 3D reading room and its engine load after the first screen is up. */
+const World = lazy(() => import('../world/World'));
 
 interface AppProps {
   /** Injected in tests; defaults to IndexedDB in the browser. */
@@ -94,9 +102,37 @@ export function App({ repository, createEngine }: AppProps) {
 
   const warningText = saveWarning(saveGame.state);
   const screen = currentScreen(nav);
+  const room = useRoom();
+  const [drawWorld] = useState(canDrawWorld);
+  useEffect(() => roomStore.setSceneUnavailable(!drawWorld), [drawWorld]);
+  const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
+  const { cases, anomalies } = shiftContents(save);
+  const inRoom = screen.id === 'archive';
+  const leaveRoom = useCallback(() => navigate({ id: 'menu' }), [navigate]);
+  const handleUse = useCallback((id: Parameters<typeof operate>[0]) => operate(id, leaveRoom), [leaveRoom]);
+  const shellClass = !drawWorld
+    ? 'app-shell'
+    : inRoom
+      ? 'app-shell app-shell--room'
+      : screen.id === 'menu'
+        ? 'app-shell app-shell--title'
+        : 'app-shell app-shell--overlay';
 
   return (
-    <main className="app-shell" key={screenKey(screen)}>
+    <>
+    {drawWorld && (
+      <Suspense fallback={null}>
+        <World
+          active={inRoom && room.panel === null}
+          backdrop={!inRoom}
+          reduceMotion={prefersReducedMotion()}
+          folders={[cases.filter((c) => seasonOf(c) === 1).length, cases.filter((c) => seasonOf(c) === 2).length]}
+          unfiled={anomalies.length}
+          onUse={handleUse}
+        />
+      </Suspense>
+    )}
+    <main className={shellClass} key={screenKey(screen)}>
       <ScreenRouter
         screen={screen}
         focusOnMount={hasNavigated}
@@ -115,5 +151,6 @@ export function App({ repository, createEngine }: AppProps) {
         createEngine={createEngine}
       />
     </main>
+    </>
   );
 }
