@@ -76,6 +76,10 @@ Serve a production build over HTTPS (any static host). Open it in Chrome on
 Android and choose **Install app**, or **Add to Home screen** in Safari on
 iOS. New versions wait until the player taps **Update now**. Saves are kept.
 
+A full on-device pass (touch, install, back gesture, offline, and
+listening to the audio) is in
+[`docs/QA-device-checklist.md`](docs/QA-device-checklist.md).
+
 The app assumes it is served from the domain root (`/`). To host it under a
 subpath, set Vite's `base` and the manifest's `start_url` and `scope` in
 `vite.config.ts`.
