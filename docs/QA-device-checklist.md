@@ -32,6 +32,8 @@ Mark each line ✅, ❌ (note what happened), or n/a.
       uses each one. The drawer slides out with folders inside.
 - [ ] Desktop: clicking the room captures the mouse for looking; **Esc** gives it back.
 - [ ] **Places** reaches every object without walking.
+- [ ] With a case open, its folder is on the desk; the corkboard, clipboard and
+      monitor open its board, findings and footage (Case 006 has footage).
 - [ ] The phone does not get hot or drain quickly in five minutes in the room.
       Note the model and Android version.
 

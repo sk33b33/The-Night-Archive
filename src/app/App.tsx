@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { saveWarning } from '../services/persistence/saveMessages';
 import { browserRepository, type SaveRepository } from '../services/persistence/saveRepository';
 import { useSaveGame } from '../services/persistence/useSaveGame';
@@ -18,9 +18,11 @@ import {
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { ScreenRouter, shiftContents } from './ScreenRouter';
 import { seasonOf } from '../domain/case';
-import { operate } from '../features/room/RoomScreen';
+import { operate, type CurrentCase, type RoomActions } from '../features/room/RoomScreen';
+import { footageOf, workingCase } from './workingCase';
+import type { InteractableId } from '../world/layout';
 import { prefersReducedMotion } from '../services/preferences/motion';
-import { roomStore, useRoom } from '../world/roomStore';
+import { caseMemory, roomStore, useRoom } from '../world/roomStore';
 import { canDrawWorld } from '../world/webgl';
 
 /** The 3D reading room and its engine load after the first screen is up. */
@@ -78,6 +80,21 @@ export function App({ repository, createEngine }: AppProps) {
     [nav, show],
   );
 
+  /** Goes through several screens at once, so Back walks back through each. */
+  const navigateThrough = useCallback(
+    (screens: readonly Screen[]) => {
+      let next = nav;
+      for (const to of screens) {
+        const step = navigationReducer(next, { type: 'navigate', to });
+        if (step === next) continue;
+        window.history.pushState(toHistoryState(step), '');
+        next = step;
+      }
+      if (next !== nav) show(next);
+    },
+    [nav, show],
+  );
+
   const back = useCallback(() => {
     if (!canGoBack(nav)) return;
     // Defer to the browser so in-app and system back stay in step; the
@@ -106,10 +123,39 @@ export function App({ repository, createEngine }: AppProps) {
   const [drawWorld] = useState(canDrawWorld);
   useEffect(() => roomStore.setSceneUnavailable(!drawWorld), [drawWorld]);
   const save = saveGame.state.status === 'ready' ? saveGame.state.save : null;
-  const { cases, anomalies } = shiftContents(save);
+  const { cases, anomalies, statusOf, isClosed } = shiftContents(save);
   const inRoom = screen.id === 'archive';
-  const leaveRoom = useCallback(() => navigate({ id: 'menu' }), [navigate]);
-  const handleUse = useCallback((id: Parameters<typeof operate>[0]) => operate(id, leaveRoom), [leaveRoom]);
+
+  // Remember the case you open, so the room's case objects follow it.
+  const screenCase = 'caseId' in screen ? screen.caseId : null;
+  useEffect(() => {
+    if (screenCase) caseMemory.set(screenCase);
+  }, [screenCase]);
+  const working = workingCase(save, cases, statusOf, screenCase ?? caseMemory.get());
+  const footage = working ? footageOf(working, save, isClosed) : null;
+  const current: CurrentCase | null = working ? { number: working.number, title: working.title } : null;
+  const roomActions: RoomActions = {
+    leave: () => navigate({ id: 'menu' }),
+    ...(working && {
+      openCaseFiles: () => navigate({ id: 'investigation', caseId: working.id }),
+      openBoard: () => navigateThrough([{ id: 'investigation', caseId: working.id }, { id: 'board', caseId: working.id }]),
+      openFindings: () =>
+        navigateThrough([{ id: 'investigation', caseId: working.id }, { id: 'findings', caseId: working.id }]),
+      ...(footage && {
+        openFootage: () =>
+          navigateThrough([
+            { id: 'investigation', caseId: working.id },
+            { id: 'evidence', caseId: working.id, evidenceId: footage },
+          ]),
+      }),
+    }),
+  };
+  const actionsRef = useRef(roomActions);
+  useEffect(() => {
+    actionsRef.current = roomActions;
+  });
+  // A stable handler for the scene; it always uses the latest actions.
+  const handleUse = useCallback((id: InteractableId) => operate(id, actionsRef.current), []);
   const shellClass = !drawWorld
     ? 'app-shell'
     : inRoom
@@ -128,6 +174,7 @@ export function App({ repository, createEngine }: AppProps) {
           reduceMotion={prefersReducedMotion()}
           folders={[cases.filter((c) => seasonOf(c) === 1).length, cases.filter((c) => seasonOf(c) === 2).length]}
           unfiled={anomalies.length}
+          workingCase={working ? { number: working.number, cards: working.evidence.length, footage: footage !== null } : null}
           onUse={handleUse}
         />
       </Suspense>
@@ -148,6 +195,7 @@ export function App({ repository, createEngine }: AppProps) {
         navigate={navigate}
         back={back}
         onContinue={continueShift}
+        room={{ actions: roomActions, current }}
         createEngine={createEngine}
       />
     </main>

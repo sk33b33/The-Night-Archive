@@ -7,7 +7,7 @@ import { PLAYER, type InteractableId } from './layout';
  * it survives moving between screens: coming back from a case returns you
  * to the station you left from, with its panel open.
  */
-export type PanelId = 'terminal' | 'drawer-1' | 'drawer-2' | 'tray';
+export type PanelId = 'terminal' | 'drawer-1' | 'drawer-2' | 'tray' | 'no-case' | 'no-footage';
 
 export interface RoomState {
   /** The object in front of you that can be used, if any. */
@@ -44,6 +44,7 @@ export const roomStore = {
   setSceneUnavailable: (sceneUnavailable: boolean) => set({ sceneUnavailable }),
   /** For tests and a new game: back to the door, nothing open. */
   reset(): void {
+    lastCase = null;
     Object.assign(pose, { x: PLAYER.start.x, z: PLAYER.start.z, yaw: PLAYER.start.yaw, pitch: PLAYER.start.pitch });
     state = { focus: null, panel: null, sceneUnavailable: state.sceneUnavailable };
     for (const l of listeners) l();
@@ -54,15 +55,20 @@ export function useRoom(): RoomState {
   return useSyncExternalStore(roomStore.subscribe, roomStore.get, roomStore.get);
 }
 
-/** Which panel an object opens; the door opens none (it leaves the room). */
+/** Which panel an object opens; the door and the case objects open none (they lead to screens). */
 export function panelFor(id: InteractableId): PanelId | null {
   switch (id) {
     case 'door':
       return null;
     case 'pc':
       return 'terminal';
-    default:
+    case 'drawer-1':
+    case 'drawer-2':
+    case 'tray':
       return id;
+    // Case objects open the case's own screens, or explain why they cannot.
+    default:
+      return null;
   }
 }
 
@@ -71,3 +77,15 @@ export function panelFor(id: InteractableId): PanelId | null {
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   (window as unknown as { __nightArchiveRoom?: unknown }).__nightArchiveRoom = { pose, roomStore };
 }
+
+/**
+ * The case you were last working on this session, if any. The case
+ * objects in the room (folder, corkboard, clipboard, monitor) follow it.
+ */
+let lastCase: string | null = null;
+export const caseMemory = {
+  get: (): string | null => lastCase,
+  set(id: string | null): void {
+    lastCase = id;
+  },
+};

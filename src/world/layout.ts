@@ -37,7 +37,16 @@ export const PLAYER = {
 /** Kenney Furniture Kit models are about half real scale. */
 export const KIT_SCALE = 2;
 
-export type InteractableId = 'pc' | 'drawer-1' | 'drawer-2' | 'tray' | 'door';
+export type InteractableId =
+  | 'pc'
+  | 'drawer-1'
+  | 'drawer-2'
+  | 'tray'
+  | 'door'
+  | 'folder'
+  | 'board'
+  | 'findings'
+  | 'monitor';
 
 export interface Interactable {
   readonly id: InteractableId;
@@ -53,7 +62,25 @@ export const INTERACTABLES: readonly Interactable[] = [
   { id: 'drawer-2', name: 'Filing cabinet, Season 2 drawer', action: 'Open the drawer' },
   { id: 'tray', name: 'Unfiled tray', action: 'Look through the tray' },
   { id: 'door', name: 'Reading room door', action: 'Leave the reading room' },
+  // The case you are working: on the desk, on the left wall, on the monitor.
+  { id: 'folder', name: 'Case folder on your desk', action: 'Open the case files' },
+  { id: 'board', name: 'Corkboard', action: 'Open the evidence board' },
+  { id: 'findings', name: 'Findings clipboard', action: 'Write up findings' },
+  { id: 'monitor', name: 'Camera 2 monitor', action: 'Watch the footage' },
 ];
+
+/** Objects that belong to the case you are working; they need one open. */
+export const CASE_OBJECTS: readonly InteractableId[] = ['folder', 'board', 'findings', 'monitor'];
+
+/** The case folder lies open on your desk, left of the keyboard (desk-local, metres). */
+export const FOLDER = { x: -0.52, z: 0.21 } as const;
+
+/** The case wall: the corkboard and the findings clipboard, on the left wall. */
+export const CORKBOARD = { z: -1.25, y: 1.55, width: 1.4, height: 0.9 } as const;
+export const CLIPBOARD = { z: 1.3, y: 1.35 } as const;
+
+/** The camera 2 monitor (Kenney vintage TV) on the front-right table. */
+export const MONITOR = { x: 3.2, z: 2.45, top: 0.654 } as const;
 
 export function interactable(id: InteractableId): Interactable {
   const found = INTERACTABLES.find((i) => i.id === id);

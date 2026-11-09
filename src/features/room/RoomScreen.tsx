@@ -1,12 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { seasonOf } from '../../domain/case';
 import { ArchiveTerminal, CaseFolders, UnfiledList, type ArchiveView } from '../archive/ArchiveScreen';
-import { INTERACTABLES, interactable, type InteractableId } from '../../world/layout';
+import { CASE_OBJECTS, INTERACTABLES, interactable, type Interactable, type InteractableId } from '../../world/layout';
 import { panelFor, roomStore, useRoom, type PanelId } from '../../world/roomStore';
+
+/** The case you are working, as the room shows it. */
+export interface CurrentCase {
+  readonly number: string;
+  readonly title: string;
+}
 
 interface RoomScreenProps {
   readonly view: ArchiveView;
-  readonly onLeave: () => void;
+  readonly actions: RoomActions;
+  readonly current: CurrentCase | null;
   readonly onOpenSettings: () => void;
   readonly focusOnMount: boolean;
 }
@@ -16,13 +23,65 @@ const PANEL_TITLE: Record<PanelId, string> = {
   'drawer-1': 'Filing cabinet · Season 1',
   'drawer-2': 'Filing cabinet · Season 2',
   tray: 'Unfiled tray',
+  'no-case': 'No case open',
+  'no-footage': 'Camera 2 monitor',
 };
 
-/** Uses an object in the room: the door leaves; everything else opens its panel. */
-export function operate(id: InteractableId, onLeave: () => void): void {
+/**
+ * Which objects are in the room, given the case you are working: the case
+ * folder is only on the desk when a case is open.
+ */
+export function present(i: Interactable, current: CurrentCase | null): boolean {
+  return i.id !== 'folder' || current !== null;
+}
+
+/** The case an object belongs to, shown under it in Places and the prompt. */
+export function caseNote(i: Interactable, current: CurrentCase | null): string | null {
+  if (!CASE_OBJECTS.includes(i.id)) return null;
+  return current ? `Case ${current.number} · ${current.title}` : 'No case open';
+}
+
+/** Where the room's objects lead. Case actions are absent when there is no case (or no footage). */
+export interface RoomActions {
+  readonly leave: () => void;
+  readonly openCaseFiles?: (() => void) | undefined;
+  readonly openBoard?: (() => void) | undefined;
+  readonly openFindings?: (() => void) | undefined;
+  readonly openFootage?: (() => void) | undefined;
+}
+
+/**
+ * Uses an object in the room. Stations open their panel; the door leaves;
+ * the case objects open the case's screens, or a panel saying why not.
+ */
+export function operate(id: InteractableId, actions: RoomActions): void {
   const panel = panelFor(id);
-  if (panel) roomStore.openPanel(panel);
-  else onLeave();
+  if (panel) {
+    roomStore.openPanel(panel);
+    return;
+  }
+  const noCase = () => roomStore.openPanel('no-case');
+  switch (id) {
+    case 'door':
+      actions.leave();
+      return;
+    case 'folder':
+      (actions.openCaseFiles ?? noCase)();
+      return;
+    case 'board':
+      (actions.openBoard ?? noCase)();
+      return;
+    case 'findings':
+      (actions.openFindings ?? noCase)();
+      return;
+    case 'monitor':
+      if (actions.openFootage) actions.openFootage();
+      else if (actions.openCaseFiles) roomStore.openPanel('no-footage');
+      else noCase();
+      return;
+    default:
+      return;
+  }
 }
 
 /**
@@ -30,7 +89,7 @@ export function operate(id: InteractableId, onLeave: () => void): void {
  * the scene offers can also be reached from the Places list, by keyboard
  * or screen reader, and still works when the scene cannot be shown.
  */
-export function RoomScreen({ view, onLeave, onOpenSettings, focusOnMount }: RoomScreenProps) {
+export function RoomScreen({ view, actions, current, onOpenSettings, focusOnMount }: RoomScreenProps) {
   const id = useId();
   const room = useRoom();
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -60,10 +119,12 @@ export function RoomScreen({ view, onLeave, onOpenSettings, focusOnMount }: Room
 
   const use = (target: InteractableId) => {
     setPlacesOpen(false);
-    operate(target, onLeave);
+    operate(target, actions);
   };
 
-  const focused = room.focus ? interactable(room.focus) : null;
+  const focusedItem = room.focus ? interactable(room.focus) : null;
+  const focused = focusedItem && present(focusedItem, current) ? focusedItem : null;
+  const places = INTERACTABLES.filter((i) => present(i, current));
 
   return (
     <div className="room-hud">
@@ -100,14 +161,27 @@ export function RoomScreen({ view, onLeave, onOpenSettings, focusOnMount }: Room
         <nav id={`${id}-places`} className="room-hud__places panel" aria-label="Places">
           <h2 className="panel__title">Places</h2>
           <ul>
-            {INTERACTABLES.map((i) => (
-              <li key={i.id}>
-                <button type="button" className="room-hud__place" onClick={() => use(i.id)}>
-                  <span className="room-hud__place-name">{i.name}</span>
-                  <span className="room-hud__place-action">{i.action}</span>
-                </button>
-              </li>
-            ))}
+            {places.map((i) => {
+              const note = caseNote(i, current);
+              return (
+                <li key={i.id}>
+                  <button
+                    type="button"
+                    className="room-hud__place"
+                    onClick={() => use(i.id)}
+                    aria-describedby={note ? `${id}-note-${i.id}` : undefined}
+                  >
+                    <span className="room-hud__place-name">{i.name}</span>
+                    <span className="room-hud__place-action">{i.action}</span>
+                  </button>
+                  {note && (
+                    <span id={`${id}-note-${i.id}`} className="room-hud__place-note">
+                      {note}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
       )}
@@ -117,7 +191,10 @@ export function RoomScreen({ view, onLeave, onOpenSettings, focusOnMount }: Room
           <span className="room-hud__crosshair" aria-hidden="true" />
           {focused ? (
             <div className="room-hud__prompt">
-              <span className="room-hud__prompt-name">{focused.name}</span>
+              <span className="room-hud__prompt-name">
+                {focused.name}
+                {caseNote(focused, current) && ` · ${caseNote(focused, current)}`}
+              </span>
               <button type="button" className="btn btn--primary" onClick={() => use(focused.id)}>
                 {focused.action}
                 <span className="room-hud__key" aria-hidden="true">
@@ -158,15 +235,40 @@ export function RoomScreen({ view, onLeave, onOpenSettings, focusOnMount }: Room
               Step back
             </button>
           </div>
-          <PanelContent panel={room.panel} view={view} />
+          <PanelContent panel={room.panel} view={view} current={current} />
         </section>
       )}
     </div>
   );
 }
 
-function PanelContent({ panel, view }: { readonly panel: PanelId; readonly view: ArchiveView }) {
+function PanelContent({
+  panel,
+  view,
+  current,
+}: {
+  readonly panel: PanelId;
+  readonly view: ArchiveView;
+  readonly current: CurrentCase | null;
+}) {
   if (panel === 'terminal') return <ArchiveTerminal view={view} />;
+  if (panel === 'no-case') {
+    return (
+      <p className="prose">
+        No case is open on your desk. Take a folder from the filing cabinet, or open one from the archive terminal,
+        and its board, findings and footage will be here.
+      </p>
+    );
+  }
+  if (panel === 'no-footage') {
+    return (
+      <p className="prose">
+        {current
+          ? `No camera footage is filed with Case ${current.number} yet. The monitor shows camera 2 when a case has footage.`
+          : 'No case is open.'}
+      </p>
+    );
+  }
   if (panel === 'tray') return <UnfiledList view={view} />;
   const season = panel === 'drawer-1' ? 1 : 2;
   const cases = view.cases.filter((c) => seasonOf(c) === season);

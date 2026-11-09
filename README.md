@@ -132,7 +132,9 @@ docs/             Changelog, per-case bibles, 3D engine plan
 - **The reading room:** walk with W A S D or the arrows, look with R and F
   or the mouse (click the room), and use what is in front of you with E. On a
   phone, drag the left half to walk and the right half to look, then tap an
-  object. See `docs/3D-engine-plan.md`.
+  object. The case you are working is in the room too: its folder on your
+  desk, its corkboard and findings clipboard on the left wall, and its
+  footage on the camera 2 monitor. See `docs/3D-engine-plan.md`.
 - **Accessibility:** keyboard and touch throughout, visible focus, reduced
   motion respected (CCTV never autoplays under it; drawers snap instead of
   sliding), a list alternative to the evidence board, and no hover-only

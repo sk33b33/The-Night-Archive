@@ -2776,3 +2776,10 @@ kbd {
     padding-inline: var(--space-3);
   }
 }
+
+.room-hud__place-note {
+  display: block;
+  margin: var(--space-1) 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-amber);
+}

@@ -21,7 +21,7 @@ import {
   type DocumentEvidence,
 } from '../domain/evidence';
 import { caseProgress, caseStatus, choiceOf } from '../domain/progress';
-import { RoomScreen } from '../features/room/RoomScreen';
+import { RoomScreen, type CurrentCase, type RoomActions } from '../features/room/RoomScreen';
 import { BriefingScreen } from '../features/briefing/BriefingScreen';
 import type { EngineFactory } from '../features/evidence/audio/useReelPlayer';
 import { EvidenceScreen } from '../features/evidence/EvidenceScreen';
@@ -45,6 +45,8 @@ export interface ScreenRouterProps {
   readonly back: () => void;
   readonly onContinue: () => void;
   readonly createEngine?: EngineFactory | undefined;
+  /** What the reading room's objects lead to, and the case you are working. */
+  readonly room: { readonly actions: RoomActions; readonly current: CurrentCase | null };
 }
 
 function Unavailable({ title, body, onBack }: { title: string; body: string; onBack: () => void }) {
@@ -125,7 +127,8 @@ export function ScreenRouter(props: ScreenRouterProps) {
               seasonComplete:
                 finaleChoice && isClosed(caseId(FINALE.caseId)) ? FINALE.ending[finaleChoice] : undefined,
             }}
-            onLeave={() => navigate({ id: 'menu' })}
+            actions={props.room.actions}
+            current={props.room.current}
             onOpenSettings={() => navigate({ id: 'settings' })}
             focusOnMount={focusOnMount}
           />

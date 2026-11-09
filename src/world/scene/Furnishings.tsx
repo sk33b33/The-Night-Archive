@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { chairSpot, DESK_TOP, DESKS, ROOM, TRAY } from '../layout';
+import { chairSpot, DESK_TOP, DESKS, MONITOR, ROOM, TRAY } from '../layout';
 import { labelTexture } from './labels';
 import { Prop } from './Prop';
 
@@ -22,8 +22,9 @@ export function Furnishings({ unfiled }: { readonly unfiled: number }) {
 
       {/* Front right: the camera 2 monitor on a table */}
       <Prop model="table" position={[3.1, 0, 2.35]} yaw={Math.PI} />
-      <Prop model="televisionVintage" position={[3.25, 0.654, 2.45]} yaw={Math.PI} />
-      <Prop model="radio" position={[2.75, 0.654, 2.45]} yaw={Math.PI} />
+      {/* The set faces into the room; its screen is drawn by CaseObjects */}
+      <Prop model="televisionVintage" position={[MONITOR.x, MONITOR.top, MONITOR.z]} interactable="monitor" />
+      <Prop model="radio" position={[2.5, MONITOR.top, 2.62]} />
 
       {/* Corners and the door side */}
       <Prop model="pottedPlant" position={[-3.6, 0, -2.65]} />

@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.25.0 — The case you are working, in the room (2026-11-09)
+
+Phase 2 of `docs/3D-engine-plan.md`.
+
+### Added
+- **Your working case.** The case you last opened this session. Otherwise
+  it is the most recently started case still open.
+- **The case folder** lies open on your NA-07 desk. Using it opens the
+  case files.
+- **The case wall** (left wall):
+  - **Corkboard:** the case number and an index card per record, pinned
+    and strung. Opens the evidence board, with the case files behind it.
+  - **Findings clipboard:** opens the findings.
+- **The camera 2 monitor** now faces the room.
+  - With footage in the case, it shows CAM 2 and opens the footage.
+  - Without, it reads "No footage filed" and says so.
+- Without a case open, the corkboard and clipboard explain how to open one.
+- Places lists the new objects. The case is named in a linked description,
+  so button names stay stable for assistive technology.
+
+### Checked
+- Typecheck, lint, build, and 481 tests pass, including new ones:
+  - the working-case rules and footage lookup
+  - the new panels
+  - an app-level run from the room through the folder, corkboard (Back
+    returns to the case files), clipboard and monitor
+- In a browser, the corkboard, clipboard and monitor focus with their case
+  named, and E on the monitor opened "Camera 2 footage". axe found no
+  violations at 360 px and 1280 px, with no console errors.
+
 ## 0.24.0 — The 3D reading room (2026-11-08)
 
 The archive becomes a place. Plan and decisions: `docs/3D-engine-plan.md`.

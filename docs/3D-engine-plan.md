@@ -1,6 +1,6 @@
 # The 3D reading room — engine plan
 
-Status: **Phase 1 built** (2026-11-08). Requested by the project owner: a
+Status: **Phases 1 and 2 built** (2026-11-08, 2026-11-09). Requested by the project owner: a
 more 3D look and feel, first-person, moving around, opening drawers, PCs
 and doors.
 
@@ -62,11 +62,23 @@ and doors.
    - the door to the title screen
    - overlays for every other screen
    - Places for accessibility
-2. **Next (proposal).** Bring more of a case into the room:
-   - the open case's folder lies on your desk while you work it
-   - the evidence board becomes a corkboard on the wall
-   - findings are typed at the desk
-   - the camera 2 monitor plays the CCTV evidence
+2. **Done.** The case you are working is in the room.
+   - **Which case:** the one you last opened this session. Otherwise it is
+     the most recently started case still open. With nothing in progress,
+     there is no case.
+   - **The case folder** lies open on your desk, labelled with its number.
+     It opens the case files.
+   - **The case wall** (left wall) has a corkboard and a findings clipboard.
+     - The corkboard carries the case number and an index card per record,
+       with pins and red string. It opens the evidence board, with the case
+       files behind it.
+     - The clipboard opens the findings.
+   - **The camera 2 monitor** (front right) shows CAM 2 when the case has
+     footage, and opens it. Otherwise it reads "No footage filed" and says
+     so.
+   - **Without a case,** the corkboard and clipboard say how to open one.
+   - **Places** lists these objects with the case named in a description,
+     so the buttons keep stable names.
 3. **Rooms.**
    - The door opens onto a corridor, with the stack room and (once Case
      010 closes) Storage B.

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { DESK_TOP, DESKS, ROOM, type InteractableId } from './layout';
 import { PlayerController } from './PlayerController';
 import { Cabinet } from './scene/Cabinet';
+import { CaseObjects, type WorkingCaseView } from './scene/CaseObjects';
 import { Furnishings } from './scene/Furnishings';
 import { preloadKit } from './scene/Prop';
 import { RoomShell } from './scene/RoomShell';
@@ -18,6 +19,8 @@ export interface WorldProps {
   readonly reduceMotion: boolean;
   readonly folders: readonly [number, number];
   readonly unfiled: number;
+  /** The case you are working, for the folder, corkboard, clipboard and monitor. */
+  readonly workingCase: WorkingCaseView | null;
   readonly onUse: (id: InteractableId) => void;
 }
 
@@ -25,7 +28,7 @@ export interface WorldProps {
  * The reading room in 3D. It stays mounted behind every screen so the
  * scene is built once; screens and panels are drawn over it.
  */
-export default function World({ active, backdrop, reduceMotion, folders, unfiled, onUse }: WorldProps) {
+export default function World({ active, backdrop, reduceMotion, folders, unfiled, workingCase, onUse }: WorldProps) {
   const own = DESKS[1];
   return (
     <div className={backdrop ? 'world world--backdrop' : 'world'} aria-hidden="true">
@@ -71,6 +74,7 @@ export default function World({ active, backdrop, reduceMotion, folders, unfiled
         <Cabinet folders={folders} reduceMotion={reduceMotion} />
         <Suspense fallback={null}>
           <Furnishings unfiled={unfiled} />
+          <CaseObjects current={workingCase} reduceMotion={reduceMotion} />
         </Suspense>
         <PlayerController active={active} onUse={onUse} />
       </Canvas>
